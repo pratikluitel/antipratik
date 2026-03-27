@@ -1,0 +1,43 @@
+/* antipratik.com — Global Reset & Base Styles
+ * Minimal by design. Theme switching is handled by data-theme on <html>
+ * via an inline script in layout.tsx — not CSS — to prevent flash.
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-primary-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Theme-aware base — overrides default dark values when theme is set */
+[data-theme="dark"] body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
