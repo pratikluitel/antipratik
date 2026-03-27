@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { ThemeProvider } from '../components/ThemeProvider';
+import Navbar from '../components/Navbar';
 import '../styles/tokens.css';
 import '../styles/globals.css';
 
@@ -13,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Google Fonts — DM Serif Display + DM Sans */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,11 +27,16 @@ export default function RootLayout({
         {/* Inline script: set data-theme before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('ap-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ThemeProvider>
+          <Navbar />
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

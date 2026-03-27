@@ -162,8 +162,9 @@
 /* ═══════════════════════════════════════════════
    NAVBAR
 ═══════════════════════════════════════════════ */
+--z-navbar:                          100;
 --nav-height-default:                48px;
---nav-height-compact:                36px;
+--nav-height-compact:                40px;
 --nav-scroll-threshold:              80px;
 --nav-transition:                    500ms ease-in-out;
 --nav-padding-x-desktop:             32px;
