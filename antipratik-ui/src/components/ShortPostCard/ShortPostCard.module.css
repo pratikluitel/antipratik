@@ -1,0 +1,71 @@
+.card {
+  composes: card from '../FeedCard/FeedCard.module.css';
+}
+
+.inner {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: var(--text-ui);
+  color: var(--color-text-sub-dark);
+  line-height: var(--lh-ui);
+  max-width: var(--measure-short);
+  margin: 0;
+}
+
+[data-theme="light"] .body {
+  color: var(--color-text-primary-light);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 12px;
+}
+
+.date {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .date {
+  color: var(--color-text-muted-light);
+}
+
+.hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.hashtag {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--pill-text-short-dark);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: opacity var(--motion-fast);
+  }
+}
+
+.hashtag:hover {
+  opacity: 0.7;
+}
+
+[data-theme="light"] .hashtag {
+  color: var(--pill-text-short-light);
+}

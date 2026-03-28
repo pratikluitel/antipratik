@@ -172,8 +172,8 @@ const musicPosts: MusicPost[] = [
     tags: ['ambient', 'kathmandu', 'field-recording'],
     title: 'Threshold (Nagarkot Dawn)',
     albumArt: '/images/music/threshold.jpg',
-    audioUrl: '/audio/threshold-nagarkot-dawn.mp3',
-    duration: 387,
+    audioUrl: '',
+    duration: 144,
     album: 'Altitude Studies',
   },
   {
@@ -184,7 +184,7 @@ const musicPosts: MusicPost[] = [
     title: 'Trisuli',
     albumArt: '/images/music/trisuli.jpg',
     audioUrl: '/audio/trisuli.mp3',
-    duration: 264,
+    duration: 144,
     album: 'River Sounds',
   },
 ];
@@ -259,6 +259,7 @@ const linkPosts: LinkPost[] = [
     domain: 'example.com',
     description:
       'A long-form piece on why most generative music sounds like waiting room ambience, and what the exceptions do differently.',
+    category: 'music',
   },
 ];
 

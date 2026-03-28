@@ -1,0 +1,13 @@
+.marker {
+  margin: 4px 0 var(--space-1);
+  padding-left: 4px;
+  font-family: var(--font-sans);
+  font-size: var(--text-nano);
+  color: var(--color-text-subtle-dark);
+  letter-spacing: var(--ls-uppercase);
+  text-transform: uppercase;
+}
+
+[data-theme="light"] .marker {
+  color: var(--color-text-subtle-light);
+}

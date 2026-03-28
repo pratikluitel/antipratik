@@ -69,6 +69,7 @@ export interface LinkPost extends BasePost {
   domain: string;
   description?: string;
   thumbnailUrl?: string;
+  category?: 'music' | 'writing' | 'video' | 'social';
 }
 
 export type Post = EssayPost | ShortPost | MusicPost | PhotoPost | VideoPost | LinkPost;
@@ -96,9 +97,37 @@ export interface Track {
   album?: string;
 }
 
+// ─── FEED LAYOUT ─────────────────────────────────────────────────────────────
+
+export type LayoutMode = 'reading' | 'visual';
+
+// Maps each ContentType to its layout mode
+// reading: essay, short
+// visual: music, photo, video, link
+export const LAYOUT_MODE: Record<ContentType, LayoutMode> = {
+  essay: 'reading',
+  short: 'reading',
+  music: 'visual',
+  photo: 'visual',
+  video: 'visual',
+  link: 'visual',
+};
+
+export type FeedItem =
+  | { kind: 'post'; post: Post }
+  | { kind: 'divider'; from: LayoutMode; to: LayoutMode }
+  | { kind: 'date'; date: string };
+
 // ─── FEED FILTER ─────────────────────────────────────────────────────────────
 
 export interface FilterState {
   activeTypes: ContentType[];
   activeTags: string[];
+  sortOrder: 'newest' | 'oldest';
 }
+
+export type FilterAction =
+  | { type: 'TOGGLE_TYPE'; contentType: ContentType }
+  | { type: 'TOGGLE_TAG'; tag: string }
+  | { type: 'SET_SORT'; order: FilterState['sortOrder'] }
+  | { type: 'CLEAR_ALL' };

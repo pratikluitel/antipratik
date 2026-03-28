@@ -1,0 +1,64 @@
+.card {
+  composes: card from '../FeedCard/FeedCard.module.css';
+}
+
+.inner {
+  padding: 20px 22px 22px;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tag {
+  composes: tag tagEssay from '../FeedCard/FeedCard.module.css';
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  color: var(--color-text-primary-dark);
+  letter-spacing: var(--ls-heading);
+  line-height: var(--lh-heading);
+  max-width: var(--measure-short);
+  margin: 0;
+}
+
+[data-theme="light"] .title {
+  color: var(--color-text-primary-light);
+}
+
+.excerpt {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: var(--text-ui);
+  color: var(--color-text-body-dark);
+  line-height: var(--lh-ui);
+  margin-top: 10px;
+  max-width: var(--measure-short);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-theme="light"] .excerpt {
+  color: var(--color-text-body-light);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+}
+
+[data-theme="light"] .meta {
+  color: var(--color-text-muted-light);
+}
+
+.separator {
+  opacity: 0.5;
+}

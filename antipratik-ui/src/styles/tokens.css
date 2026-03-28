@@ -127,7 +127,7 @@
 --color-text-primary-dark:           #EEF2F0;  /* snow — headings, primary text */
 --color-text-sub-dark:               #C8D8E8;  /* sub-headings */
 --color-text-body-dark:              #8BACC4;  /* long-form body copy */
---color-text-muted-dark:             #3A5068;  /* album names, meta, dates */
+--color-text-muted-dark:             #607D96;  /* album names, meta, dates */
 --color-text-subtle-dark:            #2E3748;  /* barely visible — meta, hints */
 
 /* ═══════════════════════════════════════════════
@@ -163,6 +163,8 @@
    NAVBAR
 ═══════════════════════════════════════════════ */
 --z-navbar:                          100;
+--z-filterbar:                       90;
+--nav-height:                        48px;
 --nav-height-default:                48px;
 --nav-height-compact:                40px;
 --nav-scroll-threshold:              80px;

@@ -1,0 +1,61 @@
+/* FeedCard.module.css — shared shell
+ * Composed into individual card CSS files via `composes`.
+ * No component of its own.
+ */
+
+.card {
+  background: var(--color-surface-dark);
+  border: 0.5px solid var(--color-border-dark);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+[data-theme="light"] .card {
+  background: var(--color-surface-light);
+  border-color: var(--color-border-light);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition:
+      transform var(--motion-default),
+      border-color var(--motion-default);
+  }
+  .card:hover { transform: translateY(-2px); }
+}
+
+.card:hover {
+  border-color: var(--color-elevated-dark);
+}
+
+[data-theme="light"] .card:hover {
+  border-color: var(--color-border-light);
+}
+
+/* ── Shared tag styles ──────────────────────────────────── */
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.tagEssay  { color: var(--pill-text-essays-dark); }
+.tagShort  { color: var(--pill-text-short-dark); }
+.tagMusic  { color: var(--pill-text-music-dark); }
+.tagPhoto  { color: var(--pill-text-photos-dark); }
+.tagVideo  { color: var(--pill-text-videos-dark); }
+.tagLink   { color: var(--pill-text-links-dark); }
+
+[data-theme="light"] .tagEssay  { color: var(--pill-text-essays-light); }
+[data-theme="light"] .tagShort  { color: var(--pill-text-short-light); }
+[data-theme="light"] .tagMusic  { color: var(--pill-text-music-light); }
+[data-theme="light"] .tagPhoto  { color: var(--pill-text-photos-light); }
+[data-theme="light"] .tagVideo  { color: var(--pill-text-videos-light); }
+[data-theme="light"] .tagLink   { color: var(--pill-text-links-light); }

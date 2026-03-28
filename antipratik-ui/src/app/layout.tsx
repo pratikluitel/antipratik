@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '../components/ThemeProvider';
+import { MusicProvider } from '../components/MusicProvider';
+import { MusicPlayerRoot } from '../components/MusicPlayer';
 import Navbar from '../components/Navbar';
 import '../styles/tokens.css';
 import '../styles/globals.css';
@@ -33,8 +35,11 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <Navbar />
-          {children}
+          <MusicProvider>
+            <Navbar />
+            {children}
+            <MusicPlayerRoot />
+          </MusicProvider>
         </ThemeProvider>
       </body>
     </html>
