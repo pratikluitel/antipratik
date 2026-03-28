@@ -1,8 +1,164 @@
-.main {
-  padding-top: var(--space-10);
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.hero {
+  /* background forced dark via inline style — see page.tsx comment */
+}
+
+.heroInner {
+  padding: 80px 20px;
+  padding-top: calc(80px + var(--nav-height));
   max-width: 680px;
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: var(--space-10);
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-uppercase);
+  text-transform: uppercase;
+  color: var(--color-text-muted-dark);
+  margin-bottom: var(--space-2);
+}
+
+.displayName {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-display);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-display);
+  color: #EEF2F0; /* snow white — hero is intentionally always dark */
+}
+
+@media (max-width: 640px) {
+  .displayName {
+    font-size: var(--text-display-mobile);
+  }
+}
+
+.description {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
+  color: var(--color-text-muted-dark);
+  margin-top: var(--space-2);
+  max-width: var(--measure-short);
+}
+
+/* ── Prayer flag tags (decorative, not interactive) ─────────────────────── */
+
+.tags {
+  display: inline-flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.tag {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 0.5px solid;
+}
+
+.tagEssays {
+  color: var(--accent-essays);
+  background: color-mix(in srgb, var(--accent-essays) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-essays) 20%, transparent);
+}
+
+.tagShort {
+  color: var(--accent-short);
+  background: color-mix(in srgb, var(--accent-short) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-short) 20%, transparent);
+}
+
+.tagMusic {
+  color: var(--accent-music);
+  background: color-mix(in srgb, var(--accent-music) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-music) 20%, transparent);
+}
+
+.tagPhotos {
+  color: var(--accent-photos);
+  background: color-mix(in srgb, var(--accent-photos) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-photos) 20%, transparent);
+}
+
+.tagVideos {
+  color: var(--accent-videos);
+  background: color-mix(in srgb, var(--accent-videos) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-videos) 20%, transparent);
+}
+
+.tagLinks {
+  color: var(--accent-links);
+  background: color-mix(in srgb, var(--accent-links) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent-links) 20%, transparent);
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding-top: var(--space-8);
+}
+
+.section:last-child {
+  padding-bottom: var(--space-8);
+}
+
+.sectionInner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  color: var(--color-text-primary-dark);
+}
+
+[data-theme='light'] .sectionTitle {
+  color: var(--color-ink-light);
+}
+
+.sectionLink {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  text-decoration: none;
+  transition: color 250ms ease-in-out;
+}
+
+[data-theme='light'] .sectionLink {
+  color: var(--color-text-muted-light);
+}
+
+.sectionLink:hover {
+  color: var(--color-text-primary-dark);
+}
+
+[data-theme='light'] .sectionLink:hover {
+  color: var(--color-ink-light);
+}
+
+/* ── Feed wrapper ───────────────────────────────────────────────────────── */
+
+.feedWrapper {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 20px;
 }

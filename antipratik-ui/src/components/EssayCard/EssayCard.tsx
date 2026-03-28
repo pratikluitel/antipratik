@@ -15,7 +15,7 @@ export default function EssayCard({ post }: Props) {
 
   return (
     <article className={styles.card}>
-      <Link href={`/post/${post.slug}`} className={styles.inner}>
+      <Link href={`/${post.slug}`} className={styles.inner}>
         <span className={styles.tag}>Essay</span>
         <h2 className={styles.title}>{post.title}</h2>
         <p className={styles.excerpt}>{post.excerpt}</p>

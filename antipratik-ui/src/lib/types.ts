@@ -84,6 +84,7 @@ export interface ExternalLink {
   description: string;
   iconUrl?: string;
   featured: boolean;
+  category: 'music' | 'writing' | 'video' | 'social';
 }
 
 // ─── MUSIC PLAYER ────────────────────────────────────────────────────────────

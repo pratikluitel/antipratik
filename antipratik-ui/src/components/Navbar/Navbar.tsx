@@ -4,18 +4,16 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '../ThemeProvider';
+import { useNavbarContext } from '../NavbarContext';
 import styles from './Navbar.module.css';
 
-interface NavbarProps {
-  articleTitle?: string;
-}
-
-export default function Navbar({ articleTitle }: NavbarProps) {
+export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
+  const { articleTitle } = useNavbarContext();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

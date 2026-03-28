@@ -1,0 +1,169 @@
+/* NewsletterBlock — always dark regardless of page theme */
+
+.block {
+  background: var(--nl-bg);
+  padding: var(--nl-padding-desktop);
+  border-radius: var(--card-radius);
+  position: relative;
+}
+
+/* Prayer flag gradient top border */
+.block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--nl-border-gradient);
+  opacity: var(--nl-border-opacity);
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+}
+
+.footer {
+  padding: var(--nl-footer-padding);
+  border-top: var(--nl-footer-border-top);
+  border-radius: 0;
+}
+
+.footer::before {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .block {
+    padding: var(--nl-padding-mobile);
+  }
+}
+
+/* ── Copy ───────────────────────────────────────────────────────────────── */
+
+.heading {
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  color: var(--color-text-primary-dark);
+  margin: 0;
+}
+
+.subtext {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  margin-top: var(--space-1);
+  max-width: var(--nl-copy-max-width);
+}
+
+/* ── Form ───────────────────────────────────────────────────────────────── */
+
+.form {
+  margin-top: var(--space-3);
+}
+
+/* The wrapper sets height — input and button use height: 100% */
+.formWrapper {
+  display: flex;
+  height: var(--nl-form-height);
+  border-radius: var(--nl-form-radius);
+  overflow: hidden;
+}
+
+.footer .formWrapper {
+  height: var(--nl-footer-form-height);
+  border-radius: var(--nl-footer-form-radius);
+}
+
+.input {
+  flex: 1;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  padding: 0 14px;
+  background: var(--nl-input-bg);
+  color: var(--nl-input-color);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--nl-input-placeholder);
+}
+
+.input:focus {
+  background: var(--nl-input-bg-focus);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.inputError {
+  background: var(--nl-input-bg-error);
+  color: var(--nl-input-color-error);
+}
+
+.button {
+  height: 100%;
+  padding: 0 18px;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  background: var(--nl-btn-bg);
+  color: var(--nl-btn-color);
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  transition: background 200ms ease-in-out;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--nl-btn-bg-hover);
+}
+
+.button:active:not(:disabled) {
+  background: var(--nl-btn-bg-active);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.errorMsg {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--nl-error-color);
+  margin-top: var(--space-1);
+}
+
+/* ── Success state ──────────────────────────────────────────────────────── */
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.successIcon {
+  color: var(--nl-success-icon-color);
+  font-size: 18px;
+}
+
+.successText {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-primary-dark);
+}
+
+/* ── Legal ──────────────────────────────────────────────────────────────── */
+
+.legal {
+  font-family: var(--font-sans);
+  font-size: var(--nl-legal-size);
+  color: var(--nl-legal-color);
+  margin-top: var(--space-2);
+}

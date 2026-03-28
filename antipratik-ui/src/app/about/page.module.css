@@ -1,0 +1,110 @@
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.hero {
+  height: var(--about-hero-height);
+  position: relative;
+  overflow: hidden;
+  background: var(--color-elevated-dark);
+}
+
+[data-theme='light'] .hero {
+  background: var(--color-canvas-light);
+}
+
+.heroFade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, var(--color-bg-dark) 100%);
+}
+
+[data-theme='light'] .heroFade {
+  background: linear-gradient(to bottom, transparent 40%, var(--color-surface-light) 100%);
+}
+
+.heroName {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  font-family: var(--font-serif);
+  font-size: var(--about-name-size);
+  letter-spacing: var(--about-name-tracking);
+  color: var(--color-text-primary-dark);
+}
+
+/* ── Bio section ────────────────────────────────────────────────────────── */
+
+.bio {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--space-6) 24px var(--space-8);
+}
+
+.bioText {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-body-dark);
+  margin-bottom: var(--space-3);
+}
+
+[data-theme='light'] .bioText {
+  color: var(--color-text-body-light);
+}
+
+.currently {
+  margin-top: var(--space-6);
+}
+
+.currentlyHeading {
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  color: var(--color-text-sub-dark);
+  margin-bottom: var(--space-2);
+}
+
+[data-theme='light'] .currentlyHeading {
+  color: var(--color-ink-light);
+}
+
+.currentlyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.currentlyList li {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-sub-dark);
+  padding-left: var(--space-2);
+  position: relative;
+}
+
+[data-theme='light'] .currentlyList li {
+  color: var(--color-text-muted-light);
+}
+
+.currentlyList li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  opacity: 0.4;
+}
+
+/* ── Newsletter ─────────────────────────────────────────────────────────── */
+
+.newsletterWrapper {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--space-6) 24px var(--space-16);
+  border-top: 0.5px solid var(--color-border-dark);
+  padding-top: var(--space-6);
+}
+
+[data-theme='light'] .newsletterWrapper {
+  border-top-color: var(--color-border-light);
+}

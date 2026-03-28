@@ -17,6 +17,7 @@ export const links: ExternalLink[] = [
     domain: 'soundcloud.com',
     description: 'Ambient and electronic tracks. Field recordings from Kathmandu and the Himalayas.',
     featured: true,
+    category: 'music',
   },
   {
     id: 'link-ext-002',
@@ -25,6 +26,7 @@ export const links: ExternalLink[] = [
     domain: 'bandcamp.com',
     description: 'Full albums and EPs. Pay what you want or nothing — the music is meant to be heard.',
     featured: true,
+    category: 'music',
   },
   // ── Writing ──────────────────────────────────────────────────────────────
   {
@@ -34,6 +36,7 @@ export const links: ExternalLink[] = [
     domain: 'substack.com',
     description: 'Longer essays on music, code, and living at altitude. Published when ready, not on a schedule.',
     featured: true,
+    category: 'writing',
   },
   {
     id: 'link-ext-004',
@@ -42,6 +45,7 @@ export const links: ExternalLink[] = [
     domain: 'medium.com',
     description: 'Technical writing on distributed systems, developer tooling, and the intersection of craft in music and code.',
     featured: false,
+    category: 'writing',
   },
   // ── Video ────────────────────────────────────────────────────────────────
   {
@@ -51,6 +55,7 @@ export const links: ExternalLink[] = [
     domain: 'youtube.com',
     description: 'Behind-the-scenes studio sessions, gear walkthroughs, and long-form process videos.',
     featured: true,
+    category: 'video',
   },
   {
     id: 'link-ext-006',
@@ -59,6 +64,7 @@ export const links: ExternalLink[] = [
     domain: 'vimeo.com',
     description: 'Short films and visual essays shot in Nepal. Higher quality than YouTube for the cinematic work.',
     featured: false,
+    category: 'video',
   },
   // ── Social ───────────────────────────────────────────────────────────────
   {
@@ -68,6 +74,7 @@ export const links: ExternalLink[] = [
     domain: 'x.com',
     description: 'Sporadic thoughts on music, code, and Kathmandu. The short-form version of everything else.',
     featured: false,
+    category: 'social',
   },
   {
     id: 'link-ext-008',
@@ -76,5 +83,6 @@ export const links: ExternalLink[] = [
     domain: 'github.com',
     description: 'Open source code. Tools, utilities, and the occasional library. Most of it is small and useful.',
     featured: false,
+    category: 'social',
   },
 ];

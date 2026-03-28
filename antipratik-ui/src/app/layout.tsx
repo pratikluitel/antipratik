@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '../components/ThemeProvider';
+import { NavbarProvider } from '../components/NavbarContext';
 import { MusicProvider } from '../components/MusicProvider';
 import { MusicPlayerRoot } from '../components/MusicPlayer';
 import Navbar from '../components/Navbar';
@@ -35,11 +36,13 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <MusicProvider>
-            <Navbar />
-            {children}
-            <MusicPlayerRoot />
-          </MusicProvider>
+          <NavbarProvider>
+            <MusicProvider>
+              <Navbar />
+              {children}
+              <MusicPlayerRoot />
+            </MusicProvider>
+          </NavbarProvider>
         </ThemeProvider>
       </body>
     </html>

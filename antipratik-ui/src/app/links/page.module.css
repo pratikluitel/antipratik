@@ -1,0 +1,31 @@
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + var(--space-8)) 20px var(--space-16);
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--text-h1);
+  color: var(--color-text-primary-dark);
+  margin-bottom: var(--space-1);
+}
+
+[data-theme='light'] .title {
+  color: var(--color-ink-light);
+}
+
+.subtitle {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+}
+
+[data-theme='light'] .subtitle {
+  color: var(--color-text-muted-light);
+}

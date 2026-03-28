@@ -223,12 +223,7 @@ const photoPosts: PhotoPost[] = [
         url: '/images/photos/patan-durbar-evening.jpg',
         alt: 'Patan Durbar Square at dusk, warm light on stone temples',
         caption: 'Patan Durbar, January. The square empties after sunset.',
-      },
-      {
-        url: '/images/photos/patan-detail-carving.jpg',
-        alt: 'Close-up of carved wooden strut on a Newari temple, peacock motif',
-        caption: 'The woodwork here has survived earthquakes that levelled everything around it.',
-      },
+      }
     ],
     location: 'Patan, Lalitpur',
   },

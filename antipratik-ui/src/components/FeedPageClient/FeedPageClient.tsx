@@ -11,6 +11,7 @@ import {
 import FilterBar from '../FilterBar/FilterBar';
 import ClusterDivider from '../ClusterDivider/ClusterDivider';
 import PostCard from '../PostCard/PostCard';
+import Lightbox from '../Lightbox/Lightbox';
 import styles from './FeedPageClient.module.css';
 
 interface Props {
@@ -43,10 +44,6 @@ export default function FeedPageClient({ posts }: Props) {
   const [lightboxImages, setLightboxImages] = useState<PhotoPost['images'] | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Suppress unused variable warnings until lightbox is wired
-  void lightboxImages;
-  void lightboxIndex;
-
   return (
     <div className={styles.page}>
       <FilterBar state={state} allTags={allTags} dispatch={dispatch} />
@@ -71,6 +68,13 @@ export default function FeedPageClient({ posts }: Props) {
           );
         })}
       </div>
+      {lightboxImages !== null && (
+        <Lightbox
+          images={lightboxImages}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxImages(null)}
+        />
+      )}
     </div>
   );
 }
