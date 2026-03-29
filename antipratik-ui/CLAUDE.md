@@ -2,6 +2,8 @@
 
 Read this file at the start of every session before writing any code.
 
+> **See [Checkpoints.md](./Checkpoints.md) for all decisions, deviations, and fixes made during implementation. When this file and CLAUDE.md conflict, the checkpoint wins.**
+
 ---
 
 ## Project Overview & Philosophy
@@ -42,7 +44,7 @@ Read this file at the start of every session before writing any code.
 
 ---
 
-## The 5 Sacred Rules
+## The Sacred Rules
 
 These rules are inviolable. Check them before writing any component.
 
@@ -72,6 +74,24 @@ All data fetching goes through `src/lib/api.ts`. This is the repository pattern 
 
 ### Rule 5 — data-mode on the Filter Bar element
 Pill colours are scoped to `[data-mode="dark"] .pill-essays` etc. Set `data-mode="dark"` or `data-mode="light"` on the filter bar container element itself — not on `<html>`. This prevents CSS specificity conflicts.
+
+### Rule 6 — NEVER use accent colors on UI chrome
+`--accent-*` tokens are reserved for content type indicators only (cards, tags, pills, player). Never use them on toggles, scrollbars, focus rings, or other UI infrastructure.
+
+### Rule 7 — rgba() in @keyframes is the one token exception
+CSS custom properties cannot have opacity applied inside `@keyframes` without `color-mix()`. Raw `rgba()` values are acceptable **only** inside `@keyframes` blocks. Document the source token in a comment.
+
+### Rule 8 — The homepage hero hardcode is intentional
+`style={{ background: '#0F1118' }}` on the hero div is the only accepted hardcoded hex in the codebase. It must be theme-resistant. Do not change it to a CSS variable.
+
+### Rule 9 — audio.removeAttribute('src'), never audio.src = ''
+Setting `audio.src = ''` resolves to the page URL. Always use `removeAttribute('src')` to clear audio source.
+
+### Rule 10 — params is a Promise in Next.js 16
+Always await params in page components and `generateMetadata`:
+```typescript
+const { slug } = await params;
+```
 
 ---
 
@@ -107,6 +127,21 @@ All tokens live in `src/styles/tokens.css`. Never import tokens.css anywhere exc
 | `--nl-*` | Newsletter block |
 | `--link-row-*`, `--link-icon-*` | External links block |
 | `--about-*` | About page |
+
+### Token Additions & Modifications
+
+These tokens were added or modified during implementation (not in the original design system HTML):
+
+| Token | Value | Note |
+|---|---|---|
+| `--nav-height` | `48px` | FilterBar needs this for sticky top positioning |
+| `--nav-height-compact` | `40px` | Navbar compact state on scroll |
+| `--nav-height-default` | `48px` | Alias for clarity in FilterBar CSS |
+| `--z-navbar` | `100` | Navbar z-index |
+| `--z-filterbar` | `90` | FilterBar z-index — must sit below navbar |
+| `--color-text-muted-dark` | `#607D96` | **Changed from `#3A5068`** — original was too dark against `#0A0E14` player background |
+
+The `--color-text-muted-dark` change is global and affects every component using it.
 
 ---
 
@@ -165,6 +200,14 @@ src/lib/
    - Not set → return from dummy data
 3. Function signatures never change when switching from dummy to real API
 
+### Type System Notes (deviations from original plan)
+
+- **ShortPost** has NO `hashtags` field. Use `post.tags` from `BasePost`.
+- **LinkPost.category** is optional: `'music' | 'writing' | 'video' | 'social'`
+- **ExternalLink.category** is REQUIRED: `'music' | 'writing' | 'video' | 'social'`
+- **FilterState** includes `sortOrder: 'newest' | 'oldest'`
+- **Additional types added post-scaffold:** `LayoutMode`, `LAYOUT_MODE`, `FeedItem`, `FilterAction` — see `src/lib/types.ts`
+
 **Go backend endpoints (future):**
 - `GET /api/posts` → `getPosts()`
 - `GET /api/posts/:slug` → `getPost(slug)`
@@ -196,6 +239,43 @@ Build in this exact order to respect component dependencies:
 
 ---
 
+## Routing
+
+| Route | File |
+|---|---|
+| `/` | `src/app/page.tsx` |
+| `/feed` | `src/app/feed/page.tsx` |
+| `/links` | `src/app/links/page.tsx` |
+| `/about` | `src/app/about/page.tsx` |
+| `/[slug]` | `src/app/[slug]/page.tsx` (essay catch-all) |
+
+**Important:** `EssayCard` links to `/${post.slug}`, NOT `/post/${post.slug}`.
+Next.js App Router prioritises named routes (`/feed`, `/links`, `/about`) over the `[slug]` catch-all. The catch-all only activates for paths that don't match a named route.
+
+---
+
+## Context Architecture
+
+### Provider nesting order (layout.tsx)
+```
+ThemeProvider
+  └── NavbarProvider
+        └── MusicProvider
+              ├── Navbar
+              ├── {children}
+              └── MusicPlayerRoot
+```
+
+### Contexts
+
+| Context | Provider | Purpose |
+|---|---|---|
+| `ThemeContext` | `ThemeProvider` | Dark/light mode, `localStorage` persistence, sets `data-theme` on `<html>` |
+| `NavbarContext` | `NavbarProvider` | `articleTitle` string — written by `ArticleClient`, read by `Navbar` |
+| `MusicContext` | `MusicProvider` | `activeTrack`, `isPlaying`, `isExiting` — global playback state |
+
+---
+
 ## What Claude Code Must NEVER Do
 
 1. **Hardcode any colour** — not `#0F1118`, not `rgb(15,17,24)`, not `rgba(...)` without a corresponding token. Use `var(--token-name)`.
@@ -208,3 +288,8 @@ Build in this exact order to respect component dependencies:
 8. **Use `px` values in CSS that have corresponding `--space-*` tokens** — use the tokens.
 9. **Cross the typography line** — DM Serif Display = content (titles, headings). DM Sans = interface (dates, tags, metadata). Never cross.
 10. **Break the prayer flag mapping** — music red on non-music content, essay blue on non-essay content, etc.
+11. **Use `box-shadow` for animated outlines on cards** — animate `border-color` instead. `box-shadow` draws outside the border box, creating a visible gap artifact.
+12. **Set `audio.src = ''`** — use `removeAttribute('src')` instead. Empty string resolves to the page URL.
+13. **Call setState on a different component inside a state updater function** — use a separate `useEffect` to trigger cross-component state changes.
+14. **Link essays to `/post/${slug}`** — correct path is `/${slug}`. Next.js catch-all handles it.
+15. **Use `--accent-*` colors on UI chrome elements** — accent tokens are for content only.
