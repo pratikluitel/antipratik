@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { ExternalLink } from '../../lib/types';
 import styles from './ExternalLinksBlock.module.css';
 
@@ -62,11 +61,6 @@ export default function ExternalLinksBlock({ links, variant }: Props) {
           {links.map((link) => (
             <LinkRow key={link.id} link={link} variant="homepage" />
           ))}
-        </div>
-        <div className={styles.viewAll}>
-          <Link href="/links" className={styles.viewAllLink}>
-            View all links →
-          </Link>
         </div>
       </div>
     );

@@ -259,24 +259,3 @@
   }
 }
 
-/* ── View all (homepage variant) ────────────────────────────────────────── */
-
-.viewAll {
-  padding-top: 12px;
-  text-align: center;
-}
-
-.viewAllLink {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: var(--color-text-subtle-dark);
-  text-decoration: none;
-}
-
-[data-theme='light'] .viewAllLink {
-  color: var(--color-text-subtle-light);
-}
-
-.viewAllLink:hover {
-  color: var(--color-text-muted-dark);
-}
