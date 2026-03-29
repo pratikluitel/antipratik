@@ -1,6 +1,6 @@
 # antipratik.com — Checkpoints
 **Last updated:** 2026-03-29
-**Current Status:** Full frontend complete — all pages (/, /feed, /links, /about, /[slug]), all card types, music player system, lightbox, article view, theme switching. Backend is dummy data. Two token audits pending (ExternalLinksBlock, NewsletterBlock). No known bugs.
+**Current Status:** Full frontend complete — all pages (/, /feed, /links, /about, /[slug]), all card types, music player system, lightbox, article view, theme switching. Backend is dummy data. No known bugs.
 
 This is a growing document. It records every implementation decision, deviation, and discovered rule that emerged during actual development. Periodically, stable knowledge gets compacted into `CLAUDE.md` and removed here — so this file stays lean and reflects only what hasn't yet been absorbed.
 
@@ -147,11 +147,11 @@ if (isPlaying && track.audioUrl) {
 
 ---
 
-## Pending Token Audits
+## Token Audits — Complete
 
-Two token audits from Phase 6 were not yet run at session end:
+Both Phase 6 audits passed with minor fixes applied (2026-03-29):
 
-- `/check-tokens src/components/ExternalLinksBlock/ExternalLinksBlock.module.css`
-- `/check-tokens src/components/NewsletterBlock/NewsletterBlock.module.css`
+- `ExternalLinksBlock.module.css` — `.icon { font-size: 16px }` → `var(--text-body)`
+- `NewsletterBlock.module.css` — `.button { transition: background 200ms ease-in-out }` → `var(--motion-fast)`
 
-Run these at the start of the next session.
+Both fixes are visual no-ops. All other values confirmed token-compliant.
