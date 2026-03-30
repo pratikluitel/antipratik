@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSP सरकार — १०० कार्यसूची टाइमलाइन</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ── ANTIPRATIK DESIGN SYSTEM ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Surfaces — Himalayan Dusk */
+  --bg:       #0F1118;
+  --surface:  #181D28;
+  --surface2: #1E2535;
+  --border:   #2E3748;
+
+  /* Text — original colors restored */
+  --text:       #e8e8f0;
+  --text-sub:   #e8e8f0;
+  --text-body:  #e8e8f0;
+  --text-muted: #8890b0;
+  --text-dim:   #8890b0;
+
+  /* Accent — original colors restored */
+  --accent:  #ff6b35;
+  --accent2: #ffb347;
+
+  /* Category colors — keep original for content identity */
+  --cat-क: #ff6b6b;
+  --cat-ख: #4ecdc4;
+  --cat-ग: #45b7d1;
+  --cat-घ: #7c5cff;
+  --cat-ङ: #ff8a5c;
+  --cat-च: #f7dc6f;
+  --cat-छ: #58d68d;
+  --cat-ज: #3498db;
+  --cat-झ: #e74c3c;
+  --cat-ञ: #e78cd6;
+  --cat-ट: #8bc34a;
+  --cat-ठ: #ff7043;
+
+  font-family: 'DM Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Noto Sans Devanagari', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  font-size: 18px;
+}
+
+/* Devanagari text falls back naturally to Noto Sans Devanagari */
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(212,168,50,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.nepal-flag {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  font-size: clamp(28px, 5vw, 48px);
+  font-family: 'DM Serif Display', 'Noto Sans Devanagari', serif;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.header .subtitle {
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.header .date-badge {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 7px 20px;
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-body);
+  font-size: 16px;
+  font-weight: 400;
+  background: var(--surface);
+}
+
+/* ── SUMMARY GRID ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 30px 0;
+}
+
+.summary-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-card .big-num {
+  font-size: 36px;
+  font-weight: 900;
+  color: #D4A832;
+  font-family: 'DM Serif Display', serif;
+}
+
+.summary-card .label {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 300;
+}
+
+/* ── CATEGORY LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px auto 30px;
+  max-width: 1100px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--surface);
+  border-radius: 14px;
+  font-size: 16px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: 0.5px solid transparent;
+  transition: color 350ms ease-in-out, border-color 350ms ease-in-out;
+}
+
+.legend-item:hover, .legend-item.active {
+  border-color: var(--border);
+  color: var(--text-body);
+}
+
+.legend-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 30px;
+}
+
+.filter-btn {
+  padding: 7px 16px;
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: rgba(238,242,240,0.55);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 350ms ease-in-out, border-color 350ms ease-in-out, background 350ms ease-in-out;
+}
+
+.filter-btn:hover {
+  border-color: #4A6A84;
+  color: var(--text-body);
+}
+
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── TIMELINE SECTION ── */
+.timeline-section {
+  margin-bottom: 56px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.timeline-header .time-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.timeline-header h2 {
+  font-size: 24px;
+  font-family: 'DM Serif Display', 'Noto Sans Devanagari', serif;
+  font-weight: 400;
+  color: var(--text-sub);
+  letter-spacing: -0.01em;
+}
+
+.timeline-header .count-badge {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.timeline-header .date-range {
+  margin-left: auto;
+  font-size: 17px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* ── CARDS GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 350ms ease-in-out, border-color 350ms ease-in-out, box-shadow 350ms ease-in-out;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+}
+
+.card:hover {
+  border-color: #3A4A5E;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.card-desc {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.5;
+  flex: 1;
+  color: var(--text-sub);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--surface2);
+}
+
+.card-cat {
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 60%;
+  line-height: 1.3;
+}
+
+.card-date {
+  font-size: 15px;
+  color: var(--text-body);
+  font-weight: 400;
+}
+
+/* ── COUNTDOWN BADGES ── */
+.card-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.card-countdown.remaining {
+  background: rgba(94,158,106,0.12);
+  color: #5E9E6A;
+}
+
+.card-countdown.urgent {
+  background: rgba(212,168,50,0.12);
+  color: #D4A832;
+}
+
+.card-countdown.overdue {
+  background: rgba(224,62,53,0.12);
+  color: #E03E35;
+}
+
+.card-countdown.done-today {
+  background: rgba(212,168,50,0.15);
+  color: #D4A832;
+}
+
+.card-countdown.no-deadline {
+  background: rgba(58,80,104,0.15);
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* ── CATEGORY COLOR ASSIGNMENTS ── */
+.cat-क .card::before, .cat-क .card-num { background: var(--cat-क); }
+.cat-ख .card::before, .cat-ख .card-num { background: var(--cat-ख); }
+.cat-ग .card::before, .cat-ग .card-num { background: var(--cat-ग); }
+.cat-घ .card::before, .cat-घ .card-num { background: var(--cat-घ); }
+.cat-ङ .card::before, .cat-ङ .card-num { background: var(--cat-ङ); }
+.cat-च .card::before, .cat-च .card-num { background: var(--cat-च); color: #0F1118; }
+.cat-छ .card::before, .cat-छ .card-num { background: var(--cat-छ); }
+.cat-ज .card::before, .cat-ज .card-num { background: var(--cat-ज); }
+.cat-झ .card::before, .cat-झ .card-num { background: var(--cat-झ); }
+.cat-ञ .card::before, .cat-ञ .card-num { background: var(--cat-ञ); }
+.cat-ट .card::before, .cat-ट .card-num { background: var(--cat-ट); }
+.cat-ठ .card::before, .cat-ठ .card-num { background: var(--cat-ठ); }
+
+.cat-क .card-cat { background: rgba(255,107,107,0.22); color: var(--cat-क); }
+.cat-ख .card-cat { background: rgba(78,205,196,0.22); color: var(--cat-ख); }
+.cat-ग .card-cat { background: rgba(69,183,209,0.22); color: var(--cat-ग); }
+.cat-घ .card-cat { background: rgba(124,92,255,0.22); color: var(--cat-घ); }
+.cat-ङ .card-cat { background: rgba(255,138,92,0.22); color: var(--cat-ङ); }
+.cat-च .card-cat { background: rgba(247,220,111,0.22); color: var(--cat-च); }
+.cat-छ .card-cat { background: rgba(88,214,141,0.22); color: var(--cat-छ); }
+.cat-ज .card-cat { background: rgba(52,152,219,0.22); color: var(--cat-ज); }
+.cat-झ .card-cat { background: rgba(231,76,60,0.22); color: var(--cat-झ); }
+.cat-ञ .card-cat { background: rgba(231,140,214,0.22); color: var(--cat-ञ); }
+.cat-ट .card-cat { background: rgba(139,195,74,0.22); color: var(--cat-ट); }
+.cat-ठ .card-cat { background: rgba(255,112,67,0.22); color: var(--cat-ठ); }
+
+/* ── DISTRIBUTION CHARTS ── */
+.dist-section {
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-col {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-col-title {
+  font-size: 19px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text-body);
+  letter-spacing: 0.02em;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-label {
+  width: 170px;
+  max-width: 35%;
+  text-align: right;
+  font-size: 16px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.bar-track {
+  flex: 1;
+  min-height: 28px;
+  height: auto;
+  align-self: stretch;
+  background: var(--surface2);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bar-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  transition: width 1s ease;
+  min-width: 32px;
+}
+
+/* ── VISUAL TIMELINE ── */
+.visual-timeline {
+  position: relative;
+  padding: 20px 0;
+  margin: 30px 0;
+}
+
+.vt-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+
+.vt-node {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.vt-node:nth-child(odd) {
+  flex-direction: row;
+  padding-right: calc(50% + 20px);
+  text-align: right;
+}
+
+.vt-node:nth-child(even) {
+  flex-direction: row-reverse;
+  padding-left: calc(50% + 20px);
+  text-align: left;
+}
+
+.vt-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  z-index: 2;
+}
+
+.vt-content {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  max-width: 100%;
+}
+
+.vt-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 2px;
+  font-family: 'DM Sans', monospace;
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 32px 20px;
+  border-top: 0.5px solid var(--surface2);
+  margin-top: 40px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal-box {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 14px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 200ms ease-in-out;
+}
+
+.modal-close:hover { color: var(--text-body); }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--surface2);
+}
+
+.modal-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-meta {
+  font-size: 16px;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.modal-body {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-body);
+  font-weight: 300;
+}
+
+/* ── INTERACTIVE TIMELINE ── */
+.itl-wrap {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  margin: 0 0 32px;
+  overflow: hidden;
+  position: relative;
+}
+.itl-header {
+  padding: 22px 28px 0;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--text-body);
+  letter-spacing: 0.02em;
+}
+/* Arrow nav buttons — scoped to the scroll-wrap, not the full card */
+.itl-scroll-wrap {
+  overflow-x: hidden;
+  overflow-y: clip;
+  padding: 20px 0 8px;
+  position: relative;
+}
+.itl-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-body);
+  font-size: 28px;
+  padding: 0;
+  transition: color 300ms ease-in-out, opacity 300ms ease-in-out;
+  opacity: 0.75;
+  pointer-events: auto;
+  line-height: 1;
+}
+.itl-arrow:hover { opacity: 1; color: var(--text); }
+.itl-arrow.hidden { opacity: 0; pointer-events: none; }
+.itl-arrow-left  { left: 6px; }
+.itl-arrow-right { right: 6px; }
+/* Subtle edge fade masks — also scoped to scroll-wrap */
+.itl-scroll-wrap::before, .itl-scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 56px;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 300ms ease-in-out;
+}
+.itl-scroll-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--surface) 20%, transparent);
+}
+.itl-scroll-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--surface) 20%, transparent);
+}
+.itl-scroll-wrap.at-start::before { opacity: 0; }
+.itl-scroll-wrap.at-end::after    { opacity: 0; }
+.itl-canvas {
+  position: relative;
+  height: 250px;
+  will-change: transform;
+  transition: transform 400ms ease-in-out;
+}
+.itl-axis-line {
+  position: absolute;
+  height: 1px;
+  background: var(--border);
+}
+/* Ruler minor ticks (every 10 days between milestones) */
+.itl-ruler-tick {
+  position: absolute;
+  width: 1px;
+  background: var(--border);
+  opacity: 0.35;
+  transform: translateX(-50%);
+}
+.itl-break {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.itl-break-inner {
+  color: var(--text-dim);
+  font-size: 15px;
+  letter-spacing: 3px;
+  font-weight: 300;
+  font-family: 'DM Sans', sans-serif;
+}
+.itl-tick {
+  position: absolute;
+  width: 1px;
+  background: var(--text-dim);
+  transform: translateX(-50%);
+}
+.itl-tick-label {
+  position: absolute;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.tl-label-main {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+.tl-label-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.itl-cluster {
+  position: absolute;
+  transform: translateX(-50%);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+.itl-cluster-body {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 52px;
+  max-width: 76px;
+  text-align: center;
+  transition: background 350ms ease-in-out, border-color 350ms ease-in-out, transform 350ms ease-in-out, box-shadow 350ms ease-in-out;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .itl-cluster:hover .itl-cluster-body,
+  .itl-cluster.active .itl-cluster-body {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.32);
+  }
+}
+.itl-cluster-count {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-family: 'DM Serif Display', serif;
+}
+.itl-cluster-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.3;
+}
+.itl-cluster-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 6px;
+  max-width: 60px;
+}
+.itl-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.itl-stem {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+/* Detail panel */
+.itl-detail {
+  border-top: 0.5px solid var(--border);
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 450ms ease-in-out;
+}
+.itl-detail > * { overflow: hidden; }
+.itl-detail.open {
+  grid-template-rows: 1fr;
+}
+.itl-detail.open > * { overflow: visible; }
+.itl-detail-inner {
+  padding: 22px 28px 26px;
+}
+.itl-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--surface2);
+  flex-wrap: wrap;
+}
+.itl-detail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 0.5px solid;
+  font-size: 15px;
+  font-weight: 500;
+}
+.itl-detail-date {
+  font-size: 15px;
+  color: var(--text-dim);
+}
+.itl-detail-count {
+  font-size: 15px;
+  color: var(--text-body);
+  font-weight: 500;
+}
+.itl-detail-close {
+  margin-left: auto;
+  background: none;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 200ms ease-in-out, border-color 200ms ease-in-out;
+}
+.itl-detail-close:hover {
+  color: var(--text-body);
+  border-color: var(--text-dim);
+}
+.itl-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.timeline-section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 32px 0 28px;
+  opacity: 0.5;
+}
+
+/* ── PAGE SECTIONS ── */
+.page-section {
+  margin-bottom: 64px;
+}
+.page-section + .page-section {
+  padding-top: 56px;
+  border-top: 0.5px solid var(--surface2);
+}
+.page-section-header {
+  margin-bottom: 28px;
+}
+.page-section-title {
+  font-family: 'DM Serif Display', 'Noto Sans Devanagari', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* ── FILTER PANEL ── */
+.filter-panel {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+.filter-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.filter-row + .filter-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--surface2);
+}
+.filter-row-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  padding-top: 6px;
+  min-width: 52px;
+  font-family: 'DM Sans', sans-serif;
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+.fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  border-radius: 14px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: rgba(238,242,240,0.55);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 300ms ease-in-out, border-color 300ms ease-in-out, background 300ms ease-in-out;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+.fchip:hover {
+  border-color: #4A6A84;
+  color: var(--text-body);
+}
+.fchip.active-time {
+  background: var(--text);
+  border-color: var(--text);
+  color: #0F1118;
+}
+.fchip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+/* Cat chip: tinted by category color when active */
+.fchip.active-cat {
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.filter-clear {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--surface2);
+}
+.filter-clear.visible { display: flex; }
+.filter-clear-label {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.filter-clear-btn {
+  font-size: 13px;
+  color: var(--text-body);
+  background: none;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 200ms, border-color 200ms;
+}
+.filter-clear-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+.filter-active-summary {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-toggle {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.lang-btn {
+  padding: 6px 14px;
+  border-radius: 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 250ms ease-in-out, color 250ms ease-in-out;
+  line-height: 1;
+}
+.lang-btn.active {
+  background: #4A7FBB;
+  color: #EEF2F0;
+}
+
+/* ── HIDDEN ── */
+.card.hidden { display: none; }
+.timeline-section.hidden { display: none; }
+
+/* ── PRINT ── */
+@media print {
+  body { background: #fff; color: #000; }
+  .filter-bar { display: none; }
+}
+
+/* ── RESPONSIVE ── */
+
+/* Prevent the fixed canvas from causing a page-level horizontal scrollbar */
+html, body { overflow-x: hidden; max-width: 100%; }
+
+@media (max-width: 900px) {
+  .charts-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  /* Container */
+  .container { padding: 12px; }
+
+  /* Lang toggle — smaller, tucked tighter */
+  .lang-toggle { top: 12px; right: 12px; }
+  .lang-btn { padding: 5px 10px; font-size: 12px; }
+
+  /* Header */
+  .header { padding: 48px 12px 24px; }
+  .header .date-badge { font-size: 14px; padding: 6px 14px; }
+
+  /* Summary grid — 2 cols on mobile */
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .summary-card .big-num { font-size: 28px; }
+  .summary-card .label { font-size: 13px; }
+
+  /* Section titles */
+  .page-section-title { font-size: 22px; }
+  .page-section { margin-bottom: 40px; }
+  .page-section + .page-section { padding-top: 36px; }
+
+  /* Timeline section headers */
+  .timeline-header h2 { font-size: 20px; }
+  .timeline-header .date-range { display: none; }
+  .timeline-header .time-icon { width: 34px; height: 34px; font-size: 16px; }
+
+  /* Cards */
+  .cards-grid { grid-template-columns: 1fr; }
+  .card-desc { font-size: 15px; }
+
+  /* Filter panel */
+  .filter-row { flex-direction: column; gap: 8px; }
+  .filter-row-label { padding-top: 0; min-width: unset; }
+  .filter-panel { padding: 14px 14px; }
+
+  /* Bar charts */
+  .bar-label { width: 110px; max-width: 32%; font-size: 13px; }
+  .chart-col-title { font-size: 16px; }
+  .chart-col { padding: 16px; }
+
+  /* Modal */
+  .modal-box { padding: 18px 16px; }
+  .modal-body { font-size: 15px; }
+
+  /* Detail grid in timeline */
+  .itl-detail-grid { grid-template-columns: 1fr; }
+  .itl-detail-inner { padding: 16px 14px 18px; }
+  .itl-detail-header { gap: 8px; }
+
+  /* Legend strip */
+  .itl-scroll-wrap { padding: 16px 0 6px; }
+
+  /* VT nodes */
+  .vt-node:nth-child(odd) { padding-right: 0; text-align: left; flex-direction: row-reverse; padding-left: 30px; }
+  .vt-node:nth-child(even) { padding-left: 30px; }
+  .vt-line { left: 10px; }
+  .vt-dot { left: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button class="lang-btn active" id="btnNe" onclick="setLang('ne')">नेपाली</button>
+  <button class="lang-btn" id="btnEn" onclick="setLang('en')">English</button>
+</div>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="nepal-flag">🇳🇵</div>
+    <h1 data-i18n="header.title">नेपाल सरकारको १०० कार्यसूची</h1>
+    <div class="subtitle" data-i18n="header.subtitle">राष्ट्रिय स्वतन्त्र पार्टी (RSP) सरकार — शासकीय सुधार प्रतिबद्धता टाइमलाइन</div>
+    <div class="date-badge" data-i18n="header.dateBadge">मन्त्रिपरिषद् निर्णय मिति: १३ चैत्र २०८२ | दिन १ = १४ चैत्र २०८२</div>
+  </div>
+
+  <!-- PRAYER FLAG BAR -->
+  <div style="height:3px;background:linear-gradient(90deg,#E03E35 0%,#E03E35 20%,#4A7FBB 20%,#4A7FBB 40%,#D4A832 40%,#D4A832 60%,#5E9E6A 60%,#5E9E6A 80%,#EEF2F0 80%,#EEF2F0 100%);border-radius:2px;margin:0 0 32px;opacity:0.6;"></div>
+
+  <!-- SUMMARY STATS -->
+  <div class="page-section">
+    <div class="summary-grid" id="summaryGrid">
+      <div class="summary-card">
+        <div class="big-num" data-i18n="num.100">१००</div>
+        <div class="label" data-i18n="stats.total">कुल कार्यसूची</div>
+      </div>
+      <div class="summary-card">
+        <div class="big-num" data-i18n="num.12">१२</div>
+        <div class="label" data-i18n="stats.sectors">विषयगत क्षेत्र</div>
+      </div>
+      <div class="summary-card">
+        <div class="big-num" data-i18n="num.84">८४</div>
+        <div class="label" data-i18n="stats.deadlined">समयसीमा तोकिएका (तत्काल सहित)</div>
+      </div>
+      <div class="summary-card">
+        <div class="big-num" data-i18n="num.16">१६</div>
+        <div class="label" data-i18n="stats.unspecified">समयसीमा नतोकिएको/अस्पष्ट</div>
+      </div>
+    </div>
+
+    <div class="timeline-section-divider"></div>
+    <h1 class="page-section-title" style="margin-bottom:20px;" data-i18n="sections.timeline">समय सीमा टाइमलाइन</h1>
+
+    <!-- INTERACTIVE TIMELINE -->
+    <div id="interactiveTimeline"></div>
+  </div>
+
+  <!-- DISTRIBUTION SECTION -->
+  <div class="page-section">
+    <div class="page-section-header">
+      <h1 class="page-section-title" data-i18n="sections.analysis">तथ्याङ्क सारांश</h1>
+    </div>
+
+    <!-- DISTRIBUTION CHARTS -->
+    <div class="dist-section" style="margin-top:0;">
+      <div class="charts-row">
+        <div class="chart-col">
+          <div class="chart-col-title" data-i18n="charts.byDeadline">◷ समयसीमा अनुसार</div>
+          <div class="bar-chart" id="barChart"></div>
+        </div>
+        <div class="chart-col">
+          <div class="chart-col-title" data-i18n="charts.bySector">◈ विषयगत क्षेत्र अनुसार</div>
+          <div class="bar-chart" id="catChart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMITMENTS SECTION -->
+  <div class="page-section">
+    <div class="page-section-header">
+      <h1 class="page-section-title" data-i18n="sections.commitments">कार्यसूची</h1>
+    </div>
+
+    <!-- FILTER PANEL -->
+    <div class="filter-panel" id="filterPanel">
+      <div class="filter-row">
+        <span class="filter-row-label" data-i18n="filter.time">समय</span>
+        <div class="filter-chips" id="timeChips"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-row-label" data-i18n="filter.sector">विषय</span>
+        <div class="filter-chips" id="catChips"></div>
+      </div>
+      <div class="filter-clear" id="filterClear">
+        <span class="filter-clear-label" data-i18n="filter.activeLabel">सक्रिय फिल्टर:</span>
+        <span class="filter-active-summary" id="filterSummary"></span>
+        <button class="filter-clear-btn" data-i18n="filter.clearBtn" onclick="clearAllFilters()">सबै हटाउनुस्</button>
+      </div>
+    </div>
+
+    <!-- TIMELINE SECTIONS -->
+    <div id="timelineSections"></div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal(event)">&times;</button>
+      <div class="modal-header">
+        <div class="modal-num" id="modalNum"></div>
+        <div>
+          <div id="modalCat" style="font-size:15px;font-weight:600;"></div>
+          <div class="modal-meta" id="modalMeta"></div>
+        </div>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span data-i18n="footer.source">स्रोत: नेपाल सरकार, मन्त्रिपरिषद्को मिति २०८२ चैत्र १३ को बैठकबाट स्वीकृत शासकीय सुधार सम्बन्धी एक सय कार्यसूचीहरू</span><br>
+    <span data-i18n="footer.note">यो इन्फोग्राफिक विश्लेषणात्मक उद्देश्यका लागि तयार गरिएको हो।</span>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const DATA = [
+  {id:1,desc:"स्वच्छ निर्वाचनमा योगदान पुर्‍याउनेप्रति आभार",days:null,dt:"—",date:null,cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:2,desc:"नतिजामुखी शासकीय प्रबन्ध (Delivery-Based Governance) लागू",days:7,dt:"७ दिन",date:"२० चैत्र २०८२",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:3,desc:"'राष्ट्रिय प्रतिबद्धता' तयार गर्ने",days:null,dt:"तत्काल",date:null,cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:4,desc:"'संविधान संशोधन बहस पत्र' तयार गर्न कार्यदल गठन",days:7,dt:"७ दिन",date:"२० चैत्र २०८२",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:5,desc:"दलित तथा बहिष्कृत समुदायप्रति औपचारिक क्षमायाचना",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:6,desc:"जेन-जी आन्दोलन प्रभावितको पुनस्थापना प्याकेज",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:7,desc:"भाद्र २४ घटनाको छानबिन समिति गठन",days:7,dt:"१ हप्ता",date:"२० चैत्र २०८२",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:8,desc:"आयोगका प्रतिवेदन सिफारिस कार्यान्वयन",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"क",catN:"प्रतिबद्धता र जनविश्वास"},
+  {id:9,desc:"मन्त्रालय संख्या १७ मा कायम गर्ने",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:10,desc:"BPR मार्फत सेवा प्रवाह सरलीकरण",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:11,desc:"अनुत्पादक बोर्ड/समिति मूल्याङ्कन कार्यदल",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:12,desc:"सङ्घीय निजामती सेवा विधेयक तजुमा",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:13,desc:"कर्मचारी आचारसंहिता कार्यान्वयन",days:null,dt:"तत्काल",date:null,cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:14,desc:"सङ्गठन/व्यवस्थापन सर्वेक्षणको राष्ट्रिय मापदण्ड",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:15,desc:"शिक्षकको सिटरोल दर्ता प्रदेशबाटै",days:90,dt:"आगामी आ.व.",date:"असार/श्रावण २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:16,desc:"कार्यसम्पादन सूचक/मूल्याङ्कन प्रणाली",days:90,dt:"९० दिन",date:"१० असार २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:17,desc:"सेवाको गुणस्तर प्रमाणीकरण मापदण्ड",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:18,desc:"सरकारी कार्यालय भौतिक पूर्वाधार मापदण्ड",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:19,desc:"कर्मचारी व्यवस्थापन सूचना प्रणाली (PMIS)",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"ख",catN:"प्रशासनिक सुधार"},
+  {id:20,desc:"नागरिक सेवा केन्द्र सञ्चालन (१२ घण्टा)",days:null,dt:"—",date:null,cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:21,desc:"नागरिकता/राहदानी डिजिटल एकीकृत प्रणाली",days:null,dt:"तत्काल",date:null,cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:22,desc:"फ्रन्ट डेस्क कर्मचारी तालिम सूची",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:23,desc:"कार्यालय पुनर्विन्यास योजना (Time & Motion)",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:24,desc:"२४ घण्टे राष्ट्रिय गुनासो व्यवस्थापन प्रणाली",days:null,dt:"—",date:null,cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:25,desc:"हेलो सरकार स्तरोन्नति + एकीकृत ड्यासबोर्ड",days:null,dt:"—",date:null,cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:26,desc:"पासपोर्ट/लाइसेन्स Faceless, Timebound",days:null,dt:"—",date:null,cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:27,desc:"Government Courier Service",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"ग",catN:"सेवा प्रवाह र गुनासो"},
+  {id:28,desc:"GIOMS प्रणाली सुदृढीकरण",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:29,desc:"नागरिक विवरण Auto-fill प्रणाली",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:30,desc:"सरकारी एप/पोर्टल अपाङ्गता-मैत्री",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:31,desc:"नागरिक एप मार्फत आवेदन प्रणाली",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:32,desc:"Appointment प्रणाली (सेवा केन्द्र)",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:33,desc:"NID आधारित e-signature अध्ययन",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:34,desc:"फाइल ट्र्याकिङ र अलर्ट प्रणाली",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:35,desc:"प्रमाणपत्र डाउनलोड (एप/इमेल)",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"घ",catN:"डिजिटल शासन"},
+  {id:36,desc:"राष्ट्रिय एकीकृत डिजिटल शासन प्लेटफर्म",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:37,desc:"डिजिटल गभर्नेन्स/डेटा संरक्षण कानून",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:38,desc:"स्वतन्त्र IT नियामक निकाय कानूनी प्रबन्ध",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:39,desc:"सूचना प्रविधि/विद्युतीय शासन कार्यालय स्थापना",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:40,desc:"सूचना प्रविधि/विद्युतीय शासन विधेयक",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:41,desc:"National Enterprise Architecture Framework",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"घ",catN:"डिजिटल शासन"},
+  {id:42,desc:"सट्टेबाजी एप/वेबसाइट बन्द",days:1,dt:"२४ घण्टा",date:"१४ चैत्र २०८२",cat:"घ",catN:"डिजिटल शासन"},
+  {id:43,desc:"सम्पत्ति छानबिन समिति गठन",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"ङ",catN:"सुशासन र भ्रष्टाचार नियन्त्रण"},
+  {id:44,desc:"राष्ट्रिय सतर्कता केन्द्र पुनसंरचना",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ङ",catN:"सुशासन र भ्रष्टाचार नियन्त्रण"},
+  {id:45,desc:"डिजिटल सम्पत्ति लगत (Digital Asset Registry)",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"ङ",catN:"सुशासन र भ्रष्टाचार नियन्त्रण"},
+  {id:46,desc:"भ्रष्टाचार विरुद्ध दोस्रो राष्ट्रिय कार्ययोजना",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"ङ",catN:"सुशासन र भ्रष्टाचार नियन्त्रण"},
+  {id:47,desc:"राष्ट्रिय सदाचार नीति जारी",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ङ",catN:"सुशासन र भ्रष्टाचार नियन्त्रण"},
+  {id:48,desc:"सार्वजनिक खरिद ऐन संशोधन",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"च",catN:"खरिद र परियोजना सुधार"},
+  {id:49,desc:"आयोजना व्यवस्थापन (Pipeline/Fast-Track)",days:60,dt:"विभिन्न",date:"१२ जेठ २०८३",cat:"च",catN:"खरिद र परियोजना सुधार"},
+  {id:50,desc:"e-procurement monitoring प्रणाली",days:90,dt:"९० दिन",date:"१० असार २०८३",cat:"च",catN:"खरिद र परियोजना सुधार"},
+  {id:51,desc:"परियोजना सहजीकरण छाता कानून मस्यौदा",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"च",catN:"खरिद र परियोजना सुधार"},
+  {id:52,desc:"सडक/यातायात आयोजना निगरानी + तौल पुल",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"च",catN:"खरिद र परियोजना सुधार"},
+  {id:53,desc:"एकल बिन्दु सेवा केन्द्र प्रभावकारी बनाउने",days:null,dt:"—",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:54,desc:"सबै परियोजनाको Investment Modality निर्धारण",days:90,dt:"९० दिन",date:"१० असार २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:55,desc:"One Door Approval System (लगानी बोर्ड)",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:56,desc:"Startup Fast Track प्रणाली",days:null,dt:"—",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:57,desc:"SME/कृषि/IT ऋण Risk Weightage घटाउने",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:58,desc:"One Door Business Platform",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:59,desc:"रोजगार/सीप/उद्यमशीलता केन्द्र रूपान्तरण",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:60,desc:"निजी क्षेत्र संरक्षण रणनीति (PSPP)",days:null,dt:"तत्काल",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:61,desc:"औद्योगिक/व्यावसायिक सुरक्षा संरचना",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:62,desc:"निजी सम्पत्ति क्षतिमा कानूनी कारबाही",days:null,dt:"तत्काल",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:63,desc:"जेन-जी प्रभावित व्यवसाय सहुलियत प्याकेज",days:null,dt:"—",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:64,desc:"PM Delivery Unit स्थापना",days:null,dt:"तत्काल",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:65,desc:"लगानी/व्यापार प्रवर्द्धन एकीकृत कार्यदल",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:66,desc:"२५ करोडसम्म उद्योग दर्ता सरलीकरण",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:67,desc:"कम्पनी/उद्योग Interoperability प्रणाली",days:60,dt:"२ महिना",date:"१२ जेठ २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:68,desc:"CSR रकम केन्द्रीकृत कोषमार्फत",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:69,desc:"Private Sector Protection Strategy",days:null,dt:"तत्काल",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:70,desc:"आयात निर्यात ढुवानी अवरोधमुक्त",days:null,dt:"तत्काल",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:71,desc:"स्वच्छ लगानी वातावरण, BEPS लागू",days:null,dt:"—",date:null,cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:72,desc:"पर्यटन क्षेत्र अध्ययन (उदयपुर, अछाम आदि)",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:73,desc:"आरोग्य पर्यटन रणनीति + Wellness Year 2027",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"छ",catN:"लगानी र उद्योग प्रवर्द्धन"},
+  {id:74,desc:"ऊर्जा निर्यात रणनीति + PPA + NEA सुधार",days:180,dt:"१८० दिन",date:"६ असोज २०८३",cat:"ज",catN:"ऊर्जा तथा जलस्रोत"},
+  {id:75,desc:"एकीकृत खानेपानी समन्वय टास्कफोर्स",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ज",catN:"ऊर्जा तथा जलस्रोत"},
+  {id:76,desc:"फेवा जलाधार संरक्षण",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"ज",catN:"ऊर्जा तथा जलस्रोत"},
+  {id:77,desc:"शहरी विकास/फोहोरमैला विधेयक",days:60,dt:"२ महिना",date:"१२ जेठ २०८३",cat:"ज",catN:"ऊर्जा तथा जलस्रोत"},
+  {id:78,desc:"निष्क्रिय बैंक खाता रकम राज्यकोषमा",days:90,dt:"९० दिन",date:"१० असार २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:79,desc:"ठूला व्यवसायमा अनिवार्य e-billing",days:30,dt:"१ महिना",date:"१३ बैशाख २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:80,desc:"कर प्रशासन स्वचालित कार्ययोजना",days:45,dt:"४५ दिन",date:"२८ बैशाख २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:81,desc:"१३९+ कोषहरूको एकीकरण",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:82,desc:"खानी/खनिज ऐन संशोधन + प्रयोगशाला",days:90,dt:"३ महिना",date:"१० असार २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:83,desc:"भन्सार पुनसंरचना + MRP अनिवार्य",days:null,dt:"—",date:null,cat:"झ",catN:"राजस्व सुधार"},
+  {id:84,desc:"धरौटी रकम परिचालन कानूनी आधार",days:60,dt:"६० दिन",date:"१२ जेठ २०८३",cat:"झ",catN:"राजस्व सुधार"},
+  {id:85,desc:"स्वास्थ्य सुधार (Free Portal/Patient Record/Burn Ward)",days:90,dt:"विभिन्न",date:"१० असार २०८३",cat:"ञ",catN:"स्वास्थ्य र शिक्षा"},
+  {id:86,desc:"दलीय विद्यार्थी सङ्गठन हटाउने + Student Council",days:90,dt:"६०+९० दिन",date:"१० असार २०८३",cat:"ञ",catN:"स्वास्थ्य र शिक्षा"},
+  {id:87,desc:"विश्वविद्यालय परीक्षा नतिजा क्यालेन्डर अनुसार",days:null,dt:"—",date:null,cat:"ञ",catN:"स्वास्थ्य र शिक्षा"},
+  {id:88,desc:"स्नातकसम्म अध्ययनमा नागरिकता नचाहिने",days:null,dt:"तत्काल",date:null,cat:"ञ",catN:"स्वास्थ्य र शिक्षा"},
+  {id:89,desc:"कक्षा ५ सम्म आन्तरिक परीक्षा बन्द",days:30,dt:"आगामी सत्र",date:"बैशाख २०८३",cat:"ञ",catN:"स्वास्थ्य र शिक्षा"},
+  {id:90,desc:"कृषि सुधार (MSP/भुक्तानी/Soil Health Card)",days:90,dt:"विभिन्न",date:"१० असार २०८३",cat:"ट",catN:"कृषि र भूमि"},
+  {id:91,desc:"भूमिहीन सुकुम्बासी समस्या समाधान",days:1000,dt:"१००० दिन",date:"२०८५+",cat:"ट",catN:"कृषि र भूमि"},
+  {id:92,desc:"सार्वजनिक जग्गा अभिलेख + अतिक्रमण हटाउने",days:15,dt:"१५ दिन",date:"२८ चैत्र २०८२",cat:"ट",catN:"कृषि र भूमि"},
+  {id:93,desc:"कसूरजन्य सम्पत्ति नियमावली संशोधन",days:60,dt:"२ महिना",date:"१२ जेठ २०८३",cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:94,desc:"CIB लाई १ करोड उपलब्ध गराउने",days:null,dt:"तत्काल",date:null,cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:95,desc:"अन्तर्राष्ट्रिय संकट अध्ययन कार्यदल",days:7,dt:"७ दिन",date:"२० चैत्र २०८२",cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:96,desc:"भन्सारमा थन्किएका सवारी लिलामी",days:null,dt:"तत्काल",date:null,cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:97,desc:"निःशुल्क 'ब्लुबस' सेवा (७ प्रदेश)",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:98,desc:"सार्वजनिक यातायातमा CCTV + SOS Button",days:30,dt:"३० दिन",date:"१३ बैशाख २०८३",cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:99,desc:"सहकारी बचतकर्ता बचत फिर्ता सुरु",days:100,dt:"१०० दिन",date:"२० असार २०८३",cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+  {id:100,desc:"सबै निकायलाई नतिजामूलक सहकार्य आह्वान",days:null,dt:"—",date:null,cat:"ठ",catN:"रणनीतिक र सामाजिक सुरक्षा"},
+];
+
+// ── TRANSLATIONS ──
+const DATA_EN = {
+  // desc, catN, date (Gregorian), dt (English)
+  1:  { desc:"Express gratitude to those who ensured free and fair elections", catN:"Commitment & Public Trust", date:null, dt:"—" },
+  2:  { desc:"Implement Delivery-Based Governance across all ministries", catN:"Commitment & Public Trust", date:"Apr 4, 2026", dt:"7 days" },
+  3:  { desc:"Prepare 'National Commitment' document", catN:"Commitment & Public Trust", date:null, dt:"Immediate" },
+  4:  { desc:"Form task force to draft 'Constitutional Amendment Debate Paper'", catN:"Commitment & Public Trust", date:"Apr 4, 2026", dt:"7 days" },
+  5:  { desc:"Formal state apology to Dalit and historically excluded communities", catN:"Commitment & Public Trust", date:"Apr 12, 2026", dt:"15 days" },
+  6:  { desc:"Rehabilitation package for Gen Z movement-affected individuals", catN:"Commitment & Public Trust", date:"Jul 6, 2026", dt:"100 days" },
+  7:  { desc:"Form high-level inquiry committee on Bhadra 24 incident", catN:"Commitment & Public Trust", date:"Apr 4, 2026", dt:"1 week" },
+  8:  { desc:"Begin implementation of commission report recommendations", catN:"Commitment & Public Trust", date:"Apr 27, 2026", dt:"30 days" },
+  9:  { desc:"Reduce ministry count to 17", catN:"Administrative Reform", date:"Apr 27, 2026", dt:"30 days" },
+  10: { desc:"Simplify public service delivery via Business Process Re-engineering", catN:"Administrative Reform", date:"Apr 27, 2026", dt:"30 days" },
+  11: { desc:"Evaluate unproductive boards and committees for dissolution/restructuring", catN:"Administrative Reform", date:"Apr 27, 2026", dt:"1 month" },
+  12: { desc:"Draft Federal Civil Service Bill", catN:"Administrative Reform", date:"May 12, 2026", dt:"45 days" },
+  13: { desc:"Mandatory enforcement of civil servant code of conduct", catN:"Administrative Reform", date:null, dt:"Immediate" },
+  14: { desc:"Finalize national standards for organisational surveys", catN:"Administrative Reform", date:"Apr 12, 2026", dt:"15 days" },
+  15: { desc:"Transfer teacher roster management to provincial level", catN:"Administrative Reform", date:"Jul/Aug 2026", dt:"Next fiscal year" },
+  16: { desc:"Implement performance indicator and evaluation system", catN:"Administrative Reform", date:"Jun 25, 2026", dt:"90 days" },
+  17: { desc:"Develop service quality certification standards", catN:"Administrative Reform", date:"May 12, 2026", dt:"45 days" },
+  18: { desc:"Set minimum standards for government office infrastructure", catN:"Administrative Reform", date:"Jul 6, 2026", dt:"100 days" },
+  19: { desc:"Develop Personnel Management Information System (PMIS)", catN:"Administrative Reform", date:"Jun 25, 2026", dt:"3 months" },
+  20: { desc:"Operate citizen service centres 12 hours/day", catN:"Service Delivery & Grievance", date:null, dt:"—" },
+  21: { desc:"Integrated digital system for citizenship and passport services", catN:"Service Delivery & Grievance", date:null, dt:"Immediate" },
+  22: { desc:"Compile training list for frontline staff", catN:"Service Delivery & Grievance", date:"Apr 12, 2026", dt:"15 days" },
+  23: { desc:"Office reorganisation plan via Time & Motion study", catN:"Service Delivery & Grievance", date:"Apr 27, 2026", dt:"1 month" },
+  24: { desc:"24-hour national grievance management system", catN:"Service Delivery & Grievance", date:null, dt:"—" },
+  25: { desc:"Upgrade Hello Sarkar hotline and integrate dashboard", catN:"Service Delivery & Grievance", date:null, dt:"—" },
+  26: { desc:"Faceless, time-bound passport and licence services", catN:"Service Delivery & Grievance", date:null, dt:"—" },
+  27: { desc:"Launch Government Courier Service", catN:"Service Delivery & Grievance", date:"Jul 6, 2026", dt:"100 days" },
+  28: { desc:"Strengthen GIOMS government information system", catN:"Digital Governance", date:"Jul 6, 2026", dt:"100 days" },
+  29: { desc:"Auto-fill citizen details across government services", catN:"Digital Governance", date:"May 27, 2026", dt:"60 days" },
+  30: { desc:"Make government apps and portals disability-accessible", catN:"Digital Governance", date:"Jul 6, 2026", dt:"100 days" },
+  31: { desc:"Application system via citizen mobile app", catN:"Digital Governance", date:"May 12, 2026", dt:"45 days" },
+  32: { desc:"Appointment booking system for service centres", catN:"Digital Governance", date:"Jun 25, 2026", dt:"3 months" },
+  33: { desc:"Study for NID-based e-signature implementation", catN:"Digital Governance", date:"Apr 27, 2026", dt:"1 month" },
+  34: { desc:"File tracking and alert system", catN:"Digital Governance", date:"Apr 27, 2026", dt:"30 days" },
+  35: { desc:"Certificate download via app and email", catN:"Digital Governance", date:"Apr 12, 2026", dt:"15 days" },
+  36: { desc:"National Integrated Digital Governance Platform", catN:"Digital Governance", date:"Jul 6, 2026", dt:"100 days" },
+  37: { desc:"Digital Governance and Data Protection legislation", catN:"Digital Governance", date:"May 27, 2026", dt:"60 days" },
+  38: { desc:"Legal framework for independent IT regulatory body", catN:"Digital Governance", date:"May 27, 2026", dt:"60 days" },
+  39: { desc:"Establish IT and e-Governance Office", catN:"Digital Governance", date:"Jun 25, 2026", dt:"3 months" },
+  40: { desc:"IT and e-Governance Bill", catN:"Digital Governance", date:"May 27, 2026", dt:"60 days" },
+  41: { desc:"National Enterprise Architecture Framework", catN:"Digital Governance", date:"May 27, 2026", dt:"60 days" },
+  42: { desc:"Shut down betting apps and websites", catN:"Digital Governance", date:"Mar 28, 2026", dt:"24 hours" },
+  43: { desc:"Form property investigation committee", catN:"Good Governance & Anti-Corruption", date:"Apr 12, 2026", dt:"15 days" },
+  44: { desc:"Restructure National Vigilance Centre", catN:"Good Governance & Anti-Corruption", date:"Apr 27, 2026", dt:"30 days" },
+  45: { desc:"Digital Asset Registry for public officials", catN:"Good Governance & Anti-Corruption", date:"Jul 6, 2026", dt:"100 days" },
+  46: { desc:"Second National Anti-Corruption Action Plan", catN:"Good Governance & Anti-Corruption", date:"Apr 12, 2026", dt:"15 days" },
+  47: { desc:"Issue National Integrity Policy", catN:"Good Governance & Anti-Corruption", date:"Apr 27, 2026", dt:"30 days" },
+  48: { desc:"Amend Public Procurement Act", catN:"Procurement & Project Reform", date:"Apr 27, 2026", dt:"30 days" },
+  49: { desc:"Project management pipeline and fast-track system", catN:"Procurement & Project Reform", date:"May 27, 2026", dt:"Various" },
+  50: { desc:"E-procurement monitoring system", catN:"Procurement & Project Reform", date:"Jun 25, 2026", dt:"90 days" },
+  51: { desc:"Draft umbrella law for project facilitation", catN:"Procurement & Project Reform", date:"May 27, 2026", dt:"60 days" },
+  52: { desc:"Road and transport project monitoring with weigh bridges", catN:"Procurement & Project Reform", date:"May 12, 2026", dt:"45 days" },
+  53: { desc:"Make single-window service centres effective", catN:"Investment & Industry Promotion", date:null, dt:"—" },
+  54: { desc:"Determine investment modality for all projects", catN:"Investment & Industry Promotion", date:"Jun 25, 2026", dt:"90 days" },
+  55: { desc:"One Door Approval System via Investment Board", catN:"Investment & Industry Promotion", date:"Apr 27, 2026", dt:"1 month" },
+  56: { desc:"Startup Fast Track system", catN:"Investment & Industry Promotion", date:null, dt:"—" },
+  57: { desc:"Reduce risk weightage for SME, agriculture and IT loans", catN:"Investment & Industry Promotion", date:"Apr 27, 2026", dt:"30 days" },
+  58: { desc:"One Door Business Registration Platform", catN:"Investment & Industry Promotion", date:"May 12, 2026", dt:"45 days" },
+  59: { desc:"Transform employment and skill centres", catN:"Investment & Industry Promotion", date:"May 27, 2026", dt:"60 days" },
+  60: { desc:"Private Sector Protection Strategy (PSPP)", catN:"Investment & Industry Promotion", date:null, dt:"Immediate" },
+  61: { desc:"Industrial and commercial security framework", catN:"Investment & Industry Promotion", date:"Apr 27, 2026", dt:"30 days" },
+  62: { desc:"Legal action for damage to private property", catN:"Investment & Industry Promotion", date:null, dt:"Immediate" },
+  63: { desc:"Business relief package for Gen Z movement-affected businesses", catN:"Investment & Industry Promotion", date:null, dt:"—" },
+  64: { desc:"Establish PM Delivery Unit", catN:"Investment & Industry Promotion", date:null, dt:"Immediate" },
+  65: { desc:"Integrated investment and trade promotion task force", catN:"Investment & Industry Promotion", date:"Apr 27, 2026", dt:"30 days" },
+  66: { desc:"Simplified industry registration up to NPR 250 million", catN:"Investment & Industry Promotion", date:"May 12, 2026", dt:"45 days" },
+  67: { desc:"Company and industry interoperability system", catN:"Investment & Industry Promotion", date:"May 27, 2026", dt:"2 months" },
+  68: { desc:"Channel CSR funds through centralised pool", catN:"Investment & Industry Promotion", date:"Jun 25, 2026", dt:"3 months" },
+  69: { desc:"Private Sector Protection Strategy", catN:"Investment & Industry Promotion", date:null, dt:"Immediate" },
+  70: { desc:"Remove trade and transport barriers", catN:"Investment & Industry Promotion", date:null, dt:"Immediate" },
+  71: { desc:"Clean investment environment with BEPS compliance", catN:"Investment & Industry Promotion", date:null, dt:"—" },
+  72: { desc:"Tourism sector study (Udayapur, Achham etc.)", catN:"Investment & Industry Promotion", date:"Apr 27, 2026", dt:"1 month" },
+  73: { desc:"Medical tourism strategy and Wellness Year 2027", catN:"Investment & Industry Promotion", date:"Apr 12, 2026", dt:"15 days" },
+  74: { desc:"Energy export strategy, PPAs and NEA reform", catN:"Energy & Water Resources", date:"Sep 23, 2026", dt:"180 days" },
+  75: { desc:"Integrated drinking water coordination task force", catN:"Energy & Water Resources", date:"Apr 27, 2026", dt:"30 days" },
+  76: { desc:"Phewa Lake watershed conservation", catN:"Energy & Water Resources", date:"Jun 25, 2026", dt:"3 months" },
+  77: { desc:"Urban development and waste management bill", catN:"Energy & Water Resources", date:"May 27, 2026", dt:"2 months" },
+  78: { desc:"Transfer dormant bank account funds to state treasury", catN:"Revenue Reform", date:"Jun 25, 2026", dt:"90 days" },
+  79: { desc:"Mandatory e-billing for large businesses", catN:"Revenue Reform", date:"Apr 27, 2026", dt:"1 month" },
+  80: { desc:"Automated tax administration action plan", catN:"Revenue Reform", date:"May 12, 2026", dt:"45 days" },
+  81: { desc:"Consolidate 139+ government funds", catN:"Revenue Reform", date:"May 27, 2026", dt:"60 days" },
+  82: { desc:"Mining act amendment and establish laboratory", catN:"Revenue Reform", date:"Jun 25, 2026", dt:"3 months" },
+  83: { desc:"Customs restructuring and mandatory MRP enforcement", catN:"Revenue Reform", date:null, dt:"—" },
+  84: { desc:"Legal basis to mobilise frozen court deposit funds within 60 days", catN:"Revenue Reform", date:"May 27, 2026", dt:"60 days" },
+  85: { desc:"Health sector reform (Free Portal, Patient Record, Burn Ward)", catN:"Health & Education", date:"Jun 25, 2026", dt:"Various" },
+  86: { desc:"Remove party student unions and establish Student Council", catN:"Health & Education", date:"Jun 25, 2026", dt:"60+90 days" },
+  87: { desc:"University exam results per academic calendar", catN:"Health & Education", date:null, dt:"—" },
+  88: { desc:"No citizenship required for undergraduate study", catN:"Health & Education", date:null, dt:"Immediate" },
+  89: { desc:"End internal exams up to Grade 5 from next academic session", catN:"Health & Education", date:"Apr 2026", dt:"Next session" },
+  90: { desc:"Agriculture reform (MSP, payment guarantees, Soil Health Cards)", catN:"Agriculture & Land", date:"Jun 25, 2026", dt:"Various" },
+  91: { desc:"Resolve landless squatter (sukumbasi) problem", catN:"Agriculture & Land", date:"2029+", dt:"1000 days" },
+  92: { desc:"Protect public land and remove encroachments", catN:"Agriculture & Land", date:"Apr 12, 2026", dt:"15 days" },
+  93: { desc:"Amend criminal asset (seizure and confiscation) regulations", catN:"Strategic & Social Security", date:"May 27, 2026", dt:"2 months" },
+  94: { desc:"Provide NPR 10 million to CIB for technology upgrade", catN:"Strategic & Social Security", date:null, dt:"Immediate" },
+  95: { desc:"Form inter-ministry task force on international crisis impacts", catN:"Strategic & Social Security", date:"Apr 4, 2026", dt:"7 days" },
+  96: { desc:"Auction vehicles stuck at customs", catN:"Strategic & Social Security", date:null, dt:"Immediate" },
+  97: { desc:"Free 'Blue Bus' service across all 7 provinces", catN:"Strategic & Social Security", date:"Jul 6, 2026", dt:"100 days" },
+  98: { desc:"CCTV/Dashcam and SOS Button in public transport", catN:"Strategic & Social Security", date:"Apr 27, 2026", dt:"30 days" },
+  99: { desc:"Begin cooperative depositor refund process", catN:"Strategic & Social Security", date:"Jul 6, 2026", dt:"100 days" },
+  100:{ desc:"Call on all agencies for results-oriented cooperation", catN:"Strategic & Social Security", date:null, dt:"—" },
+};
+
+const BUCKETS_EN = {
+  immediate:   { label:"Immediate / 24 Hours", labelShort:"Immediate", date:"Mar 28, 2026" },
+  '7days':     { label:"Within 7 Days",  labelShort:"7 Days",   date:"Apr 4, 2026" },
+  '15days':    { label:"Within 15 Days", labelShort:"15 Days",  date:"Apr 12, 2026" },
+  '30days':    { label:"Within 30 Days", labelShort:"30 Days",  date:"Apr 27, 2026" },
+  '45days':    { label:"Within 45 Days", labelShort:"45 Days",  date:"May 12, 2026" },
+  '60days':    { label:"Within 60 Days", labelShort:"60 Days",  date:"May 27, 2026" },
+  '90days':    { label:"Within 90 Days", labelShort:"90 Days",  date:"Jun 25, 2026" },
+  '100days':   { label:"Within 100 Days",labelShort:"100 Days", date:"Jul 6, 2026" },
+  '180plus':   { label:"180+ Days / Long-term", labelShort:"180+", date:"Sep 2026+" },
+  unspecified: { label:"Unspecified / Unclear", labelShort:"Unspecified", date:"—" },
+};
+
+// Timeline BL/BD labels for English (used in interactive timeline)
+const BL_EN = {
+  immediate:'Immediate', '7days':'7 Days', '15days':'15 Days', '30days':'30 Days',
+  '45days':'45 Days', '60days':'60 Days', '90days':'90 Days', '100days':'100 Days',
+  '180plus':'Sep 2026', unspecified:'Unspecified',
+};
+const BD_EN = {
+  immediate:'Mar 28',  '7days':'Apr 4',   '15days':'Apr 12',  '30days':'Apr 27',
+  '45days':'May 12',   '60days':'May 27', '90days':'Jun 25',  '100days':'Jul 6',
+  '180plus':'Sep 2026', unspecified:'—',
+};
+
+const I18N = {
+  ne: {
+    'header.title':      'नेपाल सरकारको १०० कार्यसूची',
+    'header.subtitle':   'राष्ट्रिय स्वतन्त्र पार्टी (RSP) सरकार — शासकीय सुधार प्रतिबद्धता टाइमलाइन',
+    'header.dateBadge':  'मन्त्रिपरिषद् निर्णय मिति: १३ चैत्र २०८२ | दिन १ = १४ चैत्र २०८२',
+    'stats.total':       'कुल कार्यसूची',
+    'stats.sectors':     'विषयगत क्षेत्र',
+    'stats.deadlined':   'समयसीमा तोकिएका (तत्काल सहित)',
+    'stats.unspecified': 'समयसीमा नतोकिएको/अस्पष्ट',
+    'sections.timeline':    'समय सीमा टाइमलाइन',
+    'sections.analysis':    'तथ्याङ्क सारांश',
+    'sections.commitments': 'कार्यसूची',
+    'charts.byDeadline': '◷ समयसीमा अनुसार',
+    'charts.bySector':   '◈ विषयगत क्षेत्र अनुसार',
+    'filter.time':        'समय',
+    'filter.sector':      'विषय',
+    'filter.activeLabel': 'सक्रिय फिल्टर:',
+    'filter.clearBtn':    'सबै हटाउनुस्',
+    'footer.source':     'स्रोत: नेपाल सरकार, मन्त्रिपरिषद्को मिति २०८२ चैत्र १३ को बैठकबाट स्वीकृत शासकीय सुधार सम्बन्धी एक सय कार्यसूचीहरू',
+    'footer.note':       'यो इन्फोग्राफिक विश्लेषणात्मक उद्देश्यका लागि तयार गरिएको हो।',
+    'legend.marks':  'चिह्न',
+    'legend.today':  'आज',
+    'legend.milestone': 'समयसीमा',
+    'legend.sectors': 'विषय',
+    'modal.deadline': 'समयसीमा',
+    'modal.karya': 'कार्य',
+    'modal.close': '✕ बन्द',
+    'countdown.overdue1': '△ सीमा नाघिसकेको',
+    'countdown.immediate': '▸ तत्काल',
+    'countdown.none': '— समयसीमा नतोकिएको/अस्पष्ट',
+    'countdown.remaining': '◷ {n} दिन बाँकी',
+    'countdown.urgent': '△ {n} दिन बाँकी',
+    'countdown.today': '◈ आज अन्तिम दिन',
+    'countdown.overdue': '▲ {n} दिन सीमा नाघेको',
+    'legend.todayLabel': 'आज',
+    'legend.milestoneLabel': 'Deadline',
+    'num.100': '१००', 'num.12': '१२', 'num.84': '८४', 'num.16': '१६',
+  },
+  en: {
+    'header.title':      'Government of Nepal — 100 Commitments',
+    'header.subtitle':   'Rastriya Swatantra Party (RSP) Government — Governance Reform Commitment Timeline',
+    'header.dateBadge':  'Cabinet Decision Date: 27 Mar 2026 | Day 1 = 28 Mar 2026',
+    'stats.total':       'Total Commitments',
+    'stats.sectors':     'Thematic Sectors',
+    'stats.deadlined':   'With Deadlines (incl. immediate)',
+    'stats.unspecified': 'No Deadline / Unclear',
+    'sections.timeline':    'Commitment Timeline',
+    'sections.analysis':    'Data Summary',
+    'sections.commitments': 'Commitments',
+    'charts.byDeadline': '◷ By Deadline',
+    'charts.bySector':   '◈ By Sector',
+    'filter.time':        'Time',
+    'filter.sector':      'Sector',
+    'filter.activeLabel': 'Active filters:',
+    'filter.clearBtn':    'Clear all',
+    'footer.source':     'Source: Government of Nepal, 100 Governance Reform Commitments approved by Cabinet on 27 Mar 2026',
+    'footer.note':       'This infographic is prepared for analytical purposes.',
+    'legend.marks':  'Markers',
+    'legend.today':  'Today',
+    'legend.milestone': 'Deadline',
+    'legend.sectors': 'Sectors',
+    'modal.deadline': 'Deadline',
+    'modal.karya': 'commitments',
+    'modal.close': '✕ Close',
+    'countdown.overdue1': '△ Deadline passed',
+    'countdown.immediate': '▸ Immediate',
+    'countdown.none': '— No deadline set',
+    'countdown.remaining': '◷ {n} days remaining',
+    'countdown.urgent': '△ {n} days remaining',
+    'countdown.today': '◈ Due today',
+    'countdown.overdue': '▲ {n} days overdue',
+    'legend.todayLabel': 'Today',
+    'legend.milestoneLabel': 'Deadline',
+    'num.100': '100', 'num.12': '12', 'num.84': '84', 'num.16': '16',
+  },
+};
+
+let LANG = 'ne';
+
+function t(key) { return I18N[LANG][key] || key; }
+
+function setLang(lang) {
+  LANG = lang;
+  document.getElementById('btnNe').classList.toggle('active', lang === 'ne');
+  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[lang][key] !== undefined) el.textContent = I18N[lang][key];
+  });
+
+  // Re-render all dynamic sections
+  rebuildBarCharts();
+  rebuildCatCharts();
+  rebuildFilterChips();
+  rebuildTimelineSections();
+  rebuildInteractiveTimeline();
+}
+
+function getItemDesc(item) {
+  return LANG === 'en' ? (DATA_EN[item.id]?.desc || item.desc) : item.desc;
+}
+function getItemCatN(item) {
+  return LANG === 'en' ? (DATA_EN[item.id]?.catN || item.catN) : item.catN;
+}
+function getItemDate(item) {
+  if (LANG === 'en') return DATA_EN[item.id]?.date || null;
+  return item.date;
+}
+function getItemDt(item) {
+  if (LANG === 'en') return DATA_EN[item.id]?.dt || item.dt;
+  return item.dt;
+}
+function getBucketLabel(key) {
+  return LANG === 'en' ? (BUCKETS_EN[key]?.label || key) : TIMELINE_BUCKETS.find(b=>b.key===key)?.label || key;
+}
+function getBucketLabelShort(key) {
+  return LANG === 'en' ? (BUCKETS_EN[key]?.labelShort || key) : TIMELINE_BUCKETS.find(b=>b.key===key)?.labelShort || key;
+}
+function getBucketDate(key) {
+  return LANG === 'en' ? (BUCKETS_EN[key]?.date || '—') : TIMELINE_BUCKETS.find(b=>b.key===key)?.date || '—';
+}
+function numDisplay(n) {
+  return LANG === 'en' ? String(n) : nepaliNum(n);
+}
+
+const CAT_COLORS = {
+  "क":"#ff6b6b","ख":"#4ecdc4","ग":"#45b7d1","घ":"#7c5cff",
+  "ङ":"#ff8a5c","च":"#f7dc6f","छ":"#58d68d","ज":"#3498db",
+  "झ":"#e74c3c","ञ":"#e78cd6","ट":"#8bc34a","ठ":"#ff7043"
+};
+
+const TIMELINE_BUCKETS = [
+  { key:"immediate", label:"तत्काल / २४ घण्टा", labelShort:"तत्काल", maxDays:1, date:"१४ चैत्र २०८२", bg:"#b71c1c" },
+  { key:"7days", label:"७ दिनभित्र", labelShort:"७ दिन", maxDays:7, date:"२० चैत्र २०८२", bg:"#e65100" },
+  { key:"15days", label:"१५ दिनभित्र", labelShort:"१५ दिन", maxDays:15, date:"२८ चैत्र २०८२", bg:"#ef6c00" },
+  { key:"30days", label:"३० दिनभित्र", labelShort:"३० दिन", maxDays:30, date:"१३ बैशाख २०८३", bg:"#f57f17" },
+  { key:"45days", label:"४५ दिनभित्र", labelShort:"४५ दिन", maxDays:45, date:"२८ बैशाख २०८३", bg:"#827717" },
+  { key:"60days", label:"६० दिनभित्र", labelShort:"६० दिन", maxDays:60, date:"१२ जेठ २०८३", bg:"#33691e" },
+  { key:"90days", label:"९० दिनभित्र", labelShort:"९० दिन", maxDays:90, date:"१० असार २०८३", bg:"#1b5e20" },
+  { key:"100days", label:"१०० दिनभित्र", labelShort:"१०० दिन", maxDays:100, date:"२० असार २०८३", bg:"#004d40" },
+  { key:"180plus", label:"१८०+ दिन / दीर्घकालीन", labelShort:"१८०+", maxDays:9999, date:"असोज २०८३+", bg:"#1a237e" },
+  { key:"unspecified", label:"समयसीमा नतोकिएको/अस्पष्ट", labelShort:"नतोकिएको/अस्पष्ट", maxDays:null, date:"—", bg:"#37474f" },
+];
+
+function getBucket(item) {
+  const trueTatkal = [21, 42, 60, 62, 64, 70, 87, 88, 94, 96];
+  if (item.days === null && trueTatkal.includes(item.id)) return "immediate";
+  if (item.days === null) return "unspecified";
+  for (const b of TIMELINE_BUCKETS) {
+    if (b.maxDays !== null && item.days <= b.maxDays) return b.key;
+  }
+  return "180plus";
+}
+
+function nepaliNum(n) {
+  const d = "०१२३४५६७८९";
+  return String(n).split('').map(c => d[parseInt(c)] || c).join('');
+}
+
+// Dynamic countdown: calculates days left / days overdue based on browser date
+// Day 1 = 14 Chaitra 2082 = 28 March 2026 AD
+function getCountdownHTML(item) {
+  const DAY1 = new Date(2026, 2, 28);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const elapsedDays = Math.floor((today - DAY1) / 86400000) + 1;
+
+  if (item.days === null) {
+    const trueTatkal = [21, 42, 60, 62, 64, 70, 87, 88, 94, 96];
+    if (trueTatkal.includes(item.id)) {
+      if (elapsedDays > 1) return `<span class="card-countdown overdue">${t('countdown.overdue1')}</span>`;
+      return `<span class="card-countdown urgent">${t('countdown.immediate')}</span>`;
+    }
+    return `<span class="card-countdown no-deadline">${t('countdown.none')}</span>`;
+  }
+
+  const daysLeft = item.days - elapsedDays;
+  const n = LANG === 'en' ? Math.abs(daysLeft) : nepaliNum(Math.abs(daysLeft));
+
+  if (daysLeft > 7)  return `<span class="card-countdown remaining">${t('countdown.remaining').replace('{n}', n)}</span>`;
+  if (daysLeft > 0)  return `<span class="card-countdown urgent">${t('countdown.urgent').replace('{n}', n)}</span>`;
+  if (daysLeft === 0) return `<span class="card-countdown done-today">${t('countdown.today')}</span>`;
+  return `<span class="card-countdown overdue">${t('countdown.overdue').replace('{n}', n)}</span>`;
+}
+
+// Design-system urgency palette: red → amber → green → blue → muted
+const BUCKET_COLORS = {
+  immediate:   '#E03E35',
+  '7days':     '#C4502A',
+  '15days':    '#C47A2A',
+  '30days':    '#D4A832',
+  '45days':    '#A89028',
+  '60days':    '#6A9E5A',
+  '90days':    '#5E9E6A',
+  '100days':   '#4A7FBB',
+  '180plus':   '#4A6A84',
+  unspecified: '#8BACC4',
+};
+
+// Build distribution chart
+function rebuildBarCharts() {
+  const barChart = document.getElementById('barChart');
+  barChart.innerHTML = '';
+  TIMELINE_BUCKETS.forEach(b => {
+    const count = DATA.filter(d => getBucket(d) === b.key).length;
+    if (count === 0) return;
+    const maxCount = 25;
+    const pct = Math.max(8, (count / maxCount) * 100);
+    const color = BUCKET_COLORS[b.key] || '#3A5068';
+    const dateStr = getBucketDate(b.key);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label">${getBucketLabelShort(b.key)} ${dateStr !== "—" ? '<br><span style="font-size:14px;opacity:0.7">' + dateStr + '</span>' : ''}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${color}66;border-left:3px solid ${color};color:#fff;padding-left:10px;font-weight:600;">${numDisplay(count)}</div>
+      </div>
+    `;
+    barChart.appendChild(row);
+  });
+}
+
+function rebuildCatCharts() {
+  const catChart = document.getElementById('catChart');
+  catChart.innerHTML = '';
+  const catOrder = [...new Set(DATA.map(d => d.cat))];
+  const maxCatCount = Math.max(...catOrder.map(c => DATA.filter(d => d.cat === c).length));
+  catOrder.forEach(cat => {
+    const count = DATA.filter(d => d.cat === cat).length;
+    const item = DATA.find(d => d.cat === cat);
+    const name = getItemCatN(item);
+    const pct = Math.max(12, (count / maxCatCount) * 100);
+    const color = CAT_COLORS[cat];
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label">${name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:${color}66;border-left:3px solid ${color};color:#fff;padding-left:10px;font-weight:600;">${numDisplay(count)}</div>
+      </div>
+    `;
+    catChart.appendChild(row);
+  });
+}
+
+// Verbatim text from the document for each item
+// This file contains the corrected VERBATIM object
+// Each entry is copy-pasted from the original PDF document
+
+const VERBATIM = {
+1: "सम्वत् २०८२ फाल्गुन २१ मा सम्पन्न आम निर्वाचनलाई स्वच्छ, निष्पक्ष र स्वतन्त्र वातावरणमा सफलतापूर्वक सम्पन्न गराउन योगदान पुर्‍याउने तत्कालीन सुशीला काकी नेतृत्वको सरकार, निर्वाचन आयोग, सुरक्षा निकाय, कर्मचारी, सञ्चारकर्मी तथा सम्पूर्ण मतदाताप्रति हार्दिक आभार प्रकट गर्ने।",
+2: "सरकारको समग्र कार्यसम्पादनलाई नतिजामुखी, प्रभावकारी, मापनयोग्य र जवाफदेही बनाउन तथा नागरिक जीवनमा प्रत्यक्ष सुधार ल्याउने ढाँचामा रूपान्तरण गर्न नतिजामा आधारित शासकीय प्रबन्ध (Delivery-Based Governance) लागू गर्ने। यसको लागि प्रत्येक मन्त्रालयले ७ दिनभित्र प्रमुख १० कार्य, तिनका समयसीमा, जिम्मेवार अधिकारी र प्रमुख कार्यसम्पादन सूचकसहितको कार्ययोजना तयार गरी कार्यान्वयनमा लैजाने। ती कार्यहरूको मासिक प्रगति प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयमा पेश गर्ने व्यवस्था मिलाई उक्त कार्यालयमार्फत नियमित अनुगमन, मूल्याङ्कन तथा सार्वजनिक रिपोर्टिङ सुनिश्चित गर्ने।",
+3: "नेपालको संविधानको मूल भावना, लोकतान्त्रिक प्रणालीको सुदृढीकरण तथा निर्वाचनमार्फत व्यक्त जनादेशलाई संस्थागत रूपले कार्यान्वयन गर्न निर्वाचनमा सहभागी सबै राजनीतिक दलका घोषणापत्र, वाचापत्र तथा प्रतिबद्धतापत्रहरूमा समावेश कार्यान्वयनयोग्य विषयहरूको संश्लेषण गरी 'राष्ट्रिय प्रतिबद्धता' तयार गर्ने एवंसोमा नेपाल सरकारको साझा स्वामित्व स्थापित गर्ने। उक्त प्रतिबद्धतालाई वार्षिक नीति तथा कार्यक्रम, बजेट तथा सुधार एजेण्डासँग आबद्ध गरी तत्कालैदेखि कार्यान्वयन गर्न तत्काल प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालय अन्तर्गत आवश्यक संरचना स्थापना गरी जिम्मेवारी दिने।",
+4: "देशको दीर्घकालीन राजनीतिक तथा संस्थागत सुधार, निर्वाचन प्रणाली लगायतका विषयमा संविधान संशोधनसम्बन्धी विषयहरूमा राष्ट्रिय सहमति निर्माण गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयले सात दिनभित्र 'संविधान संशोधन बहस पत्र' तयार गर्न कार्यदल गठन गर्ने तथा उक्त बहस प्रक्रियालाई सहभागितामूलक, पारदर्शी र तथ्यमा आधारित बनाउने।",
+5: "दलित तथा ऐतिहासिक रूपमा बहिष्कृत समुदायमाथि राज्य, समाज र नीतिगत संरचनाबाट भएका अन्याय, विभेद र अवसरवञ्चनाको औपचारिक स्वीकारोक्ति गर्दै सामाजिक न्याय, समावेशी पुनस्थापना र ऐतिहासिक मेलमिलापको आधार तयार गर्न १५ दिनभित्र राज्यका तर्फबाट औपचारिक क्षमायाचनासहित सुधारमुखी कार्यक्रम घोषणा गर्ने।",
+6: "सम्वत् २०८२ भदौ २३ र २४ मा भएको जेन-जी (Gen Z) आन्दोलनका क्रममा भएका घटनाबाट प्रभावित परिवार र नागरिकहरूको न्याय, पुनस्थापना र राज्यप्रतिको विश्वास पुनस्थापना गर्न एकीकृत पहल गर्ने। यस पहल अन्तर्गत शहीदका परिवार तथा घाइतेहरूको तथ्याङ्क सङ्कलन तथा प्रमाणीकरण गरी सम्मानजनक पुनस्थापना, जीवनयापनको सुरक्षा र सामाजिक संरक्षण सुनिश्चित गर्न १०० दिनभित्र योग्यताअनुसार सरकारी, सार्वजनिक र निजी क्षेत्रमा रोजगारीका अवसर, सीप विकास, मनोसामाजिक परामर्श तथा पुनस्थापना सहायता समेटिएको समन्वित प्याकेज कार्यान्वयन गर्ने; साथै उक्त आन्दोलनका क्रममा भएका घटनाको सत्यतथ्य छानबिन गर्न गठित गौरीबहादुर काकी आयोगको प्रतिवेदनका आधारमा दोषी व्यक्ति तथा पक्षहरूमाथि प्रचलित कानूनबमोजिम आवश्यक अनुसन्धान, कारबाही र अभियोजन प्रक्रिया तत्काल अघि बढाउने।",
+7: "सम्वत् २०८२ भाद्र २४ गते घटेको घटनाको सत्यतथ्य छानबिन गर्न एक उच्चस्तरीय छानबिन समिति एक हप्ताभित्र गठन गर्ने। उक्त समितिलाई घटनासम्बन्धी सम्पूर्ण विवरण सङ्कलन, विश्लेषण तथा जिम्मेवार पक्ष पहिचान गरी निश्चित समयसीमाभित्र प्रतिवेदन पेश गर्न कार्यादेश दिने तथा समितिको सिफारिसका आधारमा आवश्यक थप कारबाही प्रक्रिया अघि बढाउने।",
+8: "विभिन्न आयोगका प्रतिवेदनहरू केवल अभिलेखमा सीमित रहने र कार्यान्वयन कमजोर हुने समस्या समाधान गर्न ३० दिनभित्र सम्बन्धित प्रतिवेदनका सिफारिसहरू कार्यान्वयन गर्न आवश्यक कानूनी, प्रशासनिक र अभियोजन प्रक्रिया सुरु गर्ने।",
+9: "मन्त्रालयहरूको सङ्ख्या आवश्यकताभन्दा ठूलो भई चालुखर्च बढेको समस्यालाई समाधान गर्न ३० दिनभित्र मन्त्रालयको सङ्ख्या घटाउने निर्णय सहित मौजुदा नेपाल सरकार (कार्य विभाजन) नियमावली संशोधन गरी सङ्घीय मन्त्रालयको सङ्ख्या १७ कायम गर्ने। मन्त्रालयहरूको सङ्ख्या पुनरावलोकन गर्ने सन्दर्भमा हाल कायम रहेका दरबन्दीहरूसमेत व्यवस्थापन गर्नुपर्ने भएमा सेवा प्रवाहलाई असर नपर्ने गरी बढुवा व्यवस्थापन गर्ने। सो बमोजिम सेवा निरन्तरताका लागि सङ्क्रमिक मार्गचित्र (Transition Roadmap) तयार गर्न, जनशक्ति, बजेट तथा कार्यक्रम लगायतका प्रबन्ध मिलाउन प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयमा 'पुनसंरचना व्यवस्थापन सचिवालय' गठन गर्ने।",
+10: "सबै सार्वजनिक निकायले सेवा प्रवाहमा विद्यमान दोहोरोपन, जटिलता तथा अनावश्यक प्रक्रियाका कारण सेवा प्रवाह ढिलो, खर्चिलो र अप्रभावकारी भएको अवस्थालाई अन्त्य गर्न आआफ्ना निकायमा प्रचलनमा रहेका प्रक्रियाहरूको व्यापक समीक्षा गरी अनावश्यक तथा दोहोरिएका प्रक्रियाहरू हटाउन, निर्णय प्रक्रियामा रहेका बहु-स्वीकृति तहलाई बढीमा तीन तहमा सीमित गर्न तथा Business Process Re-engineering (BPR) मार्फत सम्पूर्ण सेवा प्रवाहलाई सरल, छिटो तथा परिणाममुखी बनाउनका लागि आवश्यक कार्यविधि, मापदण्ड तथा अनुगमन प्रणाली ३० दिनभित्र तयार/संशोधन गरी लागू गर्ने। कानूनी व्यवस्था गर्नुपर्ने अवस्थामा सो अवधिभित्र कानून संशोधनको मस्यौदा तयार गर्ने।",
+11: "नेपाल सरकार अन्तर्गत रहेका अनुत्पादक, दोहोरो कार्यक्षेत्र भएका तथा अनावश्यक वित्तीय भार सिर्जना गर्ने बोर्ड, समिति, आयोजना तथा संस्थागत संरचनाहरूको समग्र मूल्याङ्कन गरी खारेज, एकीकरण वा पुनसंरचना गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालय, अर्थ मन्त्रालय, उद्योग, वाणिज्य तथा आपूर्ति मन्त्रालय र सङ्घीय मामिला तथा सामान्य प्रशासन मन्त्रालयका प्रतिनिधिहरू रहेको एक उच्चस्तरीय कार्यदल गठन गर्ने तथा सो कार्यदललाई एक महिनाभित्र स्पष्ट सिफारिससहितको प्रतिवेदन पेश गर्न कार्यादेश दिने।",
+12: "सार्वजनिक प्रशासनलाई पूर्णतः राजनीतिक हस्तक्षेपबाट मुक्त गर्दै निष्पक्ष, तटस्थ र नागरिकप्रति उत्तरदायी बनाउने। यस उद्देश्यका लागि निजामती कर्मचारी, शिक्षक, प्राध्यापक तथा सबै राज्यसेवकले कुनै पनि दल, समूह वा स्वार्थ केन्द्रसँगको प्रत्यक्ष वा अप्रत्यक्ष आबद्धताबाट मुक्त भई कार्यसम्पादन गर्न अनिवार्य गर्ने र उल्लङ्घन भएमा प्रचलित कानूनबमोजिम कडाइका साथ विभागीय कारवाही गर्ने। साथै, सार्वजनिक प्रशासनमा दलीय ट्रेड युनियन खारेज गरी अवाञ्छित हस्तक्षेप र अनौपचारिक दबाबको अन्त्य गर्दै निर्णय प्रक्रिया तथा सेवा प्रवाहलाई प्रभावकारी बनाउने। यसका लागि आवश्यक कानूनी व्यवस्था विशेषतः सङ्घीय निजामती सेवा विधेयक ४५ दिनभित्र तजुमा गर्ने।",
+13: "विद्यमान भ्रष्टाचार, ढिलासुस्ती तथा सेवाग्राहीप्रति असहज व्यवहारजस्ता प्रवृत्तिहरूको सुधार गर्दै कर्मचारीतन्त्रलाई उत्तरदायी, सेवामुखी, जनमुखी र उदाहरणीय बनाउन कर्मचारी आचारसंहिताको अक्षरशः कार्यान्वयन गर्ने। साथै, कर्मचारीहरूले व्यावसायिक मर्यादा कायम राख्दै निष्पक्ष, तटस्थ र सरकारका निर्णयहरूको प्रभावकारी कार्यान्वयनमा समर्पित भई काम गर्ने वातावरण सुनिश्चित गर्ने।",
+14: "सङ्घ, प्रदेश तथा स्थानीय तहको सङ्गठन तथा व्यवस्थापन सर्वेक्षणको राष्ट्रिय मापदण्ड १५ दिनभित्र तजुमा गरी स्वीकृत गर्ने।",
+15: "शिक्षकको सिटरोल दर्ता तथा अवकाशपछाडिका सेवा सुविधा व्यवस्थापन आगामी आर्थिक वर्षदेखि प्रदेशको शिक्षा हेर्ने मन्त्रालयबाटै गर्ने व्यवस्था मिलाउने।",
+16: "कर्मचारीहरूको कार्यसम्पादनलाई परिणामसँग जोड्न प्रत्येक पदको कार्यविवरणको वस्तुनिष्ठ कार्यसम्पादन सूचक सम्बन्धित सार्वजनिक निकाय/कार्यालयले ४५ दिनभित्र तयार गर्ने। कार्यसम्पादन मूल्याङ्कन कमजोर हुँदा राम्रो र खराब कार्यसम्पादनलाई समान व्यवहार गर्ने प्रवृत्ति हटाउन ९० दिनभित्र कार्यसम्पादनमा आबद्ध उत्तरदायित्व र पुनरावलोकन प्रणाली लागू गर्ने।",
+17: "सार्वजनिक निकायको सेवाको गुणस्तर प्रमाणीकरण गर्ने व्यवस्था गरी उत्कृष्ट निकायलाई प्रोत्साहित (Incentivize) गर्न सङ्घीय मामिला तथा सामान्य प्रशासन मन्त्रालयले स्थानीय तहबाट प्रवाह हुने सेवाको गुणस्तर प्रमाणीकरण मापदण्ड ४५ दिनभित्र तयार गर्ने।",
+18: "सरकारी कार्यालयहरूको भौतिक पूर्वाधार र स्तरीकृत विन्यास (Standard Layout) का लागि शहरी विकास मन्त्रालयले दुई महिनाभित्र न्यूनतम मापदण्ड तजुमा गरी १०० दिनभित्र कार्यान्वयनमा लैजाने।",
+19: "कर्मचारीहरूको अद्यावधिक डिजिटल प्रोफाइल तयार गरी नियुक्ति, पदस्थापना, सरुवा, तालिम, बढुवा तथा अवकाशसम्मको व्यवस्था अनुमानयोग्य र स्वचालित बनाउन सङ्घीय मामिला तथा सामान्य प्रशासन मन्त्रालयले तीन महिनाभित्र कर्मचारी व्यवस्थापन सूचना प्रणाली (Personnel Management Information System- PMIS) को आर्किटेक्चर तयार गर्ने।",
+20: "नागरिकलाई सरकारी सेवा लिन धेरै कार्यालय धाउनुपर्ने, प्रक्रियागत झन्झट व्यहोर्नुपर्ने तथा समय र लागत दुवै बढ्ने अवस्थाको अन्त्य गर्न प्रमुख शहरहरूमा एजेन्सिफिकेसन मोडालिटीमा नागरिक सेवा केन्द्र सञ्चालन गर्ने। त्यस्ता केन्द्रहरूलाई दैनिक कम्तीमा १२ घण्टा सञ्चालन गर्ने व्यवस्था मिलाउने।",
+21: "नागरिकलाई छिटो, सहज र बिचौलिया मुक्त सेवा उपलब्ध गराउन नागरिकता, राहदानी, राष्ट्रिय परिचयपत्र तथा जिल्ला प्रशासन कार्यालयबाट प्रदान हुने सम्पूर्ण सेवाहरूलाई डिजिटल तथा एकीकृत प्रणालीमार्फत सञ्चालन गर्ने, नागरिकताको प्रतिलिपि तथा राहदानी सेवा जुनसुकै जिल्ला प्रशासन कार्यालयबाट प्राप्त गर्न सक्ने व्यवस्था तत्काल लागू गर्ने, वडास्तरबाट डिजिटल सिफारिश प्रणाली लागू गर्ने, राष्ट्रिय परिचयपत्रलाई अनिवार्य एकल परिचय प्रणालीका रूपमा प्रयोग गर्ने तथा सबै सेवा प्रक्रियालाई फेसलेस, टाइम-बाउन्ड र ट्र्याकिङ योग्य बनाउने।",
+22: "फ्रन्ट डेस्कमा काम गर्ने सबै कर्मचारीहरूलाई कार्यालयबाट उपलब्ध हुने सबै सेवाहरूको तालिम प्रदान गर्न त्यस्ता कर्मचारीहरू सूची र तालिमको आवश्यकता सबै कार्यालयहरूले १५ दिनभित्र सङ्घीय मामिला तथा सामान्य प्रशासन मन्त्रालयमा उपलब्ध गराउने। मन्त्रालयले सम्बन्धित तालिम प्रदायक संस्थाहरूसँग समन्वय गरी ६ महिनाभित्र आवश्यक तालिमको व्यवस्था गर्ने। तत्पश्चात पनि सो प्रक्रियालाई प्रत्येक निरन्तर सञ्चालन गर्ने।",
+23: "सम्पूर्ण सार्वजनिक सेवाका प्रक्रियालाई डिजिटल, ट्र्याकिङयोग्य र पारदर्शी बनाउन प्रत्येक कार्यालयले एक महिनाभित्र समय र गति (Time and Motion) को अध्ययन गरी कार्यालयको पुनर्विन्यास योजना (Restructuring Plan) तयार गर्ने।",
+24: "देशभरका नागरिकका गुनासो, सुझाव तथा सेवा अनुरोधलाई छिटो, प्रभावकारी तथा परिणाममुखी रूपमा सम्बोधन गर्न २४ घण्टे राष्ट्रिय नागरिक सहायता तथा गुनासो व्यवस्थापन प्रणाली सञ्चालन गर्ने। सोको लागि फोन, मोबाइल एप, पोर्टल तथा सामाजिक सञ्जालमार्फत गुनासो दर्ता गर्न सक्ने बहु-च्यानलको व्यवस्था मिलाउने।",
+25: "हेलो सरकार संयन्त्रलाई स्तरोन्नति गरी नागरिक सम्वादको प्लेटफर्मका रूपमा विकास गर्ने तथा एकीकृत ड्यासबोर्डमार्फत सबै मन्त्रालयसँग प्रत्यक्ष समन्वय गरी गुनासो समाधानको प्रगति real-time मा अनुगमन गर्ने।",
+26: "पासपोर्ट, नागरिकता, सवारी चालक अनुमति पत्र लगायतका सेवाहरू नागरिकलाई छिटो, सहज र बिचौलिया-मुक्त तरिकाले पूर्वानुमानयोग्य समय (Predictable Time) मा उपलब्ध गराउने व्यवस्था लागू गर्ने तथा सम्पूर्ण सेवा प्रक्रियालाई मुहारविहीन र समयबद्ध (faceless, timebound) र डिजिटल प्रणालीमा रूपान्तरण गर्ने।",
+27: "सरकारी सेवा घरमै उपलब्ध गराउने उद्देश्यले हुलाक सेवालाई आधुनिकीकरण गरी 'Government Courier Service' का रूपमा विकास गर्ने, जसमार्फत पासपोर्ट, नागरिकता प्रतिलिपि, लाइसेन्स लगायतका सरकारी कागजातहरू/सामग्रीहरू घरमै पुर्‍याउने व्यवस्था १०० दिनभित्र लागू गर्ने।",
+28: "सार्वजनिक सेवा प्रवाहलाई छिटो, पारदर्शी, कागजरहित तथा अन्तरआबद्ध बनाउन सङ्घ, प्रदेश र स्थानीय तहका सबै सरकारी निकायहरूमा १०० दिनभित्र विद्यमान GIOMS प्रणालीलाई सुदृढ र प्रयोगकर्तामैत्री बनाउने।",
+29: "सरकारसँग पहिलेनै भएको नागरिकको वैयक्तिक विवरण (जस्तै: नागरिकता नम्बर हाल्दा नाम/ठेगाना) पुनः सोध्नुको सट्टा Auto-fill हुने व्यवस्था सम्बन्धित कार्यालयहरूले आफ्ना प्रणालीहरूमा ६० दिनभित्र गर्ने। नागरिकले आफ्नो विवरण (जस्तै: नागरिकता नम्बर) सरकारलाई एक पटक दिएपछि, अन्य सरकारी निकायले सोही डेटा प्रयोग गर्ने वातावरण मिलाउने।",
+30: "सरकारी एप वा पोर्टलहरू अपाङ्गता भएका व्यक्ति र कम प्राविधिक ज्ञान भएका नागरिकले पनि चलाउन सक्ने गरी सरल बनाउने कार्य १०० दिनमा सम्पन्न गर्ने।",
+31: "अनलाइन आवेदन प्रणालीलाई सहज बनाउन नागरिक एप मार्फत आवेदन दिने व्यवस्था मिलाउने। यसरी नागरिक एप मार्फत आवेदन गर्दा व्यक्तिले आफ्नो फोनमा रहेको एपले Locally Store गरेको विवरण वा अन्य प्रणालीबाट प्राप्त विवरणको आधारमा Form Fill-up गर्ने व्यवस्था मिलाउने। तर नागरिक एपले Centrally Data Store गर्न भने नमिल्ने बनाउने। यस्तो व्यवस्थाबाट प्रहरी प्रतिवेदन, राहदानी र सवारीचालक अनुमति पत्रका लागि आवेदन गर्न सक्ने व्यवस्था ४५ दिनभित्र मिलाउने।",
+32: "आवेदन दिएको सेवा प्राप्त गर्न भौतिक रूपमा उपस्थित हुनुपर्ने अवस्था भएमा उपलब्ध मिति र समय मध्ये नागरिकलाई आफ्नो सुविधाको दिन र समयको Appointment लिन सक्ने व्यवस्था गरी सोही अनुसार नागरिक सेवा केन्द्र वा सरकारी निकाय मार्फत सेवा प्रवाह गर्ने व्यवस्था गर्ने तीन महिनाभित्र मिलाउने।",
+33: "Digital Signature हाल Certificate को माध्यमबाट हुने गरेकोमा NID Card, Biometric वा OTP को प्रयोग गरी e-signature गरी नागरिकले आफ्नो विवरण बुझाउन सक्ने व्यवस्था गर्ने। यसको लागि राष्ट्रिय परिचयपत्र तथा पञ्जीकरण विभागको भौतिक तथा साङ्गठनिक सुदृढीकरण गर्ने। राष्ट्रिय परिचयपत्र (NID) नम्बरलाई आधार बनाई नागरिकका सबै सेवाहरूमा डिजिटल हस्ताक्षरद्वारा प्रमाणीकरण प्रणाली लागू गर्न गृह मन्त्रालयको संयोजकत्वमा अध्ययन गरी एक महिनाभित्र प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयमा प्रतिवेदन दिने।",
+34: "फाइल कुन टेबुलमा कति समय बस्यो भन्ने ट्र्याकिङ गर्ने र थोकिएको समय नाघेमा माथिल्लो अधिकारीलाई 'अलर्ट' जाने प्रणालीको उपयोग विद्यमान एकीकृत कार्यालय व्यवस्थापन प्रणालीमा ३० दिनभित्र गर्ने।",
+35: "प्रमाणपत्रहरू नागरिकले आधिकारिक मोबाइल एप/नागरिक एप वा इमेलमा 'डाउनलोड' गर्न मिल्ने व्यवस्था १५ दिनभित्र मिलाउने।",
+36: "सार्वजनिक सेवा प्रवाहलाई पूर्णरूपमा डिजिटल, एकद्वार र अन्तरआबद्ध प्रणालीमा रूपान्तरण गर्ने उद्देश्यले 'राष्ट्रिय एकीकृत डिजिटल शासन प्लेटफर्म' स्थापना गरी डिजिटल गभर्नेन्स ब्लुप्रिन्ट कार्यान्वयन गर्ने। यस अन्तर्गत 'एउटा विवरण एकपटकमात्र बुझाउने' सिद्धान्त अवलम्बन गर्दै सबै तहका सरकारका सेवा, डाटा र प्रणालीहरूलाई एकीकृत गरी डिजिटल सार्वजनिक पूर्वाधारमा आधारित राष्ट्रिय डाटा एक्सचेन्ज प्लेटफर्म स्थापना तथा सञ्चालनको कार्य १०० दिनभित्र प्रारम्भ गर्ने।",
+37: "नागरिकले एउटै डिजिटल प्लेटफर्ममार्फत सबै सेवा सहज रूपमा प्राप्त गर्न सक्ने व्यवस्था मिलाउन, सेवा प्रवाहमा दोहोरोपनको अन्त्य गर्न, पारदर्शिता अभिवृद्धि तथा समय र लागत उल्लेख्य रूपले घटाउन डिजिटल गभर्नेन्स र व्यक्तिगत डाटा संरक्षणसम्बन्धी नीति तथा कानूनको तजुमा ६० दिनभित्र गर्ने।",
+38: "सूचना प्रविधि तथा डिजिटल गभर्नेन्स सम्बन्धी नियम बनाउने र नियमन गर्ने स्वतन्त्र नियामक निकाय (Independent Regulatory Authority) को स्थापनाका लागि आवश्यक कानूनी तथा संस्थागत प्रबन्ध ६० दिनभित्र गर्ने।",
+39: "नेपालको सूचना प्रविधि तथा विद्युतीय शासन प्रणालीमा विद्यमान खण्डीकृत संरचना, अन्तरआबद्धताको अभाव, मापदण्ड तथा संस्थागत समन्वयको कमजोरी, दक्ष जनशक्ति र प्राविधिक क्षमताको कमी तथा सेवा प्रवाहमा देखिएको अप्रभावकारिता समाधान गरी एकीकृत, सुरक्षित, दक्ष र परिणाममुखी डिजिटल शासन प्रणाली स्थापना गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालय मातहत रहने गरी सूचना प्रविधि तथा विद्युतीय शासन कार्यालय स्थापना गर्ने कार्य तीन महिनाभित्र सम्पन्न गर्ने। हालको सूचना प्रविधि विभाग खारेज गर्ने तथा सूचना प्रविधिसम्बन्धी सबै सार्वजनिक निकायहरूलाई यस कार्यालय अन्तर्गत सञ्चालन गर्ने व्यवस्था मिलाउने।",
+40: "सूचना प्रविधि तथा विद्युतीय शासन विधेयक ६० दिनभित्र तजुमा गर्ने।",
+41: "National Enterprise Architecture Framework ६० दिनभित्र तयार गर्ने।",
+42: "सञ्चार तथा सूचना प्रविधि मन्त्रालयले सट्टेबाजी एप (Betting App) र त्यससम्बन्धी वेबसाइट २४ घण्टाभित्र बन्द गर्ने।",
+43: "देशमा व्याप्त भ्रष्टाचार, सम्पत्ति लुकाउने प्रवृत्ति तथा दण्डहीनताको अन्त्य गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालय अन्तर्गत रहने गरी १५ दिनभित्र अधिकारसम्पन्न सम्पत्ति छानबिन समिति गठन गर्ने। सो समितिमा कानून, अर्थ, राजस्व तथा अनुसन्धान क्षेत्रका विज्ञ तथा सम्बन्धित निकायका प्रतिनिधिहरू समावेश गर्ने। सोको लागि आवश्यक कानूनी तथा प्राविधिक संयन्त्र विकास गरी सम्पूर्ण प्रक्रिया पारदर्शी र नतिजामुखी हुने सुनिश्चित गर्ने। उक्त समितिलाई आवश्यक कागजात, विवरण तथा अभिलेख सङ्कलन, विश्लेषण तथा सिफारिस गर्ने लगायतका अधिकार प्रदान गर्ने। पहिलो चरणमा वि. सं. २०६२/६३ देखि हाल (२०८२/८३) सम्म सार्वजनिक पद धारण गरेका प्रमुख राजनीतिक पदाधिकारी तथा उच्चपदस्थ कर्मचारीहरूको सम्पत्ति विवरणको सङ्कलन, प्रमाणीकरण तथा छानबिन गर्ने। दोस्रो चरणमा वि. सं. २०४८ सालदेखि २०६१/६२ सम्मको अवधिमा सार्वजनिक पद धारण गरेका सोही प्रकृतिका पदाधिकारी तथा कर्मचारीहरूको सम्पत्ति छानबिन गर्ने। छानबिन प्रक्रियालाई कानूनी मापदण्ड, प्रमाणमा आधारित तथा निष्पक्ष रूपमा सञ्चालन गर्ने तथा समितिले पेश गरेको प्रतिवेदन तथा सिफारिसहरू सम्बन्धित निकायमार्फत कार्यान्वयन गर्ने व्यवस्था मिलाउने।",
+44: "सुशासन प्रवर्द्धन, भ्रष्टाचार नियन्त्रण तथा सार्वजनिक सेवा प्रवाहमा पारदर्शिता र जवाफदेहिता अभिवृद्धि गर्न राष्ट्रिय सतर्कता केन्द्रको पुनसंरचना योजना ३० दिनभित्र तयार गरी कार्यान्वयनमा ल्याउने।",
+45: "भ्रष्टाचार नियन्त्रणलाई प्रणालीगत बनाउन नेपाल राष्ट्र बैङ्कले १०० दिनभित्र, बैंक खाता, डिजिटल वालेट, शेयर लगानी तथा अन्य वित्तीय गतिविधिहरूलाई समेट्ने समन्वित डिजिटल सम्पत्ति लगत (Integrated Digital Asset Registry) स्थापना गर्ने, सोमा जोखिममा आधारित सङ्केत (Risk-Based Red Flag) प्रणाली लागू गर्ने तथा सन्देहास्पद कारोबारहरूको स्वचालित पहिचान गरी सम्बन्धित निकायमार्फत अनुसन्धान प्रक्रिया अघि बढाउने।",
+46: "भ्रष्टाचार विरुद्धको संयुक्त राष्ट्रसङ्घीय अभिसन्धि अनुकूल हुने गरी भ्रष्टाचार विरुद्धको दोस्रो राष्ट्रिय कार्ययोजना १५ दिनभित्र जारी गर्ने।",
+47: "सदाचारिता प्रवर्द्धन, सूचनादाताको संरक्षण (Whistleblower Protection) र हित/स्वार्थको द्वन्द्व (Conflict of Interest) व्यवस्थापनका लागि ३० दिनभित्र राष्ट्रिय सदाचार नीति जारी गर्ने तथा सम्बन्धित कानून तजुमा तथा संशोधन प्रक्रिया अघि बढाउने।",
+48: "सार्वजनिक खरिद प्रक्रियामा हुने ढिलासुस्ती, लागत वृद्धि, गुणस्तरहीन कार्य तथा भ्रष्टाचार नियन्त्रण गर्न सार्वजनिक खरिद ऐनलाई ३० दिनभित्र संशोधन गरी Value for Money, Life Cycle Costing, EGov Market Place तथा Performance-Based Contracting जस्ता अवधारणाहरू लागू गर्ने। खरिद प्रक्रियालाई पूर्णतः डिजिटल, पारदर्शी तथा ट्र्याकिङयोग्य बनाउने तथा प्रतिस्पर्धालाई प्रोत्साहन गर्ने।",
+49: "आयोजना व्यवस्थापनका लागि देहायका कार्य गर्ने:\nक) देशका प्राथमिकता प्राप्त विकास परियोजनाहरूमा स्पष्टता ल्याउन राष्ट्रिय स्तरको Project Pipeline तयार गर्ने, सबै परियोजनाहरूलाई आर्थिक, सामाजिक तथा वातावरणीय आधारमा प्राथमिकता निर्धारण गर्ने तथा प्रत्येक परियोजनाका लागि उपयुक्त लगानी मोडालिटी (सरकारी, PPP, विदेशी लगानी आदि) तय गर्ने कार्य राष्ट्रिय योजना आयोगले दुई महिनाभित्र सम्पन्न गर्ने।\nख) लामो समयदेखि अलपत्र परेका, रुग्ण अवस्थामा रहेका तथा समयमा सम्पन्न हुन नसकेका आयोजनाहरूको पुनरावलोकन गरी बजेट व्यवस्था, जग्गा अधिग्रहण, वातावरणीय प्रभाव मूल्याङ्कन (EIA) स्वीकृति, ठेक्का तोड्ने लगायतका प्रक्रियाहरू सरल बनाउने। रुग्ण आयोजना, ठेक्का तोडिएका परियोजना र प्रतिफलविहीन लगानी भई रहने समस्या समाधान गर्न ३० दिनभित्र अध्ययन टोली गठन गरी उक्त टोलीले आयोजनाको औचित्य र सम्भाव्यता मूल्याङ्कन गरी निरन्तरता दिनुपर्ने वा नपर्ने अवस्थाको बारेमा सिफारिस गर्ने। साथै, कुनै आयोजनाहरूको निर्माण तथा सञ्चालनका लागि अन्तर्निकाय समन्वय गर्नुपर्ने भएमा प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयले तत्काल समन्वय र सहजीकरण गर्ने।\nग) राष्ट्रिय गौरवका तथा ठूला रणनीतिक आयोजनाहरूको कार्यान्वयनलाई शीघ्र, समयबद्ध तथा गुणस्तरीय बनाउन जग्गा प्रप्ति, मुआब्जा निर्धारण, रुख कटान तथा वातावरणीय प्रभाव मूल्याङ्कन प्रतिवेदन स्वीकृति सम्बन्धी प्रक्रियाहरूलाई 'Fast-Track Mechanism' अन्तर्गत सञ्चालन गर्न, सम्बन्धित सबै निकायहरूबीच समन्वय गरी एकीकृत र स्वचालित स्वीकृति प्रणाली लागू गर्न, अनावश्यक ढिलासुस्ती तथा दोहोरो प्रक्रियाहरू हटाउन, स्पष्ट समयसीमा थोकी कार्यान्वयन गर्न तथा आयोजना कार्यान्वयनमा देखिने अवरोधहरू समाधान गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालयबाट प्रत्यक्ष अनुगमन तथा सहजीकरण गर्ने।\nघ) राष्ट्रिय तथा प्राथमिकताप्राप्त पूर्वाधार आयोजनाहरूको कार्यान्वयनमा देखिएको ढिलासुस्ती तथा ठेक्का प्रक्रियामा बारम्बार असफलता अन्त्य गर्न दुई पटक भन्दा बढी ठेक्का नलागेका वा ठेक्का प्रक्रिया असफल भएका आयोजनाहरूलाई सरकारी पूर्वाधार निर्माण कम्पनीमार्फत प्रत्यक्ष कार्यान्वयन गर्ने व्यवस्थाका लागि तीस दिनभित्र कानून तजुमा गरी उक्त कम्पनीका लागि आवश्यक पर्ने स्रोत, साधन, जनशक्ति तथा उपकरण व्यवस्थापन गर्ने।",
+50: "आयोजना छनोटदेखि भुक्तानीसम्मका विभिन्न चरणहरूमा ट्र्याकिङ्ग नहुँदा अनियमितता, भेरिएसन आदेशको दुरुपयोग र ढिलाइ हुने समस्या समाधान गर्न ९० दिनभित्र data-based end-to-end e-procurement monitoring प्रणाली लागू गर्ने।",
+51: "परियोजनाहरू विभिन्न कानून, स्वीकृति र निकायगत प्रक्रियामा अल्झिँदा आयोजना निर्माण तथा सञ्चालनमा वर्षौं लाग्ने समस्या समाधान गर्न ६० दिनभित्र परियोजना सहजीकरण (Project Facilitation) सम्बन्धी छाता कानूनको मस्यौदा तयार गर्ने।",
+52: "लामो समयदेखि नागरिकलाई दैनिक सास्ती गरिरहेका प्रमुख सडक तथा यातायात पूर्वाधार आयोजना समयमा पूरा नहुने समस्या समाधान गर्न तत्कालै आयोजना निगरानी कार्यतालिका बनाई कार्यान्वयन गर्ने। राजमार्ग (Highway) का रणनैतिक क्षेत्रहरूमा अध्ययन गरेर तौल पुल ४५ दिन भित्र राख्ने।",
+53: "देशमा लगानी वातावरण सुधार गर्न उद्योग दर्ता, स्वीकृति तथा सञ्चालन प्रक्रियालाई सरल, छिटो तथा पारदर्शी बनाउन उद्योग विभागमा रहेको एकल बिन्दु सेवा केन्द्रमा खटिने कर्मचारीलाई थप अधिकार प्रत्यायोजन गरी प्रभावकारी बनाउने।",
+54: "देशको पूर्वाधार विकासलाई द्रुत, व्यवस्थित तथा लगानीमैत्री बनाउन नेपालमा सञ्चालनमा रहेका राष्ट्रिय गौरवका आयोजना तथा लगानी बोर्डमा दर्ता भएका सम्पूर्ण परियोजनाहरूको लगानीको ढाँचा (Investment Modality) अनिवार्य रूपमा निर्धारण गर्ने। सोको लागि राष्ट्रिय योजना आयोग, लगानी बोर्ड नेपाल र अर्थ मन्त्रालयले संयुक्त रूपमा ९० (नब्बे) दिनभित्र सबै परियोजनालाई सरकारी कोष, सार्वजनिक-निजी साझेदारी, निजी लगानी वा मिश्रित लगानी ढाँचामा वर्गीकरण गरी पुँजी परिचालन, जोखिम बाँडफाँट, कार्यान्वयन ढाँचा तथा समयसीमा सहितको National Structured Project Pipeline ९० (नब्बे) दिनभित्र तयार गरी सार्वजनिक गर्ने। उक्त संरचना अनुसार परियोजनाहरूलाई लगानीयोग्य (Bankable) बनाउँदै कार्यान्वयन प्रक्रिया द्रुत रूपमा अघि बढाउने।",
+55: "स्वदेशी तथा वैदेशिक लगानीकर्ताहरुलाई एकीकृत रूपले सहजताका साथ निर्धारित समयावधि भित्रै थोकिए बमोजिमका सेवा उपलब्ध गराउनका निम्ति लगानी बोर्ड नेपाल अन्तर्गत आगामी एक महिना भित्रै एकद्वार स्वीकृति प्रणाली (One Door Approval System) स्थापना गरी एक महिनाभित्र सञ्चालनमा ल्याउने।",
+56: "देशमा उद्यमशीलता प्रवर्द्धन, लगानी वातावरण सुधार तथा व्यवसाय दर्ता प्रक्रियालाई सरल, छिटो (दुई दिन भित्र) र झन्झटरहित बनाउन 'Startup Fast Track' प्रणाली लागू गर्ने।",
+57: "साना तथा मझौला उद्योग (SME), कृषि तथा सूचना प्रविधि क्षेत्रको ऋणप्रवाहमा हाल रहेको जोखिम भार (Risk Weightage) घटाई उपयुक्त तहमा झार्ने व्यवस्था नेपाल राष्ट्र बैंकले ३० दिनभित्र मिलाउने।",
+58: "व्यवसाय दर्ता, कर दर्ता, बैंक खाता तथा अन्य आवश्यक अनुमति लिनुपर्ने विषयलाई एकीकृत गरी ४५ दिनभित्र One Door Business Platform मार्फत सेवा उपलब्ध गराउने। सेवा प्रवाहको क्रममा सम्पूर्ण प्रक्रिया डिजिटल, पारदर्शी तथा ट्र्याकिङयोग्य बनाई कार्यान्वयनका लागि कानूनी, प्राविधिक तथा प्रक्रियागत सुधार तत्काल लागू गर्ने।",
+59: "देशमा रोजगारी सिर्जना, सीप विकास तथा उद्यमशीलता प्रवर्द्धनलाई एकीकृत रूपमा सुदृढ गर्न शिक्षा, विज्ञान तथा प्रविधि मन्त्रालय अन्तर्गतको प्राविधिक शिक्षा तथा व्यावसायिक तालिम परिषद् (CTEVT), श्रम, रोजगार तथा सामाजिक सुरक्षा मन्त्रालय अन्तर्गतको व्यावसायिक तथा सीप विकास तालिम प्रतिष्ठान तथा उद्योग, वाणिज्य तथा आपूर्ति मन्त्रालय अन्तर्गतको औद्योगिक व्यवसाय विकास प्रतिष्ठान लगायतका संस्थाहरूले संयुक्त रूपमा कार्य गर्ने गरी रोजगार सेवा केन्द्रहरूलाई ६० दिनभित्र 'रोजगार, सीप तथा उद्यमशीलता केन्द्र' का रूपमा रूपान्तरण गर्ने। सो केन्द्रले रोजगारविहीनहरूको दर्ता र सार्वजनिक रोजगार कार्यक्रमका अतिरिक्त स्थानीय सीप तथा सोको माग नक्साङ्कन, तालिम समन्वय, उद्यमशीलता सहजीकरण तथा वैदेशिक रोजगारीबाट फर्किएका श्रमिकहरूको पुनःएकीकरण सम्बन्धी कार्यहरू सञ्चालन गर्ने। स्थानीय तहलाई उक्त केन्द्रको प्रभावकारी परिचालन गर्न न्यूनतम बजेट विनियोजन एवं वार्षिक सीप विकास योजना समावेश गरी कार्यसम्पादनमा जवाफदेहिता सुनिश्चित गर्न अनुरोध गर्ने। उक्त व्यवस्था कार्यान्वयनका लागि आवश्यक डिजिटल प्रणाली, मापदण्ड तथा कार्यविधि तत्काल निर्माण गरी लागू गर्ने।",
+60: "देशको आर्थिक स्थायित्व, लगानी वातावरण सुदृढीकरण तथा निजी क्षेत्रको विश्वास पुनस्थापना गर्ने उद्देश्यले, 'निजी क्षेत्र संरक्षण एवं प्रवर्द्धन रणनीति (Private Sector Protection and Promotion Strategy - PSPP)' स्वीकृत गरी तत्काल कार्यान्वयन गर्ने। सो रणनीति मार्फत भौतिक सुरक्षा तथा सम्पत्ति संरक्षण, आर्थिक पुनरुत्थान तथा नियामकीय सरलीकरण र लगानी प्रवर्द्धन तथा युवा उद्यमशीलता सम्बन्धी कार्यनीतिहरू तत्काल कार्यान्वयन गर्ने।",
+61: "गृह मन्त्रालयले औद्योगिक तथा व्यावसायिक सुरक्षा सुदृढीकरणका लागि आवश्यक संरचना तथा द्रुत प्रतिकार्य संयन्त्र ३० दिनभित्र विकास गर्ने।",
+62: "सुरक्षा निकायहरूले निजी सम्पत्तिमा भएको क्षति, लुटपाट तथा आक्रमणमा संलग्न व्यक्तिहरूमाथि कडाइका साथ कानूनी कारबाही प्रक्रिया तत्काल अगाडि बढाउने।",
+63: "अर्थ मन्त्रालय तथा नेपाल राष्ट्र बैंकले जेन-जी जनआन्दोलनका क्रममा प्रभावित व्यवसायहरूका लागि सहुलियत तथा पुनःस्थापना प्याकेज जारी गर्ने।",
+64: "देशको लगानी, उत्पादन, निर्यात, उत्पादकत्व तथा विकास वित्त प्रणालीलाई एकीकृत, प्रभावकारी तथा परिणाममुखी बनाउने उद्देश्यले प्रधानमन्त्री तथा मन्त्रिपरिषद्को कार्यालय अन्तर्गत 'प्रधानमन्त्री कार्यसम्पादन एकाइ (PM Delivery Unit)' तत्काल स्थापना गर्ने। उक्त एकाइले राष्ट्रिय प्राथमिकता प्राप्त परियोजनाहरूका लागि मुख्य कार्यसम्पादन सूचक (KPI), मन्त्रालयगत कार्यसम्पादन ट्र्याकिङ, समस्या तथा अवरोध समाधान संयन्त्र सहितको केन्द्रीय ड्यासबोर्ड सञ्चालन गर्ने।",
+65: "लगानी बोर्ड नेपाल, व्यापार तथा निकासी प्रवर्द्धन केन्द्र, उद्योग विभाग लगायतका निकायहरूबीच रहेको कार्यजिम्मेवारीको दोहोरोपन अन्त्य गर्न ३० दिनभित्र एकीकृत संरचनाको विस्तृत सङ्गठन तथा व्यवस्थापन सर्भेका लागि तत्काल एक कार्यदल गठन गर्ने। उक्त कार्यदलले लगानी प्रवर्द्धन, निर्यात विस्तार तथा प्रवर्द्धन, उद्योग विकास, परियोजना संरचना तथा विकास वित्त सम्बन्धी कार्यहरूलाई एकीकृत रूपमा एकल बिन्दु सेवा प्रणालीमा रूपान्तरण गर्न स्पष्ट रोडम्याप, कार्यात्मक संरचना तथा आवश्यक कानूनी व्यवस्था सहितको प्रतिवेदन पेश गर्ने। सो प्रतिवेदनका आधारमा आवश्यक संस्थागत तथा कानूनी सुधार प्रक्रिया तत्काल अगाडि बढाउने।",
+66: "नेपालमा उद्योग तथा व्यवसाय सञ्चालनलाई सरल, पारदर्शी र बिचौलिया मुक्त बनाउन, साना उद्योग दर्ता प्रक्रियामा रहेको दोहोरो अभ्यास अन्त्य गरी २५ करोडसम्मका उद्योगहरूलाई एकीकृत रूपमा घरेलु तथा साना उद्योग कार्यालयमार्फत मात्र दर्ता हुने व्यवस्था गर्ने तथा दर्ता शुल्क खारेज गर्ने व्यवस्था ४५ दिनभित्र गर्ने।",
+67: "कम्पनी रजिस्ट्रार कार्यालय, उद्योग विभाग र वाणिज्य आपूर्ति तथा उपभोक्ता संरक्षण विभागमा रहेका उद्योग व्यवसायसँग सम्बन्धित विवरणहरू स्वचालित रूपमा आदान प्रदान (Interoperability) हुने प्रणाली दुई महिना भित्र विकास गर्ने। कम्पनी तथा उद्योग दर्ता र आयात/निर्यात सम्बन्धमा सेवाग्राहीलाई आवश्यक जानकारी तथा सहजीकरण गर्न निशुल्क परामर्शसेवा डेस्क स्थापना गर्ने, डिजिटल प्रणाली विकास गरी बिचौलियाको संलग्नता अन्त्य गर्ने कार्य १५ दिनभित्र गर्ने। साथै तीनै तहका सरकारी निकायबाट दर्ता भएका उद्योग, व्यवसाय तथा फर्महरूको तथ्यांकलाई अद्यावधिक गरी Real Time Data लिने प्रणाली तीन महिना भित्र विकास गर्ने।",
+68: "औद्योगिक प्रतिष्ठानहरूको Corporate Social Responsibility (CSR) रकमलाई केन्द्रीकृत गरी नेपाल सरकारले थोकेको कोषमार्फत प्राथमिकताका क्षेत्रमा परिचालन गर्ने व्यवस्था मिलाउने तथा यसका लागि आवश्यक कानून संशोधन तथा निर्माण गर्ने कार्य तीन महिनाभित्र सम्पन्न गर्ने।",
+69: "जेन-जी आन्दोलन तथा सार्वजनिक प्रदर्शनका कारण निजी क्षेत्रको लगानी वातावरण र रोजगारीमा परेको प्रभावलाई न्यूनीकरण गर्दै सुरक्षित, स्थिर र विश्वसनीय व्यावसायिक वातावरण सुनिश्चित गर्ने उद्देश्यले, देहाय बमोजिम गर्ने:\nक) निजी क्षेत्र, उद्योग-व्यवसाय, बैंक तथा वित्तीय संस्था, साना तथा मझौला उद्यम (SMEs) तथा सेवा क्षेत्रको सुरक्षा तथा संरक्षणका लागि 'Private Sector Protection Strategy' बनाई तत्काल लागू गर्ने।\nख) उद्योग, व्यापारिक केन्द्र, बैंकिङ पूर्वाधार तथा आपूर्ति शृंखलाको सुरक्षाका लागि सुरक्षा निकायलाई उच्च सतर्कता कायम गर्न तथा विशेष सुरक्षा प्रबन्ध गर्ने।\nग) प्रदर्शनका कारण अवरोध भएका व्यवसाय सञ्चालन तथा पुनःसञ्चालनको लागि प्राथमिकताका साथ प्रशासनिक सहजीकरण गर्ने।\nघ) व्यवसायमा भएको क्षतिको तथ्यांक सङ्कलन गरी आवश्यक राहत, पुनस्थापना तथा सहुलियत प्याकेज (जस्तै: कर छुट, ब्याज सहुलियत, ऋण पुनसंरचना) तयार गर्ने।\nङ) निजी क्षेत्रसँग निरन्तर संवाद तथा समन्वयका लागि प्रधानमन्त्रीको अध्यक्षतामा रहेको उद्योग-वाणिज्य सम्वाद परिषद्लाई सक्रिय गराउने।",
+70: "आपूर्तिशृंखलामा अवरोध हुन नदिन आयात निर्यात हुने मार्गमा ढुवानीका साधन विना अवरोध संचालन हुने व्यवस्था गृह मन्त्रालयले तत्काल मिलाउने।",
+71: "वैदेशिक तथा आन्तरिक लगानी प्रवर्द्धन गर्न स्वच्छ लगानी वातावरण सुनिश्चित गर्ने, स्वचालित लगानी स्वीकृति प्रणाली लागू गर्ने, लगानीकर्ताको वास्तविक स्वामित्व (Beneficial Ownership) खुलाउने व्यवस्थालाई कडाईका साथ कार्यान्वयन गर्ने र अन्तर्राष्ट्रिय कर तथा वित्तीय पारदर्शिता मापदण्ड (Base Erosion and Profit Shifting-BEPS) लागू गरी पूँजी पलायन तथा मनी लाउण्ड्रिङ्ग नियन्त्रण गर्ने।",
+72: "उदयपुर (कोशी नदी आसपास), अछाम (रामारोशन), बाजुरा बडिमालिका, अपी हिमाल ट्रेकिङ्ग रुट, दोदी हिमाल ट्रेकिङ्ग रुट लगायतका क्षेत्रमा व्यवस्थित पर्यटनका लागि आवश्यक अध्ययन गरी १ महिनाभित्र कार्यान्वयनयोग्य खाका प्रस्तुत गर्ने।",
+73: "नेपाललाई आरोग्य पर्यटन (पूर्वीय दर्शन, ध्यान, योग, प्राकृतिक चिकित्सा लगायत) को हब बनाउन १५ दिनभित्र आरोग्य पर्यटन रणनीति जारी गर्ने। साथै, नेपालको प्रस्तावमा संयुक्त राष्ट्रसंघले अप्रिल १५ लाई अन्तर्राष्ट्रिय आरोग्य दिवस मनाउने निर्णय गरेकोमा उक्त प्रस्तावमा मतदान गर्ने सबै सदस्य राष्ट्रहरूलाई धन्यवाद ज्ञापन गर्ने। आरोग्य पर्यटनलाई आर्थिक रूपान्तरणको राष्ट्रिय एजेन्डाको रूपमा लिई 'Nepal Wellness Year 2027' मनाउन अन्तर्निकाय समन्वय संयन्त्र बनाउने।",
+74: "ऊर्जा क्षेत्र विकासका लागि देहायका कार्य गर्ने:\nक) ऊर्जा निर्यात रणनीति एक महिनाभित्र तयार गर्ने।\nख) देशको ऊर्जा क्षेत्रलाई आर्थिक रूपान्तरणको प्रमुख आधारका रूपमा विकास गर्न, विद्युत् उत्पादन, प्रसारण, वितरण तथा निर्यात सम्बन्धी अवरोधहरू तत्काल हटाई द्रुत विकास सुनिश्चित गर्ने उद्देश्यले पेन्डिङ रहेका सबै विद्युत् खरिद सम्झौता (PPA) तथा अनुमतिपत्र सम्बन्धी निर्णय अधिकतम १८० दिनभित्र गर्ने।\nग) विद्युत् निर्यातलाई उच्च मूल्य प्राप्त हुने बजार (विशेष गरी साँझको पीक समय) मा केन्द्रित गर्ने रणनीति तत्कालै कार्यान्वयनमा लैजाने।\nघ) नेपाल विद्युत् प्राधिकरणको संरचनात्मक सुधार सम्बन्धी रोडम्याप तयार गरी कार्यान्वयन प्रक्रिया तत्काल अघि बढाउने।\nङ) ऊर्जा क्षेत्रको दीर्घकालीन वित्तीय स्रोत व्यवस्थापनका लागि बहुआयामिक वित्तीय संरचना (सरकारी, निजी, विदेशी तथा डायस्पोरा लगानी) विकास गर्ने। साथै, उक्त सुधारहरू कार्यान्वयनका लागि सम्बन्धित निकायले स्पष्ट समयसीमा थोकी कार्यान्वयनमा लैजाने।",
+75: "खानेपानी तथा सरसफाइ क्षेत्रका विभिन्न निकायबीच समन्वयको अभाव अन्त्य गर्न प्रधानमन्त्री तथा मन्त्रिपरिषद् कार्यालयको नेतृत्वमा काठमाडौँ उपत्यका खानेपानी लिमिटेड, नेपाल खानेपानी संस्थान र खानेपानी तथा ढल व्यवस्थापन विभाग समावेश गरी एकीकृत संयन्त्र तयार गर्न एक उच्चस्तरीय 'एकीकृत खानेपानी समन्वय टास्कफोर्स' गठन गर्ने। यसले ३० दिनभित्र एकीकृत संरचना र सुधार प्रस्ताव पेश गर्ने।",
+76: "पोखरास्थित फेवा संरक्षित जलाधार क्षेत्रको अतिक्रमण हटाइ पुनस्थापना, पहिरो व्यवस्थापन, मुहान संरक्षण र जलवायुपरिवर्तन अनुकूलनका कार्यहरू सरोकारवालाहरूको सहभागितामा तीन महिना भित्र प्रक्रिया अघि बढाइ जलाधार क्षेत्रको प्रभावकारी रूपमा संरक्षण गर्ने।",
+77: "शहरी विकास विधेयक र फोहोरमैला व्यवस्था सम्बन्धी विधेयक सङ्घीय संसदमा पेश गर्ने स्वीकृतिका लागि दुई महिनाभित्र मन्त्रिपरिषद्समक्ष पेश गर्ने।",
+78: "राज्यका निष्क्रिय स्रोतहरूको प्रभावकारी उपयोग गर्न १० वर्ष वा सोभन्दा बढी समयदेखि निष्क्रिय रहेका बैंक तथा वित्तीय संस्थाका खाताहरूको विवरण सङ्कलन गरी हकवालाले दावी नगरेको रकम कानूनी प्रक्रिया पूरा गरी राज्यकोषमा ल्याउने तथा अन्य स्रोतहरूको पहिचान गरी व्यवस्थापन गर्ने कार्य ९० दिनभित्र सम्पन्न गर्ने।",
+79: "राजस्व प्रणालीलाई पारदर्शी, डिजिटल तथा प्रभावकारी बनाउन ठूला व्यवसायहरूले अनिवार्य रूपमा e-billing प्रणाली एक महिनाभित्र लागू गर्ने।",
+80: "कर प्रशासनलाई स्वचालित बनाउने, राजस्व चुहावट नियन्त्रण गर्ने तथा करदातालाई सरल सेवा उपलब्ध गराउने कार्ययोजना अर्थ मन्त्रालयले ४५ दिनभित्र तजुमा गरी लागू गर्ने।",
+81: "करिब १३९ भन्दा बढी कोषहरू छरिएर, दोहोरिएर वा कम प्रभावकारी रूपमा सञ्चालन हुँदा सार्वजनिक स्रोतको उपयोग कमजोर भएको समस्या समाधान गर्न ६० दिनभित्र समान प्रकृतिका कोषहरूको एकीकरण तथा रकम उच्च प्रतिफलयुक्त परियोजनामा लगानी गर्ने ढाँचा तयार गर्ने।",
+82: "खानी तथा खनिज क्षेत्रका निष्क्रिय अनुमतिपत्र खारेज गर्ने तथा सक्रिय फर्महरूको कडाइका साथ नियमन गर्ने। खानी तथा खनिज पदार्थ ऐन, २०४२, सम्बन्धी नियमावली तथा कार्यविधिहरूलाई समयानुकूल संशोधन तथा परिमार्जन गरी लगानीमैत्री, पारदर्शी तथा कार्यान्वयनयोग्य बनाई विभाग अन्तर्गतका प्रयोगशालाहरूमा आधुनिक उपकरण (XRF, XRD, ICP-MS, Petrographic Microscope आदि) जडान गरी परीक्षण क्षमता अभिवृद्धि गर्ने कार्य तीन महिनामा प्रारम्भ गर्ने। साथै, रणनीतिक खनिजहरूको एकीकृत डाटाबेस निर्माण गर्ने।",
+83: "भन्सार प्रणालीलाई व्यापार सहजीकरणमुखी रूपमा पुनसंरचना गर्ने, वाणिज्य तथा उपभोक्ता संरक्षण सम्बन्धी कार्यहरूलाई अलग गरी प्रभावकारी नियमन सुनिश्चित गर्ने तथा बजारमा Maximum Retail Price (MRP) अनिवार्य कार्यान्वयन र सघन अनुगमन गर्ने।",
+84: "अड्डा अदालत तथा सरकारी निकायमा रहेको ठूलो धरौटी रकम निष्क्रिय भई विकास निर्माणमा उपयोग हुन नसकेको समस्या समाधान गर्न ६० दिनभित्र त्यस्तो रकम परिचालन गर्ने कानूनी आधार तयार गर्ने।",
+85: "स्वास्थ्य क्षेत्रको सुधारका लागि देहायका कार्य गर्ने:\nक) विपन्न, असहाय तथा बेवारिसे बिरामीले अस्पताल सेवामा पहुँच नपाउने, आर्थिक कारणले उपचारबाट वञ्चित अवस्थाको अन्त्य गर्न र निजी-सरकारी दुवै क्षेत्रमा सामाजिक उत्तरदायित्व अभिवृद्धि गर्न सरकारी तथा निजी अस्पिालका कुल शय्यामध्ये कम्तीमा १० प्रतिशत निःशुल्क उपलब्ध गराउने व्यवस्था कडाइका साथ तत्काल कार्यान्वयन गर्ने। सम्पूर्ण स्वास्थ्य संस्थाहरूमा निःशुल्क सेवा उपलब्धता, लाभग्राही विवरण तथा सेवा उपयोगको रियल टाइम अनुगमनका लागि 'Free Health Portal' विकास गरी उक्त पोर्टल ३० दिनभित्र देशभर लागू गर्ने।\nख) बिरामीको उपचार इतिहास, Referral, पुनःसेवा र Clinical Follow-Up व्यवस्थित गर्न बिरामीको अभिलेख प्रणाली (Patient Record System) का लागि डिजिटल, एकीकृत र अन्तरआबद्ध स्वास्थ्य सूचना प्रणाली विकास तीन महिनाभित्र गर्ने। अनावश्यक निजी अस्पिताल रिफर गर्ने प्रवृत्ति नियन्त्रण गर्न स्पष्ट Refer Protocol लागू गर्ने।\nग) सरकारी अस्पतालमा स्वास्थ्यकर्मीको उपस्थिति, व्यवहार, सरसफाइ र सेवाको आधारभूत मापदण्ड सुनिश्चित गर्न Attendance Monitoring, Conduct Review र Cleanliness Audit एक हप्ताभित्र अनिवार्य गर्ने तथा सम्पूर्ण सेवा प्रवाहलाई नागरिकमैत्री र जवाफदेही बनाउने।\nघ) अस्पताल फार्मेसीमा औषधीको मौज्दात तथा मूल्य देखिने डिजिटल प्रणाली तीन महिनाभित्र सञ्चालन गर्ने। नागरिकलाई गुणस्तरीय तथा सस्तो मूल्यमा औषधी उपलब्ध गराउने उद्देश्यले, देशभरका सरकारी अस्पताल तथा प्रमुख स्वास्थ्य संस्थाहरूमा 'सुलभ फार्मेसी' सञ्चालन गर्ने व्यवस्था लागू गर्ने, उक्त फार्मेसीमार्फत आवश्यक औषधीहरू जेनेरिक नाममा न्यूनतम मूल्यमा उपलब्ध गराउने, निजी क्षेत्रसँग सहकार्य गरी आपूर्ति व्यवस्थापन सुदृढ गर्ने र उक्त कार्यक्रम १०० (एक सय) दिनभित्र चरणबद्ध रूपमा देशभर सञ्चालनमा ल्याउने।\nङ) जलन उपचारका लागि प्रदेशस्तरमा सुविधासम्पन्न अस्पतालको अभाव हुँदा मृत्युदर, अपाङ्गता र दीर्घकालीन पुनस्थापना समस्या बढ्ने अवस्थाको समाधान गर्न ३० दिनभित्र अधिकांश अस्पतालहरूमा Burn Ward स्थापना प्रक्रिया सुरु गर्ने। जलनका बिरामीका लागि सहुलियत दरमा उपचार हुने व्यवस्था मिलाउने।\nच) सुदूर पश्चिम, मध्य तथा पूर्वी नेपालका पहाडी क्षेत्रहरूमा आपत्कालीन स्वास्थ्य सेवाका लागि एयर एम्बुलेन्स तयारी अवस्थामा (standby) राख्ने व्यवस्था तत्काल लागू गर्ने।",
+86: "शिक्षा क्षेत्रमा दलीय हस्तक्षेप, विद्यार्थीको वास्तविक आवाज नसमेटिने र शैक्षिक गुणस्तर गिरावटको समस्या समाधान गर्न ६० दिनभित्र विद्यालय/विश्वविद्यालय हाताबाट दलीय विद्यार्थी सङ्गठनका संरचना हटाई ९० दिनभित्र Student Council/ Voice of Student संयन्त्रको विकास गर्ने।",
+87: "विश्वविद्यालयहरूबाट लिइने स्नातक र स्नातकोत्तर परीक्षाको नतिजा शिक्षा, विज्ञान तथा प्रविधि मन्त्रालयले उपलब्ध गराएको क्यालेन्डर अनुसार निकाल्ने।",
+88: "विद्यार्थीहरूलाई स्नातकसम्मको अध्ययन गर्न नागरिकता नचाहिने गरी विश्वविद्यालयहरूले आवश्यक कार्यविधिगत व्यवस्था तत्कालै गर्ने।",
+89: "कक्षा ५ सम्मका विद्यार्थीहरूलाई आन्तरिक परीक्षा लिने कार्य आगामी शैक्षिक सत्रदेखि बन्द गर्ने। उनीहरूलाई मनोवैज्ञानिक असर र दबाव नपर्ने खालको मूल्याङ्कन प्रणालीबारे विकल्प तयार गर्ने।",
+90: "कृषि क्षेत्रको विकासका लागि देहायका कार्य गर्ने:\nक) प्रमुख कृषि उपजको न्यूनतम मूल्य सुरक्षा नहुँदा किसान बजारको अनियन्त्रित उतारचढावबाट घाटामा जाने समस्या समाधान गर्न ३० दिनभित्र प्रमुख खाद्यान्न बालीको न्यूनतम समर्थन मूल्य निर्धारण प्रक्रिया सुरु गर्ने।\nख) कृषकले उत्पादन गरेको कृषि उपजको उचित मूल्य सुनिश्चित गर्न कृषि उपज खरिदमा उधारो कारोबार अधिकतम २५ दिनभित्र अनिवार्य भुक्तानी हुने व्यवस्था लागू गर्ने र सो अवधिभित्र भुक्तानी नभएमा ब्याजसहित भुक्तानी गर्नुपर्ने निर्देशिका तत्काल जारी गर्ने, कृषि उपजको बजार पहुँच सुदृढ गर्न राष्ट्रिय कृषि बजार सूचना प्रणाली सञ्चालन गर्ने तथा एसएमएस/डिजिटल माध्यमबाट दैनिक मूल्य जानकारी कृषकसम्म पुर्‍याउने, प्रत्येक पालिकामा साप्ताहिक कृषि हाटबजार सञ्चालन गर्न स्थानीय तहलाई सहजीकरण गर्ने, कृषि उपजको भण्डारण तथा बजारीकरण सुधारका लागि 'एक पालिका एक चिस्यान केन्द्र' कार्यक्रम प्रारम्भ गर्ने। प्रत्येक जिल्लामा सार्वजनिक निजी साझेदारीमा चिस्यान केन्द्र स्थापना गर्न १० दिनभित्र सम्भाव्यता अध्ययन गर्ने।\nग) व्यवसायिक कृषि फार्म सञ्चालन गरेका कृषकहरूलाई स्वाइल हेल्थ कार्ड (Soil Health Card) दिने व्यवस्था तीन महिनाभित्र सम्पन्न गर्ने।",
+91: "देशभरका भूमिहीन सुकुम्बासी तथा अव्यवस्थित बसोबासीको एकीकृत डिजिटल लगत सङ्कलन तथा प्रमाणीकरण ६० दिनभित्र सम्पन्न गर्ने र भूमिहीन सुकुम्बासी तथा अव्यवस्थित बसोबासी समस्या १००० दिनभित्र समाधान गर्न स्थानीय तहको समन्वयमा घर परिवार सर्वेक्षण सञ्चालन गर्ने, वास्तविक लाभग्राही पहिचानका लागि स्पष्ट मापदण्ड (कट-अफ मिति, आय स्तर, अन्य सम्पत्ति स्वामित्व) लागू गर्ने, सार्वजनिक, ऐलानी तथा गुठी जग्गाको अभिलेख अद्यावधिक, नक्साङ्कन तथा Geographic Information System- GIS आधारित डिजिटल डाटाबेस तयार गर्ने, पहिचान भएका वास्तविक सुकुम्बासीलाई चरणबद्ध रूपमा जग्गा उपलब्ध गराउने वा शहरी क्षेत्रमा वैकल्पिक रूपमा एकीकृत आवास (Land Pooling / Apartment Model) मार्फत पुनर्वासको व्यवस्था मिलाउने। जग्गा वितरण तथा पुनर्वास प्रक्रियालाई पूर्णतः पारदर्शी बनाउन सार्वजनिक ड्यासबोर्ड सञ्चालन गर्ने तथा सम्पूर्ण कार्यक्रमको समन्वय, अनुगमन र कार्यान्वयन सम्बन्धित मन्त्रालयको प्रत्यक्ष निगरानीमा सञ्चालन गर्ने।",
+92: "सार्वजनिक जग्गाको संरक्षण तथा अतिक्रमण नियन्त्रण गर्न डिजिटल अभिलेख तयार गर्ने, निगरानी प्रणाली सुदृढ गर्ने तथा अवैध कब्जा हटाउने कार्य तत्काल प्रारम्भ गर्ने। नयाँ अतिक्रमणमा कडाइका साथ रोक लगाउने र अवैध कब्जा हटाउने विशेष अभियान सञ्चालन गर्ने। नेपाल बाल सङ्गठनसम्बन्धी उच्चस्तरीय जाँचबुझ आयोग (हरिबाबु आयोग) को प्रतिवेदन बमोजिम बाल सङ्गठनको जग्गा अतिक्रमण तथा बिनामीनासम्बन्धी अनुसन्धान १५ दिनभित्र सुरु गर्ने।",
+93: "कसूरजन्य सम्पत्ति व्यवस्थापन प्रक्रियालाई सरल, सहज बनाउन र एकरूपता कायम गर्न कसूरजन्य सम्पत्ति (रोक्का, नियन्त्रण र जफत) नियमावली दुई महिनाभित्र संशोधन गर्ने।",
+94: "नेपाल प्रहरीको केन्द्रीय अनुसन्धान ब्यूरो (CIB) लाई प्रविधियुक्त बनाउन तत्कालै कम्तीमा १ करोड रुपैंया उपलब्ध गराउने।",
+95: "अन्तर्राष्ट्रिय तथा क्षेत्रीय संकटहरूको प्रभाव अध्ययन गर्न अन्तर–मन्त्रालय कार्यदल गठन गर्ने, सोको आधारमा आवश्यक नीति तथा रणनीति तयार गर्ने कार्य परराष्ट्र मन्त्रालयको संयोजकत्वमा ३० दिनभित्र सम्पन्न गर्ने। मध्यपूर्वका देशहरूमा विकसित हुँदै गएको परिस्थितिका कारण नेपालमा आर्थिक, वैदेशिक रोजगारी, आपूर्ति शृंखला, ऊर्जा तथा सामाजिक क्षेत्रमा पर्न सक्ने बहुआयामिक प्रभावहरूको समयमै मूल्याङ्कन तथा व्यवस्थापन गर्न सम्बन्धित मन्त्रालयहरू (परराष्ट्र, श्रम, अर्थ, उद्योग, आपूर्ति, ऊर्जा लगायत) को प्रतिनिधित्व रहने गरी एक उच्चस्तरीय अन्तर–मन्त्रालय अध्ययन कार्यदल गठन गर्ने। उक्त कार्यदलले विस्तृत अध्ययन गरी ७ (सात) दिनभित्र अल्पकालीन, मध्यकालीन तथा दीर्घकालीन नीतिगत तथा कार्यक्रमगत उपायहरू सहित प्रतिवेदन पेश गर्ने। सो प्रतिवेदनका आधारमा आवश्यक निर्णय तथा कार्यान्वयन प्रक्रिया तत्काल अघि बढाउने।",
+96: "भन्सारमा थन्किएका सवारी साधनहरूको विवरण संकलन गरी तिनीहरूको प्रयोग, व्यवस्थापन वा लिलामी गर्ने व्यवस्था तत्काल मिलाउने।",
+97: "महिलाहरूको सुरक्षित आवागमन सुनिश्चित गर्न सातै प्रदेशमा निःशुल्क 'ब्लुबस' सेवा सञ्चालन गर्ने। पहिलो चरणमा १०० दिन भित्र कम्तिमा २५ वटा बस सञ्चालनमा ल्याउने।",
+98: "सार्वजनिक यातायातमा हुने लैङ्गिक हिंसा रोकथाम गर्न सबै सवारी साधनमा CCTV/Dashcam जडान गर्ने र राइड-शेयरिङ एपहरूमा SOS Button अनिवार्य गरी आकस्मिक तथा खतराको सूचना प्रहरीसम्म तत्काल पुग्ने व्यवस्था मिलाउने कार्य ३० दिनमा सम्पन्न गर्ने।",
+99: "सहकारीका साना बचतकर्ताहरूको बचत फिर्ताको प्रक्रिया १०० दिनभित्रै सुरु गर्ने।",
+100: "आम निर्वाचन २०८२ को जनादेश, नेपालको संविधानको मूल भावना र राजनीतिक दलहरूले जनतासमक्ष प्रस्तुत गरेका प्रतिबद्धताहरूको प्रभावकारी कार्यान्वयनका लागि नेपाल सरकार, प्रदेश तथा स्थानीय सरकार, संवैधानिक निकायहरू, निजामती प्रशासन, नेपाली सेना लगायत सबै सुरक्षा निकाय, सार्वजनिक सेवा प्रवाह गर्ने निकायहरू, राजनीतिक दलहरू, निजी क्षेत्र, गैरसरकारी क्षेत्र, नागरिक समाज तथा विकास साझेदारहरूले एकताबद्ध भई नतिजामूलक सहकार्य गर्ने र सो सहकार्यलाई संस्थागत तथा परिणाममुखी बनाउन आवश्यक नीतिगत, संरचनात्मक तथा कार्यक्रमगत व्यवस्था मिलाउने। साथै, उक्त साझा राष्ट्रिय दायित्व निर्वाहमा सबै सरोकारवालालाई सक्रिय, समन्वित र उत्तरदायी भूमिका निर्वाह गर्न हार्दिक आह्वान गर्ने।"
+};
+
+
+// Modal functions
+function openModal(id) {
+  const item = DATA.find(d => d.id === id);
+  if (!item) return;
+  document.getElementById('modalNum').textContent = numDisplay(id);
+  document.getElementById('modalNum').style.background = CAT_COLORS[item.cat];
+  document.getElementById('modalCat').textContent = getItemCatN(item);
+  document.getElementById('modalCat').style.color = CAT_COLORS[item.cat];
+  const dateStr = getItemDate(item);
+  document.getElementById('modalMeta').innerHTML = dateStr
+    ? `${t('modal.deadline')}: ${dateStr} &nbsp;${getCountdownHTML(item)}`
+    : getCountdownHTML(item);
+  const bodyText = LANG === 'ne' ? (VERBATIM[id] || item.desc) : (DATA_EN[id]?.desc || item.desc);
+  document.getElementById('modalBody').innerHTML = bodyText.replace(/\n/g, '<br>');
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('modal').classList.remove('show');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) { e.stopPropagation(); closeModal(); }
+});
+
+// Build timeline sections
+function rebuildTimelineSections() {
+  const sectionsEl = document.getElementById('timelineSections');
+  sectionsEl.innerHTML = '';
+  activeTimeBucket = null;
+  activeCatKey = null;
+  TIMELINE_BUCKETS.forEach(b => {
+    const items = DATA.filter(d => getBucket(d) === b.key);
+    if (items.length === 0) return;
+    const section = document.createElement('div');
+    section.className = 'timeline-section';
+    section.dataset.bucket = b.key;
+    section.innerHTML = `
+      <div class="timeline-header">
+        <div class="time-icon" style="background:${BUCKET_COLORS[b.key]}66;border:1px solid ${BUCKET_COLORS[b.key]}AA;color:${BUCKET_COLORS[b.key]}">${b.labelShort === "तत्काल" || b.key === 'immediate' ? "▸" : b.labelShort === "नतोकिएको/अस्पष्ट" || b.key === 'unspecified' ? "∞" : "◷"}</div>
+        <div><h2>${getBucketLabel(b.key)}</h2></div>
+        <span class="count-badge" style="background:${BUCKET_COLORS[b.key]}66;border:1px solid ${BUCKET_COLORS[b.key]}AA;color:${BUCKET_COLORS[b.key]}">${numDisplay(items.length)} ${t('modal.karya')}</span>
+        <span class="date-range">${getBucketDate(b.key)}</span>
+      </div>
+      <div class="cards-grid">
+        ${items.map(item => `
+          <div class="card cat-${item.cat}" data-cat="${item.cat}" onclick="openModal(${item.id})">
+            <div class="card-top">
+              <div class="card-num">${numDisplay(item.id)}</div>
+              <div class="card-desc">${getItemDesc(item)}</div>
+            </div>
+            <div class="card-footer">
+              <span class="card-cat">${getItemCatN(item)}</span>
+              <span class="card-date">${getItemDate(item) || (getBucket(item) === 'unspecified' ? '—' : getItemDt(item)) || '—'}</span>
+            </div>
+            <div style="margin-top:8px">${getCountdownHTML(item)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    sectionsEl.appendChild(section);
+  });
+}
+
+// ── FILTER SYSTEM ──
+let activeTimeBucket = null;
+let activeCatKey    = null;
+
+function rebuildFilterChips() {
+  const timeChipsEl = document.getElementById('timeChips');
+  const catChipsEl  = document.getElementById('catChips');
+  timeChipsEl.innerHTML = '';
+  catChipsEl.innerHTML  = '';
+
+  TIMELINE_BUCKETS.forEach(b => {
+    const count = DATA.filter(d => getBucket(d) === b.key).length;
+    if (count === 0) return;
+    const color = BUCKET_COLORS[b.key];
+    const chip = document.createElement('button');
+    chip.className = 'fchip' + (activeTimeBucket === b.key ? ' active-time' : '');
+    chip.dataset.bucket = b.key;
+    chip.innerHTML = `${getBucketLabelShort(b.key)} <span style="color:${color};opacity:0.7;font-size:12px;">(${numDisplay(count)})</span>`;
+    chip.addEventListener('click', () => toggleTimeFilter(b.key, chip));
+    timeChipsEl.appendChild(chip);
+  });
+
+  const filterCatOrder = [...new Set(DATA.map(d => d.cat))];
+  filterCatOrder.forEach(cat => {
+    const item  = DATA.find(d => d.cat === cat);
+    const name  = getItemCatN(item);
+    const count = DATA.filter(d => d.cat === cat).length;
+    const color = CAT_COLORS[cat];
+    const chip  = document.createElement('button');
+    chip.className = 'fchip' + (activeCatKey === cat ? ' active-cat' : '');
+    chip.dataset.cat = cat;
+    if (activeCatKey === cat) chip.style.background = color;
+    chip.innerHTML = `<span class="fchip-dot" style="background:${color}"></span>${name} <span style="opacity:0.5;font-size:12px;">(${numDisplay(count)})</span>`;
+    chip.addEventListener('click', () => toggleCatFilter(cat, chip, color));
+    catChipsEl.appendChild(chip);
+  });
+}
+
+function toggleTimeFilter(key, chip) {
+  if (activeTimeBucket === key) {
+    activeTimeBucket = null;
+    chip.classList.remove('active-time');
+  } else {
+    activeTimeBucket = key;
+    document.getElementById('timeChips').querySelectorAll('.fchip').forEach(c => c.classList.remove('active-time'));
+    chip.classList.add('active-time');
+  }
+  applyFilters();
+}
+
+function toggleCatFilter(cat, chip, color) {
+  if (activeCatKey === cat) {
+    activeCatKey = null;
+    chip.classList.remove('active-cat');
+    chip.style.background = '';
+  } else {
+    activeCatKey = cat;
+    document.getElementById('catChips').querySelectorAll('.fchip').forEach(c => {
+      c.classList.remove('active-cat');
+      c.style.background = '';
+    });
+    chip.classList.add('active-cat');
+    chip.style.background = color;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  document.querySelectorAll('.timeline-section').forEach(section => {
+    const bucketMatch = !activeTimeBucket || section.dataset.bucket === activeTimeBucket;
+    if (!bucketMatch) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+
+    section.querySelectorAll('.card').forEach(card => {
+      const catMatch = !activeCatKey || card.dataset.cat === activeCatKey;
+      card.classList.toggle('hidden', !catMatch);
+    });
+
+    const visible = section.querySelectorAll('.card:not(.hidden)').length;
+    if (visible === 0) section.classList.add('hidden');
+    else section.classList.remove('hidden');
+  });
+
+  updateFilterSummary();
+}
+
+function updateFilterSummary() {
+  const clearEl   = document.getElementById('filterClear');
+  const summaryEl = document.getElementById('filterSummary');
+  const parts = [];
+  if (activeTimeBucket) parts.push(getBucketLabelShort(activeTimeBucket));
+  if (activeCatKey) {
+    const item = DATA.find(d => d.cat === activeCatKey);
+    if (item) parts.push(getItemCatN(item));
+  }
+  if (parts.length) {
+    clearEl.classList.add('visible');
+    summaryEl.textContent = parts.join(' · ');
+  } else {
+    clearEl.classList.remove('visible');
+    summaryEl.textContent = '';
+  }
+}
+
+window.clearAllFilters = function() {
+  activeTimeBucket = null;
+  activeCatKey     = null;
+  document.getElementById('timeChips').querySelectorAll('.fchip').forEach(c => c.classList.remove('active-time'));
+  document.getElementById('catChips').querySelectorAll('.fchip').forEach(c => {
+    c.classList.remove('active-cat');
+    c.style.background = '';
+  });
+  document.querySelectorAll('.timeline-section').forEach(s => s.classList.remove('hidden'));
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('hidden'));
+  updateFilterSummary();
+};
+
+function getTodayNepali() {
+  if (LANG === 'en') {
+    const now = new Date();
+    return now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  const DAY1 = new Date(2026, 2, 28);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const elapsed = Math.floor((now - DAY1) / 86400000);
+  const months = [
+    { name: 'चैत्र', days: 30, year: '२०८२' },
+    { name: 'बैशाख', days: 31, year: '२०८३' },
+    { name: 'जेठ',   days: 31, year: '२०८३' },
+    { name: 'असार',  days: 32, year: '२०८३' },
+    { name: 'साउन',  days: 31, year: '२०८३' },
+    { name: 'भदौ',   days: 31, year: '२०८३' },
+    { name: 'असोज',  days: 30, year: '२०८३' },
+  ];
+  let remaining = elapsed + 13;
+  for (const m of months) {
+    if (remaining < m.days) return `${nepaliNum(remaining + 1)} ${m.name} ${m.year}`;
+    remaining -= m.days;
+  }
+  return '';
+}
+
+function rebuildInteractiveTimeline() {
+  const container = document.getElementById('interactiveTimeline');
+  if (!container) return;
+  container.innerHTML = '';
+  buildTimeline(container);
+}
+
+function buildTimeline(container) {
+
+  const S   = 11;   // px per day (proportional scale)
+  const LP  = 48;   // left padding — axis starts right at first cluster
+
+  function xD(d) { return LP + d * S; }
+
+  const X100  = xD(100);
+  const XBS   = X100 + 28;
+  const XBE   = XBS + 76;
+  const X180  = XBE + 90;
+  const XUNS  = X180 + 110;
+  const W     = XUNS + 88;
+
+  const BX = {
+    immediate:   LP,           // axis starts exactly here
+    '7days':     xD(7),
+    '15days':    xD(15),
+    '30days':    xD(30),
+    '45days':    xD(45),
+    '60days':    xD(60),
+    '90days':    xD(90),
+    '100days':   xD(100),
+    '180plus':   X180,
+    unspecified: XUNS,
+  };
+
+  const BL = LANG === 'en' ? BL_EN : {
+    immediate:   'तत्काल',   '7days':   '७ दिन',
+    '15days':    '१५ दिन',   '30days':  '३० दिन',
+    '45days':    '४५ दिन',   '60days':  '६० दिन',
+    '90days':    '९० दिन',   '100days': '१०० दिन',
+    '180plus':   'असोज २०८३', unspecified: 'अस्पष्ट',
+  };
+
+  const BD = LANG === 'en' ? BD_EN : {
+    immediate:   '१४ चैत्र',  '7days':   '२० चैत्र',
+    '15days':    '२८ चैत्र',  '30days':  '१३ बैशाख',
+    '45days':    '२८ बैशाख',  '60days':  '१२ जेठ',
+    '90days':    '१० असार',   '100days': '२० असार',
+    '180plus':   'असोज २०८३', unspecified: '—',
+  };
+
+  const CH = 260;
+  const AB = 68;        // axis bottom from canvas bottom
+  const SH = 16;        // stem height
+  const CB = AB + SH;   // cluster bottom
+
+  // Viewport width for arrow-based navigation
+  let viewW = 0;        // set after insertion
+  let offset = 0;       // current translate offset (negative = scrolled right)
+
+  function mk(tag, cls, css) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (css) e.style.cssText = css;
+    return e;
+  }
+
+  // ── Wrap ──
+  const wrap = mk('div', 'itl-wrap');
+
+  // Arrow buttons live inside sw so they're clipped to the timeline area only
+  const arrL = mk('button', 'itl-arrow itl-arrow-left hidden');
+  arrL.innerHTML = '&#8249;';
+  arrL.setAttribute('aria-label', 'Scroll left');
+  const arrR = mk('button', 'itl-arrow itl-arrow-right');
+  arrR.innerHTML = '&#8250;';
+  arrR.setAttribute('aria-label', 'Scroll right');
+
+  const sw = mk('div', 'itl-scroll-wrap at-start');
+  sw.appendChild(arrL);
+  sw.appendChild(arrR);
+  const cv = mk('div', 'itl-canvas', `width:${W}px;height:${CH}px;`);
+
+  // ── Ruler: major axis line from LP to XBS, then XBE to end ──
+  cv.appendChild(mk('div', 'itl-axis-line', `left:${LP}px;width:${XBS - LP}px;bottom:${AB}px;`));
+  cv.appendChild(mk('div', 'itl-axis-line', `left:${XBE}px;width:${XUNS + 36 - XBE}px;bottom:${AB}px;`));
+
+  // Minor ruler ticks every 5 days between LP and X100 (skip milestone positions)
+  const milestoneSet = new Set([0, 7, 15, 30, 45, 60, 90, 100]);
+  for (let d = 5; d <= 100; d += 5) {
+    if (milestoneSet.has(d)) continue;   // milestone ticks handled separately
+    const x = xD(d);
+    const tickH = (d % 10 === 0) ? 10 : 6;   // longer every 10 days
+    cv.appendChild(mk('div', 'itl-ruler-tick',
+      `left:${x}px;bottom:${AB - tickH}px;height:${tickH}px;`));
+  }
+
+  // Break indicator
+  const brk = mk('div', 'itl-break', `left:${XBS}px;width:${XBE - XBS}px;bottom:${AB - 11}px;height:24px;`);
+  brk.innerHTML = '<span class="itl-break-inner">/ /</span>';
+  cv.appendChild(brk);
+
+  // ── Today marker — dot on axis only, legend below the timeline ──
+  (function() {
+    const DAY1 = new Date(2026, 2, 28);
+    const now  = new Date();
+    now.setHours(0, 0, 0, 0);
+    const elapsed = Math.floor((now - DAY1) / 86400000) + 1;
+    if (elapsed < 0 || elapsed > 100) return;
+
+    const tx = xD(elapsed);
+
+    // Larger red dot on the axis
+    cv.appendChild(mk('div', '', `
+      position:absolute;
+      left:${tx}px;
+      bottom:${AB - 7}px;
+      width:14px;height:14px;border-radius:50%;
+      background:#E03E35;
+      transform:translateX(-50%);
+      z-index:5;
+      box-shadow:0 0 0 4px rgba(224,62,53,0.2);
+    `));
+  })();
+
+  // Detail panel
+  const detail = mk('div', 'itl-detail');
+
+  // ── Clusters + milestone ticks ──
+  TIMELINE_BUCKETS.forEach(b => {
+    const key   = b.key;
+    const x     = BX[key];
+    if (x === undefined) return;
+    const items = DATA.filter(d => getBucket(d) === key);
+    if (!items.length) return;
+    const color = BUCKET_COLORS[key];
+
+    // Milestone tick — taller and brighter than ruler ticks
+    const tickH = 20;
+    cv.appendChild(mk('div', 'itl-tick',
+      `left:${x}px;bottom:${AB - tickH}px;height:${tickH}px;`));
+
+    // Label below axis
+    const lbl = mk('div', 'itl-tick-label', `left:${x}px;bottom:0;`);
+    lbl.innerHTML = `<span class="tl-label-main">${BL[key]}</span><span class="tl-label-sub">${BD[key]}</span>`;
+    cv.appendChild(lbl);
+
+    // Cluster
+    const dots = items.map(it =>
+      `<span class="itl-dot" style="background:${CAT_COLORS[it.cat]}"></span>`
+    ).join('');
+
+    const clust = mk('div', 'itl-cluster', `left:${x}px;bottom:${CB}px;`);
+    clust.dataset.key = key;
+    clust.innerHTML = `
+      <div class="itl-cluster-body" style="border-color:${color}88;">
+        <div class="itl-cluster-count" style="color:${color}">${numDisplay(items.length)}</div>
+        <div class="itl-cluster-label">${BL[key]}</div>
+        <div class="itl-cluster-dots">${dots}</div>
+      </div>
+      <div class="itl-stem"></div>
+    `;
+
+    clust.addEventListener('click', e => {
+      e.stopPropagation();
+      const wasActive = clust.classList.contains('active');
+      cv.querySelectorAll('.itl-cluster').forEach(c => {
+        c.classList.remove('active');
+        c.querySelector('.itl-cluster-body').style.background  = '';
+        c.querySelector('.itl-cluster-body').style.borderColor = BUCKET_COLORS[c.dataset.key] + '88';
+      });
+      if (wasActive) {
+        closeDetail();
+      } else {
+        clust.classList.add('active');
+        const body = clust.querySelector('.itl-cluster-body');
+        body.style.background  = color + '33';
+        body.style.borderColor = color;
+        openDetail(key, items, color);
+      }
+    });
+
+    cv.appendChild(clust);
+  });
+
+  sw.appendChild(cv);
+  wrap.appendChild(sw);
+
+  // ── Legend strip ──
+  const legendStrip = mk('div', '', `
+    padding:14px 24px 18px;
+    border-top:0.5px solid var(--surface2);
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  `);
+
+  function legendItem(iconHtml, label) {
+    const el = mk('div', '', `display:flex;align-items:center;gap:7px;`);
+    const icon = mk('span', '', `display:flex;align-items:center;flex-shrink:0;`);
+    icon.innerHTML = iconHtml;
+    const txt = mk('span', '', `
+      font-size:12px;color:var(--text-dim);
+      font-family:'DM Sans','Noto Sans Devanagari',sans-serif;
+      white-space:nowrap;
+    `);
+    txt.textContent = label;
+    el.appendChild(icon);
+    el.appendChild(txt);
+    return el;
+  }
+
+  function legendSep() {
+    return mk('div', '', `
+      width:1px;height:14px;
+      background:var(--border);
+      margin:0 10px;
+      flex-shrink:0;
+      align-self:center;
+    `);
+  }
+
+  function legendRowTitle(text) {
+    const el = mk('span', '', `
+      font-size:10px;font-weight:500;
+      letter-spacing:0.1em;text-transform:uppercase;
+      color:var(--text-dim);opacity:0.6;
+      font-family:'DM Sans',sans-serif;
+      white-space:nowrap;
+      margin-right:12px;
+      align-self:center;
+    `);
+    el.textContent = text;
+    return el;
+  }
+
+  // Row 1: today + milestone tick
+  const row1 = mk('div', '', `display:flex;align-items:center;flex-wrap:wrap;gap:4px;`);
+  row1.appendChild(legendRowTitle(t('legend.marks')));
+  row1.appendChild(legendItem(
+    `<span style="width:13px;height:13px;border-radius:50%;background:#E03E35;display:inline-block;box-shadow:0 0 0 3px rgba(224,62,53,0.18);"></span>`,
+    `${t('legend.todayLabel')} — ${getTodayNepali()}`
+  ));
+  legendStrip.appendChild(row1);
+
+  // Row 2: category dots
+  const row2 = mk('div', '', `display:flex;align-items:center;flex-wrap:wrap;gap:4px;`);
+  row2.appendChild(legendRowTitle(t('legend.sectors')));
+  const legendCats = [...new Set(DATA.map(d => d.cat))];
+  legendCats.forEach((cat, i) => {
+    const item  = DATA.find(d => d.cat === cat);
+    const name  = getItemCatN(item);
+    const color = CAT_COLORS[cat];
+    if (i > 0) row2.appendChild(legendSep());
+    row2.appendChild(legendItem(
+      `<span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>`,
+      name
+    ));
+  });
+  legendStrip.appendChild(row2);
+
+  wrap.appendChild(legendStrip);
+  wrap.appendChild(detail);
+  container.appendChild(wrap);
+
+  // ── Arrow navigation ──
+  function updateArrows() {
+    viewW = sw.getBoundingClientRect().width || sw.offsetWidth;
+    const maxOffset = -(W - viewW + LP);
+    arrL.classList.toggle('hidden', offset >= 0);
+    arrR.classList.toggle('hidden', offset <= maxOffset);
+    sw.classList.toggle('at-start', offset >= 0);
+    sw.classList.toggle('at-end',   offset <= maxOffset);
+  }
+
+  function scrollBy(delta) {
+    viewW = sw.getBoundingClientRect().width || sw.offsetWidth;
+    const maxOffset = -(W - viewW + LP);
+    offset = Math.min(0, Math.max(maxOffset, offset + delta));
+    cv.style.transform = `translateX(${offset}px)`;
+    updateArrows();
+  }
+
+  const STEP = 320;
+  arrL.addEventListener('click', e => { e.stopPropagation(); scrollBy(+STEP); });
+  arrR.addEventListener('click', e => { e.stopPropagation(); scrollBy(-STEP); });
+
+  // Init after paint so offsetWidth is available
+  requestAnimationFrame(() => { requestAnimationFrame(updateArrows); });
+  window.addEventListener('resize', updateArrows);
+
+  // ── Detail panel ──
+  function openDetail(key, items, color) {
+    const cardsHtml = items.map(item => `
+      <div class="card cat-${item.cat}" onclick="openModal(${item.id})">
+        <div class="card-top">
+          <div class="card-num">${numDisplay(item.id)}</div>
+          <div class="card-desc">${getItemDesc(item)}</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-cat">${getItemCatN(item)}</span>
+        </div>
+        <div style="margin-top:8px">${getCountdownHTML(item)}</div>
+      </div>
+    `).join('');
+
+    detail.innerHTML = `
+      <div class="itl-detail-inner">
+        <div class="itl-detail-header">
+          <span class="itl-detail-badge" style="background:${color}33;border-color:${color};color:${color}">◷ ${BL[key]}</span>
+          <span class="itl-detail-date">${BD[key]}</span>
+          <span class="itl-detail-count">${numDisplay(items.length)} ${t('modal.karya')}</span>
+          <button class="itl-detail-close" onclick="itlClose()">${t('modal.close')}</button>
+        </div>
+        <div class="itl-detail-grid">${cardsHtml}</div>
+      </div>
+    `;
+    detail.classList.remove('open');
+    void detail.offsetHeight; // force reflow so 0fr state is painted before transition
+    detail.classList.add('open');
+    setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+  }
+
+  function closeDetail() {
+    detail.classList.remove('open');
+    setTimeout(() => { if (!detail.classList.contains('open')) detail.innerHTML = ''; }, 460);
+  }
+
+  window.itlClose = function() {
+    cv.querySelectorAll('.itl-cluster').forEach(c => {
+      c.classList.remove('active');
+      c.querySelector('.itl-cluster-body').style.background  = '';
+      c.querySelector('.itl-cluster-body').style.borderColor = BUCKET_COLORS[c.dataset.key] + '88';
+    });
+    closeDetail();
+  };
+
+  document.addEventListener('click', () => {
+    if (detail.classList.contains('open')) window.itlClose();
+  });
+  wrap.addEventListener('click', e => e.stopPropagation());
+}
+
+rebuildInteractiveTimeline();
+
+// ── INITIAL BUILD ──
+rebuildBarCharts();
+rebuildCatCharts();
+rebuildTimelineSections();
+rebuildFilterChips();
+</script>
+
+</body>
+</html>
