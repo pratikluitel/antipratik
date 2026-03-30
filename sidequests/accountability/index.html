@@ -784,8 +784,8 @@ body {
   border: 0.5px solid var(--border);
   border-radius: 10px;
   padding: 8px 10px;
-  min-width: 52px;
-  max-width: 76px;
+  min-width: 56px;
+  max-width: 84px;
   text-align: center;
   transition: background 350ms ease-in-out, border-color 350ms ease-in-out, transform 350ms ease-in-out, box-shadow 350ms ease-in-out;
 }
@@ -803,7 +803,7 @@ body {
   font-family: 'DM Serif Display', serif;
 }
 .itl-cluster-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
   margin-top: 3px;
   white-space: normal;
@@ -1031,7 +1031,7 @@ body {
   margin-left: 4px;
 }
 
-/* ── LANGUAGE TOGGLE ── */
+/* ── LANGUAGE SWITCHER ── */
 .lang-toggle {
   position: fixed;
   top: 20px;
@@ -1039,29 +1039,47 @@ body {
   z-index: 200;
   display: flex;
   align-items: center;
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: 20px;
-  padding: 2px;
   gap: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 .lang-btn {
-  padding: 6px 14px;
-  border-radius: 18px;
+  padding: 4px 2px;
   border: none;
   background: transparent;
   color: var(--text-dim);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   font-family: 'DM Sans', sans-serif;
   cursor: pointer;
-  transition: background 250ms ease-in-out, color 250ms ease-in-out;
+  letter-spacing: 0.04em;
+  position: relative;
+  transition: color 250ms ease-in-out;
   line-height: 1;
 }
-.lang-btn.active {
+.lang-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
   background: #4A7FBB;
-  color: #EEF2F0;
+  transform: scaleX(0);
+  transition: transform 250ms ease-in-out;
+  transform-origin: left;
+}
+.lang-btn.active {
+  color: var(--text-body);
+  font-weight: 500;
+}
+.lang-btn.active::after {
+  transform: scaleX(1);
+}
+.lang-btn:hover:not(.active) { color: var(--text-body); opacity: 0.7; }
+.lang-sep {
+  color: var(--text-dim);
+  font-size: 11px;
+  opacity: 0.4;
+  padding: 0 7px;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ── HIDDEN ── */
@@ -1087,9 +1105,9 @@ html, body { overflow-x: hidden; max-width: 100%; }
   /* Container */
   .container { padding: 12px; }
 
-  /* Lang toggle — smaller, tucked tighter */
+  /* Lang toggle — smaller on mobile */
   .lang-toggle { top: 12px; right: 12px; }
-  .lang-btn { padding: 5px 10px; font-size: 12px; }
+  .lang-btn { font-size: 12px; }
 
   /* Header */
   .header { padding: 48px 12px 24px; }
@@ -1148,6 +1166,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
 
 <div class="lang-toggle">
   <button class="lang-btn active" id="btnNe" onclick="setLang('ne')">नेपाली</button>
+  <span class="lang-sep">/</span>
   <button class="lang-btn" id="btnEn" onclick="setLang('en')">English</button>
 </div>
 
@@ -1481,6 +1500,7 @@ const BUCKETS_EN = {
   '90days':    { label:"Within 90 Days", labelShort:"90 Days",  date:"Jun 25, 2026" },
   '100days':   { label:"Within 100 Days",labelShort:"100 Days", date:"Jul 6, 2026" },
   '180plus':   { label:"180+ Days / Long-term", labelShort:"180+", date:"Sep 2026+" },
+  '1000days':  { label:"1000 Days / Long-range Plan", labelShort:"1000 Days", date:"2029+" },
   unspecified: { label:"Unspecified / Unclear", labelShort:"Unspecified", date:"—" },
 };
 
@@ -1488,12 +1508,12 @@ const BUCKETS_EN = {
 const BL_EN = {
   immediate:'Immediate', '7days':'7 Days', '15days':'15 Days', '30days':'30 Days',
   '45days':'45 Days', '60days':'60 Days', '90days':'90 Days', '100days':'100 Days',
-  '180plus':'Sep 2026', unspecified:'Unspecified',
+  '180plus':'Sep 2026', '1000days':'2029+', unspecified:'Unspecified',
 };
 const BD_EN = {
   immediate:'Mar 28',  '7days':'Apr 4',   '15days':'Apr 12',  '30days':'Apr 27',
   '45days':'May 12',   '60days':'May 27', '90days':'Jun 25',  '100days':'Jul 6',
-  '180plus':'Sep 2026', unspecified:'—',
+  '180plus':'Sep 2026', '1000days':'2029+', unspecified:'—',
 };
 
 const I18N = {
@@ -1638,7 +1658,8 @@ const TIMELINE_BUCKETS = [
   { key:"60days", label:"६० दिनभित्र", labelShort:"६० दिन", maxDays:60, date:"१२ जेठ २०८३", bg:"#33691e" },
   { key:"90days", label:"९० दिनभित्र", labelShort:"९० दिन", maxDays:90, date:"१० असार २०८३", bg:"#1b5e20" },
   { key:"100days", label:"१०० दिनभित्र", labelShort:"१०० दिन", maxDays:100, date:"२० असार २०८३", bg:"#004d40" },
-  { key:"180plus", label:"१८०+ दिन / दीर्घकालीन", labelShort:"१८०+", maxDays:9999, date:"असोज २०८३+", bg:"#1a237e" },
+  { key:"180plus", label:"१८०+ दिन / दीर्घकालीन", labelShort:"१८०+", maxDays:999, date:"असोज २०८३+", bg:"#1a237e" },
+  { key:"1000days", label:"१००० दिन / दीर्घकालीन योजना", labelShort:"१००० दिन", maxDays:9999, date:"२०८५+", bg:"#1a237e" },
   { key:"unspecified", label:"समयसीमा नतोकिएको/अस्पष्ट", labelShort:"नतोकिएको/अस्पष्ट", maxDays:null, date:"—", bg:"#37474f" },
 ];
 
@@ -1694,6 +1715,7 @@ const BUCKET_COLORS = {
   '90days':    '#5E9E6A',
   '100days':   '#4A7FBB',
   '180plus':   '#4A6A84',
+  '1000days':  '#2A4A66',
   unspecified: '#8BACC4',
 };
 
@@ -2074,14 +2096,19 @@ function buildTimeline(container) {
   function xD(d) { return LP + d * S; }
 
   const X100  = xD(100);
-  const XBS   = X100 + 28;
-  const XBE   = XBS + 76;
-  const X180  = XBE + 90;
-  const XUNS  = X180 + 110;
-  const W     = XUNS + 88;
+  const XBS   = X100 + 28;      // first break start
+  const XBE   = XBS + 76;       // first break end
+  const X180  = XBE + 90;       // असोज 2083
+  const XBS2  = X180 + 100;     // second break start (before 1000days)
+  const XBE2  = XBS2 + 76;      // second break end
+  const X1000 = XBE2 + 90;      // 1000 days
+  const XBS3  = X1000 + 80;     // third break start (before unspecified)
+  const XBE3  = XBS3 + 76;      // third break end
+  const XUNS  = XBE3 + 90;      // unspecified — floats off ruler
+  const W     = XUNS + 100;
 
   const BX = {
-    immediate:   LP,           // axis starts exactly here
+    immediate:   LP,
     '7days':     xD(7),
     '15days':    xD(15),
     '30days':    xD(30),
@@ -2090,6 +2117,7 @@ function buildTimeline(container) {
     '90days':    xD(90),
     '100days':   xD(100),
     '180plus':   X180,
+    '1000days':  X1000,
     unspecified: XUNS,
   };
 
@@ -2098,7 +2126,8 @@ function buildTimeline(container) {
     '15days':    '१५ दिन',   '30days':  '३० दिन',
     '45days':    '४५ दिन',   '60days':  '६० दिन',
     '90days':    '९० दिन',   '100days': '१०० दिन',
-    '180plus':   'असोज २०८३', unspecified: 'अस्पष्ट',
+    '180plus':   'असोज २०८३', '1000days': '१००० दिन',
+    unspecified: 'अस्पष्ट',
   };
 
   const BD = LANG === 'en' ? BD_EN : {
@@ -2106,17 +2135,17 @@ function buildTimeline(container) {
     '15days':    '२८ चैत्र',  '30days':  '१३ बैशाख',
     '45days':    '२८ बैशाख',  '60days':  '१२ जेठ',
     '90days':    '१० असार',   '100days': '२० असार',
-    '180plus':   'असोज २०८३', unspecified: '—',
+    '180plus':   'असोज २०८३', '1000days': '२०८५+',
+    unspecified: '—',
   };
 
   const CH = 260;
-  const AB = 68;        // axis bottom from canvas bottom
-  const SH = 16;        // stem height
-  const CB = AB + SH;   // cluster bottom
+  const AB = 68;
+  const SH = 16;
+  const CB = AB + SH;
 
-  // Viewport width for arrow-based navigation
-  let viewW = 0;        // set after insertion
-  let offset = 0;       // current translate offset (negative = scrolled right)
+  let viewW = 0;
+  let offset = 0;
 
   function mk(tag, cls, css) {
     const e = document.createElement(tag);
@@ -2128,7 +2157,6 @@ function buildTimeline(container) {
   // ── Wrap ──
   const wrap = mk('div', 'itl-wrap');
 
-  // Arrow buttons live inside sw so they're clipped to the timeline area only
   const arrL = mk('button', 'itl-arrow itl-arrow-left hidden');
   arrL.innerHTML = '&#8249;';
   arrL.setAttribute('aria-label', 'Scroll left');
@@ -2141,24 +2169,58 @@ function buildTimeline(container) {
   sw.appendChild(arrR);
   const cv = mk('div', 'itl-canvas', `width:${W}px;height:${CH}px;`);
 
-  // ── Ruler: major axis line from LP to XBS, then XBE to end ──
-  cv.appendChild(mk('div', 'itl-axis-line', `left:${LP}px;width:${XBS - LP}px;bottom:${AB}px;`));
-  cv.appendChild(mk('div', 'itl-axis-line', `left:${XBE}px;width:${XUNS + 36 - XBE}px;bottom:${AB}px;`));
+  // ── Gradient axis: segment 1 (LP → XBS): red → amber → green → blue ──
+  // Colors correspond to BUCKET_COLORS urgency sequence
+  const seg1W = XBS - LP;
+  cv.appendChild(mk('div', '', `
+    position:absolute;
+    left:${LP}px;width:${seg1W}px;height:1px;bottom:${AB}px;
+    background:linear-gradient(to right,
+      #E03E35 0%,
+      #C4502A ${(xD(7)-LP)/seg1W*100}%,
+      #D4A832 ${(xD(30)-LP)/seg1W*100}%,
+      #5E9E6A ${(xD(90)-LP)/seg1W*100}%,
+      #4A7FBB 100%);
+  `));
 
-  // Minor ruler ticks every 5 days between LP and X100 (skip milestone positions)
+  // Segment 2 (XBE → XBS2): 180plus color
+  cv.appendChild(mk('div', 'itl-axis-line', `left:${XBE}px;width:${XBS2 - XBE}px;bottom:${AB}px;`));
+
+  // Segment 3 (XBE2 → XBS3): 1000days color
+  cv.appendChild(mk('div', 'itl-axis-line', `left:${XBE2}px;width:${XBS3 - XBE2}px;bottom:${AB}px;`));
+
+  // Segment 4 (XBE3 → XUNS+36): dotted/faded — unspecified has no real position
+  cv.appendChild(mk('div', '', `
+    position:absolute;
+    left:${XBE3}px;width:${XUNS + 36 - XBE3}px;height:1px;bottom:${AB}px;
+    background:repeating-linear-gradient(to right,#3A5068 0,#3A5068 6px,transparent 6px,transparent 12px);
+    opacity:0.5;
+  `));
+
+  // Minor ruler ticks every 5 days
   const milestoneSet = new Set([0, 7, 15, 30, 45, 60, 90, 100]);
   for (let d = 5; d <= 100; d += 5) {
-    if (milestoneSet.has(d)) continue;   // milestone ticks handled separately
+    if (milestoneSet.has(d)) continue;
     const x = xD(d);
-    const tickH = (d % 10 === 0) ? 10 : 6;   // longer every 10 days
+    const tickH = (d % 10 === 0) ? 10 : 6;
     cv.appendChild(mk('div', 'itl-ruler-tick',
       `left:${x}px;bottom:${AB - tickH}px;height:${tickH}px;`));
   }
 
-  // Break indicator
+  // Break 1 — after 100 days
   const brk = mk('div', 'itl-break', `left:${XBS}px;width:${XBE - XBS}px;bottom:${AB - 11}px;height:24px;`);
   brk.innerHTML = '<span class="itl-break-inner">/ /</span>';
   cv.appendChild(brk);
+
+  // Break 2 — before 1000 days
+  const brk2 = mk('div', 'itl-break', `left:${XBS2}px;width:${XBE2 - XBS2}px;bottom:${AB - 11}px;height:24px;`);
+  brk2.innerHTML = '<span class="itl-break-inner">/ /</span>';
+  cv.appendChild(brk2);
+
+  // Break 3 — before unspecified (signals it has no temporal position)
+  const brk3 = mk('div', 'itl-break', `left:${XBS3}px;width:${XBE3 - XBS3}px;bottom:${AB - 11}px;height:24px;`);
+  brk3.innerHTML = '<span class="itl-break-inner">/ /</span>';
+  cv.appendChild(brk3);
 
   // ── Today marker — dot on axis only, legend below the timeline ──
   (function() {
