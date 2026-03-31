@@ -386,18 +386,18 @@ body {
 }
 
 /* ── CATEGORY COLOR ASSIGNMENTS ── */
-.cat-क .card::before, .cat-क .card-num { background: var(--cat-क); }
-.cat-ख .card::before, .cat-ख .card-num { background: var(--cat-ख); }
-.cat-ग .card::before, .cat-ग .card-num { background: var(--cat-ग); }
-.cat-घ .card::before, .cat-घ .card-num { background: var(--cat-घ); }
-.cat-ङ .card::before, .cat-ङ .card-num { background: var(--cat-ङ); }
+.cat-क .card::before, .cat-क .card-num { background: var(--cat-क); color: #0F1118; }
+.cat-ख .card::before, .cat-ख .card-num { background: var(--cat-ख); color: #0F1118; }
+.cat-ग .card::before, .cat-ग .card-num { background: var(--cat-ग); color: #0F1118; }
+.cat-घ .card::before, .cat-घ .card-num { background: var(--cat-घ); color: #0F1118; }
+.cat-ङ .card::before, .cat-ङ .card-num { background: var(--cat-ङ); color: #0F1118; }
 .cat-च .card::before, .cat-च .card-num { background: var(--cat-च); color: #0F1118; }
-.cat-छ .card::before, .cat-छ .card-num { background: var(--cat-छ); }
-.cat-ज .card::before, .cat-ज .card-num { background: var(--cat-ज); }
-.cat-झ .card::before, .cat-झ .card-num { background: var(--cat-झ); }
-.cat-ञ .card::before, .cat-ञ .card-num { background: var(--cat-ञ); }
-.cat-ट .card::before, .cat-ट .card-num { background: var(--cat-ट); }
-.cat-ठ .card::before, .cat-ठ .card-num { background: var(--cat-ठ); }
+.cat-छ .card::before, .cat-छ .card-num { background: var(--cat-छ); color: #0F1118; }
+.cat-ज .card::before, .cat-ज .card-num { background: var(--cat-ज); color: #0F1118; }
+.cat-झ .card::before, .cat-झ .card-num { background: var(--cat-झ); color: #0F1118; }
+.cat-ञ .card::before, .cat-ञ .card-num { background: var(--cat-ञ); color: #0F1118; }
+.cat-ट .card::before, .cat-ट .card-num { background: var(--cat-ट); color: #0F1118; }
+.cat-ठ .card::before, .cat-ठ .card-num { background: var(--cat-ठ); color: #0F1118; }
 
 .cat-क .card-cat { background: rgba(255,107,107,0.22); color: var(--cat-क); }
 .cat-ख .card-cat { background: rgba(78,205,196,0.22); color: var(--cat-ख); }
@@ -784,8 +784,9 @@ body {
   border: 0.5px solid var(--border);
   border-radius: 10px;
   padding: 8px 10px;
-  min-width: 56px;
-  max-width: 84px;
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
   text-align: center;
   transition: background 350ms ease-in-out, border-color 350ms ease-in-out, transform 350ms ease-in-out, box-shadow 350ms ease-in-out;
 }
@@ -1082,7 +1083,62 @@ body {
   user-select: none;
 }
 
-/* ── HIDDEN ── */
+/* ── MOBILE: horizontal chip scrolling ── */
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    overflow: visible;
+  }
+  .filter-row-label {
+    padding-top: 0;
+    min-width: 36px;
+    flex-shrink: 0;
+  }
+  .filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  .fchip { flex-shrink: 0; }
+}
+
+/* ── MODAL: swipe-down drag handle indicator ── */
+.modal-drag-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+  opacity: 0.5;
+}
+@media (min-width: 769px) {
+  .modal-drag-handle { display: none; }
+}
+/* Modal slides up from bottom on mobile */
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal-box {
+    border-radius: 14px 14px 0 0;
+    max-height: 88vh;
+    padding: 12px 16px 32px;
+    transition: transform 350ms ease-in-out;
+    transform: translateY(0);
+    will-change: transform;
+  }
+  .modal-box.dragging {
+    transition: none;
+  }
+}
 .card.hidden { display: none; }
 .timeline-section.hidden { display: none; }
 
@@ -1133,9 +1189,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
   .card-desc { font-size: 15px; }
 
   /* Filter panel */
-  .filter-row { flex-direction: column; gap: 8px; }
-  .filter-row-label { padding-top: 0; min-width: unset; }
-  .filter-panel { padding: 14px 14px; }
+  /* Filter panel — chips stay horizontal with scroll */
 
   /* Bar charts */
   .bar-label { width: 110px; max-width: 32%; font-size: 13px; }
@@ -1261,6 +1315,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
   <!-- MODAL -->
   <div class="modal-overlay" id="modal">
     <div class="modal-box">
+      <div class="modal-drag-handle"></div>
       <button class="modal-close" onclick="closeModal(event)">&times;</button>
       <div class="modal-header">
         <div class="modal-num" id="modalNum"></div>
@@ -1895,6 +1950,58 @@ function closeModal(e) {
   document.getElementById('modal').classList.remove('show');
 }
 
+// ── Swipe-down to close modal (mobile) ──
+(function() {
+  const overlay = document.getElementById('modal');
+  let startY = 0, startX = 0, dragging = false;
+  const box = () => overlay.querySelector('.modal-box');
+
+  overlay.addEventListener('touchstart', e => {
+    if (e.target.closest('.modal-body')) return; // allow scrolling body
+    startY = e.touches[0].clientY;
+    startX = e.touches[0].clientX;
+    dragging = false;
+  }, { passive: true });
+
+  overlay.addEventListener('touchmove', e => {
+    const dy = e.touches[0].clientY - startY;
+    const dx = e.touches[0].clientX - startX;
+    if (!dragging && Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
+    if (!dragging && Math.abs(dx) > Math.abs(dy)) return; // horizontal swipe — ignore
+    dragging = true;
+    if (dy < 0) return; // don't drag upward
+    const b = box();
+    if (b) {
+      b.classList.add('dragging');
+      b.style.transform = `translateY(${dy}px)`;
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  overlay.addEventListener('touchend', e => {
+    if (!dragging) return;
+    const dy = e.changedTouches[0].clientY - startY;
+    const b = box();
+    if (b) {
+      b.classList.remove('dragging');
+      if (dy > 120) {
+        // Committed dismiss — animate out then close
+        b.style.transition = 'transform 280ms ease-in-out';
+        b.style.transform = `translateY(100%)`;
+        setTimeout(() => {
+          closeModal(null);
+          b.style.transform = '';
+          b.style.transition = '';
+        }, 290);
+      } else {
+        // Snap back
+        b.style.transform = '';
+      }
+    }
+    dragging = false;
+  }, { passive: true });
+})();
+
 document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target === this) { e.stopPropagation(); closeModal(); }
 });
@@ -2308,82 +2415,88 @@ function buildTimeline(container) {
   sw.appendChild(cv);
   wrap.appendChild(sw);
 
-  // ── Legend strip ──
+  // ── Legend strip — clean 2-column grid layout ──
   const legendStrip = mk('div', '', `
-    padding:14px 24px 18px;
-    border-top:0.5px solid var(--surface2);
-    display:flex;
-    flex-direction:column;
-    gap:16px;
+    padding: 14px 24px 18px;
+    border-top: 0.5px solid var(--surface2);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 28px;
+    align-items: start;
+    overflow: visible;
   `);
 
-  function legendItem(iconHtml, label) {
-    const el = mk('div', '', `display:flex;align-items:center;gap:7px;`);
-    const icon = mk('span', '', `display:flex;align-items:center;flex-shrink:0;`);
-    icon.innerHTML = iconHtml;
-    const txt = mk('span', '', `
-      font-size:12px;color:var(--text-dim);
-      font-family:'DM Sans','Noto Sans Devanagari',sans-serif;
-      white-space:nowrap;
-    `);
-    txt.textContent = label;
-    el.appendChild(icon);
-    el.appendChild(txt);
-    return el;
+  // On narrow viewports collapse to single column via JS after insertion
+  function adjustLegend() {
+    const w = legendStrip.offsetWidth;
+    if (w > 0 && w < 400) {
+      legendStrip.style.gridTemplateColumns = '1fr';
+      legendStrip.style.padding = '12px 14px 16px';
+    } else {
+      legendStrip.style.gridTemplateColumns = 'auto 1fr';
+      legendStrip.style.padding = '14px 24px 18px';
+    }
   }
 
-  function legendSep() {
-    return mk('div', '', `
-      width:1px;height:14px;
-      background:var(--border);
-      margin:0 10px;
-      flex-shrink:0;
-      align-self:center;
-    `);
-  }
-
-  function legendRowTitle(text) {
+  function legendColTitle(text) {
     const el = mk('span', '', `
-      font-size:10px;font-weight:500;
-      letter-spacing:0.1em;text-transform:uppercase;
-      color:var(--text-dim);opacity:0.6;
-      font-family:'DM Sans',sans-serif;
-      white-space:nowrap;
-      margin-right:12px;
-      align-self:center;
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: 0.6;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+      padding-top: 3px;
     `);
     el.textContent = text;
     return el;
   }
 
-  // Row 1: today + milestone tick
-  const row1 = mk('div', '', `display:flex;align-items:center;flex-wrap:wrap;gap:4px;`);
-  row1.appendChild(legendRowTitle(t('legend.marks')));
-  row1.appendChild(legendItem(
-    `<span style="width:13px;height:13px;border-radius:50%;background:#E03E35;display:inline-block;box-shadow:0 0 0 3px rgba(224,62,53,0.18);"></span>`,
-    `${t('legend.todayLabel')} — ${getTodayNepali()}`
-  ));
-  legendStrip.appendChild(row1);
+  // Left col 1: Markers label
+  legendStrip.appendChild(legendColTitle(t('legend.marks')));
 
-  // Row 2: category dots
-  const row2 = mk('div', '', `display:flex;align-items:center;flex-wrap:wrap;gap:4px;`);
-  row2.appendChild(legendRowTitle(t('legend.sectors')));
+  // Right col 1: Today dot entry
+  const markerRow = mk('div', '', `display:flex;align-items:center;gap:8px;`);
+  markerRow.innerHTML = `
+    <span style="width:13px;height:13px;border-radius:50%;background:#E03E35;display:inline-block;flex-shrink:0;box-shadow:0 0 0 3px rgba(224,62,53,0.18);"></span>
+    <span style="font-size:12px;color:var(--text-dim);font-family:'DM Sans','Noto Sans Devanagari',sans-serif;">${t('legend.todayLabel')} — ${getTodayNepali()}</span>
+  `;
+  legendStrip.appendChild(markerRow);
+
+  // Left col 2: Sectors label
+  legendStrip.appendChild(legendColTitle(t('legend.sectors')));
+
+  // Right col 2: Categories in a tight grid
+  const catGrid = mk('div', '', `
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px 12px;
+  `);
   const legendCats = [...new Set(DATA.map(d => d.cat))];
-  legendCats.forEach((cat, i) => {
+  legendCats.forEach(cat => {
     const item  = DATA.find(d => d.cat === cat);
     const name  = getItemCatN(item);
     const color = CAT_COLORS[cat];
-    if (i > 0) row2.appendChild(legendSep());
-    row2.appendChild(legendItem(
-      `<span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>`,
-      name
-    ));
+    const entry = mk('div', '', `display:flex;align-items:center;gap:6px;`);
+    entry.innerHTML = `
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>
+      <span style="font-size:12px;color:var(--text-dim);font-family:'DM Sans','Noto Sans Devanagari',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</span>
+    `;
+    catGrid.appendChild(entry);
   });
-  legendStrip.appendChild(row2);
+  legendStrip.appendChild(catGrid);
 
   wrap.appendChild(legendStrip);
   wrap.appendChild(detail);
   container.appendChild(wrap);
+
+  requestAnimationFrame(() => {
+    adjustLegend();
+    window.addEventListener('resize', adjustLegend);
+  });
 
   // ── Arrow navigation ──
   function updateArrows() {
@@ -2406,6 +2519,60 @@ function buildTimeline(container) {
   const STEP = 320;
   arrL.addEventListener('click', e => { e.stopPropagation(); scrollBy(+STEP); });
   arrR.addEventListener('click', e => { e.stopPropagation(); scrollBy(-STEP); });
+
+  // ── Touch swipe with inertia ──
+  let touchStartX = 0, touchLastX = 0, touchVelocity = 0;
+  let touchLastTime = 0, touchMoved = false;
+  let inertiaFrame = null;
+
+  sw.addEventListener('touchstart', e => {
+    cancelAnimationFrame(inertiaFrame);
+    touchStartX = e.touches[0].clientX;
+    touchLastX  = touchStartX;
+    touchLastTime = Date.now();
+    touchMoved = false;
+    cv.style.transition = 'none';
+  }, { passive: true });
+
+  sw.addEventListener('touchmove', e => {
+    const x = e.touches[0].clientX;
+    const dx = x - touchLastX;
+    const now = Date.now();
+    touchVelocity = dx / Math.max(1, now - touchLastTime);
+    touchLastX = x;
+    touchLastTime = now;
+    const totalDx = x - touchStartX;
+    if (Math.abs(totalDx) > 6) touchMoved = true;
+    if (touchMoved) {
+      viewW = sw.getBoundingClientRect().width || sw.offsetWidth;
+      const maxOffset = -(W - viewW + LP);
+      offset = Math.min(0, Math.max(maxOffset, offset + dx));
+      cv.style.transform = `translateX(${offset}px)`;
+      updateArrows();
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  sw.addEventListener('touchend', () => {
+    if (!touchMoved) return;
+    cv.style.transition = 'transform 400ms ease-in-out';
+    // Apply inertia
+    const applyInertia = () => {
+      if (Math.abs(touchVelocity) < 0.3) {
+        cv.style.transition = 'transform 400ms ease-in-out';
+        return;
+      }
+      viewW = sw.getBoundingClientRect().width || sw.offsetWidth;
+      const maxOffset = -(W - viewW + LP);
+      offset = Math.min(0, Math.max(maxOffset, offset + touchVelocity * 16));
+      cv.style.transform = `translateX(${offset}px)`;
+      touchVelocity *= 0.88;
+      updateArrows();
+      inertiaFrame = requestAnimationFrame(applyInertia);
+    };
+    cv.style.transition = 'none';
+    inertiaFrame = requestAnimationFrame(applyInertia);
+  }, { passive: true });
 
   // Init after paint so offsetWidth is available
   requestAnimationFrame(() => { requestAnimationFrame(updateArrows); });
