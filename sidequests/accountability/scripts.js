@@ -1242,6 +1242,7 @@ function buildTimeline(container) {
 
   // ── Detail panel ──
   function openDetail(key, items, color) {
+    
     const cardsHtml = items.map(item => `
       <div class="card cat-${item.cat}" onclick="openModal(${item.id})">
         <div class="card-top">
