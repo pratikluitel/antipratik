@@ -139,9 +139,15 @@ These tokens were added or modified during implementation (not in the original d
 | `--nav-height-default` | `48px` | Alias for clarity in FilterBar CSS |
 | `--z-navbar` | `100` | Navbar z-index |
 | `--z-filterbar` | `90` | FilterBar z-index — must sit below navbar |
-| `--color-text-muted-dark` | `#607D96` | **Changed from `#3A5068`** — original was too dark against `#0A0E14` player background |
+| `--color-text-muted-dark` | `#7A9AB4` | **Changed from `#3A5068` → `#607D96` → `#7A9AB4`** — previous values failed contrast on dark bg; affects navbar links, hero text, section meta |
+| `--color-text-subtle-dark` | `#4A6A84` | **Changed from `#2E3748`** — was identical to `--color-border-dark`, near-invisible; affects ExternalLinksBlock labels and arrows |
+| `--link-domain-color-dark` | `#4A6A84` | **Changed from `#2E3748`** — domain text in ExternalLinksBlock (dark mode) was unreadable |
+| `--nl-legal-color` | `#607D96` | **Changed from `#1E2535`** — legal text on `#0A0E14` newsletter bg was near-zero contrast |
+| `--color-text-subtle-light` | `#7A7268` | **Changed from `#C8C0B4`** — was too close to parchment bg, near-invisible |
+| `--link-domain-color-light` | `#8A8070` | **Changed from `#C8C0B4`** — domain text in ExternalLinksBlock (light mode) was unreadable |
+| `--color-text-muted-light` | `#4A5860` | **Changed from `#7A8890`** — navbar links and section meta on parchment bg were below WCAG AA |
 
-The `--color-text-muted-dark` change is global and affects every component using it.
+These contrast fixes are global — every component using these tokens benefits automatically.
 
 ---
 
@@ -293,3 +299,4 @@ ThemeProvider
 13. **Call setState on a different component inside a state updater function** — use a separate `useEffect` to trigger cross-component state changes.
 14. **Link essays to `/post/${slug}`** — correct path is `/${slug}`. Next.js catch-all handles it.
 15. **Use `--accent-*` colors on UI chrome elements** — accent tokens are for content only.
+16. **Set text color tokens below minimum contrast** — all text tokens must achieve ≥ 4.5:1 (WCAG AA normal text) or ≥ 3:1 (large/bold text) against their expected background. "Subtle" is for de-emphasis, not invisibility. Verify contrast before changing any `--color-text-*`, `--link-*-color`, or `--nl-*-color` token.
