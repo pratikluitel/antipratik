@@ -100,7 +100,7 @@ const { slug } = await params;
 All tokens live in `src/styles/tokens.css`. Never import tokens.css anywhere except `src/app/layout.tsx`.
 
 | Prefix | Category |
-|--------|----------|
+|--------|-----------|
 | `--font-serif`, `--font-sans` | Typefaces |
 | `--text-*` | Type scale (display/h1/h2/h3/body/ui/meta/label/micro) |
 | `--lh-*` | Line heights |
@@ -142,7 +142,9 @@ These tokens were added or modified during implementation (not in the original d
 | `--color-text-muted-dark` | `#7A9AB4` | **Changed from `#3A5068` → `#607D96` → `#7A9AB4`** — previous values failed contrast on dark bg; affects navbar links, hero text, section meta |
 | `--color-text-subtle-dark` | `#4A6A84` | **Changed from `#2E3748`** — was identical to `--color-border-dark`, near-invisible; affects ExternalLinksBlock labels and arrows |
 | `--link-domain-color-dark` | `#4A6A84` | **Changed from `#2E3748`** — domain text in ExternalLinksBlock (dark mode) was unreadable |
-| `--nl-legal-color` | `#607D96` | **Changed from `#1E2535`** — legal text on `#0A0E14` newsletter bg was near-zero contrast |
+| `--nl-legal-color` | `#607D96` (root) / `#7A9AB4` (per theme) | **Root changed from `#1E2535`**; then per-theme overrides added in `[data-theme]` blocks — `#607D96` fails WCAG AA on elevated newsletter bg (#8); both themes now use `var(--color-text-muted-dark)` = `#7A9AB4` |
+| `--nl-bg` | `#0A0E14` (root fallback) / `#181D28` dark / `#1C2B3A` light | **Per-theme overrides added** — `#0A0E14` was indistinguishable from dark page bg and jarring in light mode; dark now uses `--color-surface-dark`, light uses `--color-stone` (#8) |
+| `--nl-input-bg` | `#181D28` (root) / `#0F1118` dark | **Dark mode override added** — input bg must be darker than new block bg `#181D28` to remain visible; overridden to `--color-bg-dark` in dark mode (#8) |
 | `--color-text-subtle-light` | `#7A7268` | **Changed from `#C8C0B4`** — was too close to parchment bg, near-invisible |
 | `--link-domain-color-light` | `#8A8070` | **Changed from `#C8C0B4`** — domain text in ExternalLinksBlock (light mode) was unreadable |
 | `--color-text-muted-light` | `#4A5860` | **Changed from `#7A8890`** — navbar links and section meta on parchment bg were below WCAG AA |
