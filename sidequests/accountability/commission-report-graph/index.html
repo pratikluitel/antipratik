@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nepal GenZ Andolan — Commission Report Knowledge Graph</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body class="kg-body">
+
+<div class="kg-topbar">
+  <div class="kg-topbar-left">
+    <h1>Nepal Commission Report — Knowledge Graph</h1>
+    <div class="kg-search-wrap">
+      <input type="text" id="search" placeholder="Search nodes…" oninput="filterSearch(this.value)">
+    </div>
+  </div>
+  <div class="kg-topbar-controls">
+    <div class="kg-filters" id="filters"></div>
+  </div>
+  <div class="kg-topbar-right">
+    <div class="kg-legend" id="legend"></div>
+    <span class="kg-count" id="count"></span>
+    <button class="kg-help-btn" id="helpBtn" onclick="toggleHelp()" title="How to read this graph">?</button>
+  </div>
+</div>
+
+<div class="kg-canvas-wrap">
+  <svg id="graph"></svg>
+  <div class="kg-tooltip" id="tooltip"></div>
+  <div class="kg-info-panel" id="info-panel">
+    <span class="close" onclick="closePanel()">✕</span>
+    <div id="panel-content"></div>
+  </div>
+  <div class="kg-help-panel" id="help-panel">
+    <button class="kg-help-close" onclick="toggleHelp()">✕</button>
+    <h2 class="kg-help-title">How to read this graph</h2>
+    <ul class="kg-help-list">
+      <li><span class="kg-help-icon">⬤</span><span><strong>Node size</strong> reflects number of connections — larger nodes are more central to the story.</span></li>
+      <li><span class="kg-help-icon">🎨</span><span><strong>Node colour</strong> indicates category: Person, Organisation, Event, Place, Legal, Finding, Outcome, or Digital.</span></li>
+      <li><span class="kg-help-icon">→</span><span><strong>Arrows</strong> show directed relationships between entities (e.g. "charged under", "caused", "organised").</span></li>
+      <li><span class="kg-help-icon">👆</span><span><strong>Click a node</strong> to open its detail panel with full description and all connections.</span></li>
+      <li><span class="kg-help-icon">✥</span><span><strong>Drag nodes</strong> to reposition them and untangle the graph.</span></li>
+      <li><span class="kg-help-icon">🔍</span><span><strong>Scroll or pinch</strong> to zoom in and out of the graph.</span></li>
+      <li><span class="kg-help-icon">⬚</span><span><strong>Filter buttons</strong> in the top bar show or hide entire categories.</span></li>
+      <li><span class="kg-help-icon">🔎</span><span><strong>Search</strong> fades out any node whose label or description doesn't match.</span></li>
+    </ul>
+    <p class="kg-help-note">Data sourced from the 907-page Pratibeden (Inquiry Commission Report), 2082.</p>
+  </div>
+</div>
+
+<script src="graph.js"></script>
+</body>
+</html>
