@@ -127,8 +127,8 @@
 --color-text-primary-dark:           #EEF2F0;  /* snow — headings, primary text */
 --color-text-sub-dark:               #C8D8E8;  /* sub-headings */
 --color-text-body-dark:              #8BACC4;  /* long-form body copy */
---color-text-muted-dark:             #607D96;  /* album names, meta, dates */
---color-text-subtle-dark:            #2E3748;  /* barely visible — meta, hints */
+--color-text-muted-dark:             #7A9AB4;  /* album names, meta, dates */
+--color-text-subtle-dark:            #4A6A84;  /* subtle — meta, hints */
 
 /* ═══════════════════════════════════════════════
    LIGHT MODE SURFACES — Parchment
@@ -141,8 +141,8 @@
 /* Light mode text */
 --color-text-primary-light:          #0F1118;
 --color-text-body-light:             #2A3A4A;  /* slightly blue-grey — not pure black */
---color-text-muted-light:            #7A8890;
---color-text-subtle-light:           #C8C0B4;
+--color-text-muted-light:            #4A5860;
+--color-text-subtle-light:           #7A7268;
 
 /* Mountain landscape */
 --color-night-sky:                   #2A4A66;
@@ -386,7 +386,7 @@
 --nl-btn-bg-hover:                   #ffffff;
 --nl-btn-bg-active:                  #D8D2C4;
 --nl-btn-color:                      #0F1118;
---nl-legal-color:                    #1E2535;
+--nl-legal-color:                    #607D96;
 --nl-legal-size:                     11px;
 --nl-error-color:                    #E03E35;
 --nl-success-icon-color:             #5E9E6A;
@@ -423,8 +423,8 @@
 --link-desc-color-dark:              #3A5068;
 --link-desc-color-light:             #A0A090;
 --link-domain-size:                  10px;
---link-domain-color-dark:            #2E3748;
---link-domain-color-light:           #C8C0B4;
+--link-domain-color-dark:            #4A6A84;
+--link-domain-color-light:           #8A8070;
 --link-accent-music:                 #E03E35;
 --link-accent-writing:               #4A7FBB;
 --link-accent-video:                 #5E9E6A;
