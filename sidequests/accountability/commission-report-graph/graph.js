@@ -443,3 +443,16 @@ function closePanel() {
   document.getElementById("info-panel").style.display = "none";
   updateVisibility();
 }
+
+function toggleHelp() {
+  const panel = document.getElementById("help-panel");
+  const btn   = document.getElementById("helpBtn");
+  const isOpen = panel.classList.toggle("open");
+  btn.classList.toggle("active", isOpen);
+}
+
+// Close help panel when clicking the SVG background
+svg.on("click.help", () => {
+  const panel = document.getElementById("help-panel");
+  if (panel.classList.contains("open")) toggleHelp();
+});
