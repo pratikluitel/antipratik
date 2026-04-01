@@ -366,7 +366,7 @@
 /* ═══════════════════════════════════════════════
    NEWSLETTER BLOCK
 ═══════════════════════════════════════════════ */
---nl-bg:                             #0A0E14;  /* always dark, both modes */
+--nl-bg:                             #0A0E14;  /* fallback only — overridden per theme below */
 --nl-padding-desktop:                64px 32px;
 --nl-padding-mobile:                 48px 24px;
 --nl-border-gradient:                linear-gradient(90deg, transparent 0%, #E03E35 20%, #4A7FBB 40%, #D4A832 60%, #5E9E6A 80%, transparent 100%);
@@ -466,6 +466,9 @@
   --card-border:                     var(--card-border-dark);
   --card-hover-bg:                   var(--card-hover-bg-dark);
   --card-hover-border:               var(--card-hover-border-dark);
+  --nl-bg:                           var(--color-surface-dark);    /* #181D28 — raised surface, visible against page bg #0F1118 */
+  --nl-input-bg:                     var(--color-bg-dark);          /* #0F1118 — inputs darker than block = inset feel */
+  --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 5.9:1 on new block bg */
 }
 
 /* ═══════════════════════════════════════════════
@@ -489,4 +492,6 @@
   --card-border:                     var(--card-border-light);
   --card-hover-bg:                   var(--card-hover-bg-light);
   --card-hover-border:               var(--card-hover-border-light);
+  --nl-bg:                           var(--color-stone);            /* #1C2B3A — warmer dark, less jarring on parchment */
+  --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 4.9:1 on new block bg */
 }
