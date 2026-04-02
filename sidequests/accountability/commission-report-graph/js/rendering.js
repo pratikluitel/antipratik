@@ -1,6 +1,7 @@
 // Create selections immediately (before warm-up, so they're ready to render)
 const linkSel = g.append("g").selectAll("line").data(links).join("line")
   .attr("stroke-width", 0.8).attr("stroke-opacity", 0.5)
+  .attr("shape-rendering", "crispEdges") // Hardware optimization for straight lines
   .attr("stroke", d => {
     const src = nodes.find(n => n.id === (typeof d.source === "string" ? d.source : d.source.id));
     return src ? CATEGORIES[src.cat]?.color || "#888" : "#888";
@@ -13,6 +14,7 @@ const linkSel = g.append("g").selectAll("line").data(links).join("line")
 const nodeSel = g.append("g").selectAll("g").data(nodes).join("g")
   .attr("class", "node-g")
   .style("cursor", "pointer")
+  .style("will-change", "transform") // Offload translation coordinate calculations to GPU
   .call(d3.drag()
     .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
     .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
@@ -73,7 +75,27 @@ nodeSel.append("text")
     }
     return radius + gap;
   })
-  .text(d => d.label.length > 18 ? d.label.slice(0, 16) + "…" : d.label);
+  .each(function(d) {
+    const el = d3.select(this);
+    const words = d.label.split(/\s+/);
+    let line = [];
+    const maxLineLen = 14; 
+    let tspan = el.append("tspan").attr("x", 0).attr("dy", "0.35em");
+    
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        line.push(word);
+        const text = line.join(" ");
+        if (text.length > maxLineLen && line.length > 1) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = el.append("tspan").attr("x", 0).attr("dy", "1.1em").text(word);
+        } else {
+            tspan.text(text);
+        }
+    }
+  });
 
 // Ensure critical events render visually on top of all other nodes (Z-index)
 nodeSel.filter(d => criticalEvents.has(d.id)).raise();

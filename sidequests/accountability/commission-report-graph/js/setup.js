@@ -1,5 +1,5 @@
 const svg = d3.select("#graph");
-const g = svg.append("g");
+const g = svg.append("g").style("will-change", "transform");
 
 const zoom = d3.zoom().scaleExtent([0.15, 4]).on("zoom", e => g.attr("transform", e.transform));
 svg.call(zoom);

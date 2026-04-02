@@ -1365,7 +1365,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  z-index: 100;
+  z-index: 40;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: all 0.2s ease;
 }
