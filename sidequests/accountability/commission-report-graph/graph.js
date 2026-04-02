@@ -1,12 +1,12 @@
 const CATEGORIES = {
-  person:   { label: "Person",       color: "#E24B4A", light: "#FCEBEB" },
-  org:      { label: "Organisation", color: "#378ADD", light: "#E6F1FB" },
-  event:    { label: "Event",        color: "#E4A135", light: "#FAEEDA" },
-  place:    { label: "Place",        color: "#1D9E75", light: "#EAF3DE" },
-  legal:    { label: "Legal",        color: "#7F77DD", light: "#EEEDFE" },
-  finding:  { label: "Finding",      color: "#888780", light: "#F2F1EF" },
-  outcome:  { label: "Outcome",      color: "#D4537E", light: "#FBEAF0" },
-  digital:  { label: "Digital",      color: "#0F6E56", light: "#E1F5EE" },
+  person:   { label: "Person",       color: "#E03E35", light: "#FDECEA" },
+  org:      { label: "Organisation", color: "#4A7FBB", light: "#E8F0F8" },
+  event:    { label: "Event",        color: "#D4A832", light: "#FAF0D4" },
+  place:    { label: "Place",        color: "#5E9E6A", light: "#E8F4EA" },
+  legal:    { label: "Legal",        color: "#4A7C6F", light: "#E4F0EC" },
+  finding:  { label: "Finding",      color: "#7A8890", light: "#EEF0F2" },
+  outcome:  { label: "Outcome",      color: "#7A8890", light: "#EEF0F2" },
+  digital:  { label: "Digital",      color: "#4A7C6F", light: "#E4F0EC" },
 };
 
 const nodes = [
@@ -77,7 +77,7 @@ const nodes = [
   { id: "hami_nepal", label: "Hami Nepal NGO", cat: "org", desc: "Non-profit registered at Narapureshwar, Kathmandu. Founded Bhadra 24, 2077 (2020). Track record: 2072 earthquake hospital management, COVID plasma bank + 270 ICU beds, Turkey earthquake 14 tons relief. Admin of 'Youth Against Corruption' Discord. Medical camp at Maitighar on Bhadra 23. Saved both Police HQ and APF HQ on Bhadra 24.", section: "§5.2" },
   { id: "nepal_police", label: "Nepal Police", cat: "org", desc: "2,776 rubber bullets, 7,873 total rounds fired on Bhadra 23–24. 3 officers killed by protesters. 1,616+ injured. 219 police units damaged. NPR 1.59 Cr damage. ~4 hours of live fire without stop order on Bhadra 23. Refused to provide ammunition accounting to Commission.", section: "§12.1, §12.3" },
   { id: "apf", label: "Armed Police Force (APF)", cat: "org", desc: "APF deployed alongside Nepal Police. Victor Control issued by APF IGP Ayal on Bhadra 24 including prisoner release order. Three APF officers recommended for APF Act §112 action.", section: "§13.2" },
-  { id: "nepal_army", label: "Nepal Army", cat: "org", desc: "Deployed to vital installations. Thwarted airport attack. Saved President Karki by evacuation. 4 installation commanders recommended for Army Act §105 action for failing to protect Shital Niwas, Baluwatar, Singha Durbar, Parliament.", section: "§13.2" },
+  { id: "nepal_army", label: "Nepal Army", cat: "org", desc: "Deployed to vital installations. Thwarted airport attack. Saved Several Political Leaders by evacuation. 4 installation commanders recommended for Army Act §105 action for failing to protect Shital Niwas, Baluwatar, Singha Durbar, Parliament.", section: "§13.2" },
   { id: "nid", label: "National Investigation Dept (NID)", cat: "org", desc: "Intelligence failure. Failed to provide timely warning about Discord violence plans or march escalation risk. Two joint directors recommended for Special Service Act action.", section: "§13.2" },
   { id: "discord_servers", label: "Discord Servers (Youth/Yuwa)", cat: "org", desc: "Two servers: 'Youth Against Corruption' (18,010 messages, Admin: Hami Nepal) and 'Yuwa Hub' (12,144 messages, 2-tier Core Member system). Combined 664,000+ messages in 50 hours. Used for march planning, PM vote (Karki won), Molotov coordination, and real-time arson coordination.", section: "§12.13" },
   { id: "cyabra", label: "Cyabra (Israel)", cat: "org", desc: "Israeli social media analytics firm. Report on Nepal protests: 34% of X profiles were fake or inauthentic. Commission notes methodological concerns with the report but cites it as evidence of coordinated inauthentic behaviour.", section: "§14.10" },
@@ -98,6 +98,7 @@ const nodes = [
   { id: "discord_tony_claim", label: "False Rape Claim", cat: "digital", desc: "Discord 'Tony' posted false claim rape was occurring at Global College hostel during protest. Spread faster than any denial. Police confirmed nothing happened. College burned on Bhadra 24.", section: "§12.13, §14.10" },
   { id: "molotov_356", label: "Molotov: 356 Mentions", cat: "digital", desc: "Molotov cocktails discussed 356 times across both Discord servers over 50 hours. IDKEHUAIM's first post at 10:40 PM Sept 7 triggered the cascade. CCTV confirmed actual Molotov attacks at Parliament.", section: "§12.13" },
   { id: "deepfakes", label: "AI Deepfake Videos", cat: "digital", desc: "Commission confirmed AI-edited/deepfake videos claiming security force atrocities were present in evidence (§12.5, item 6). Metadata stripped — verification impossible. First confirmed AI disinformation in Nepal's political history.", section: "§12.5" },
+  { id: "disinformation", label: "Coordinated Disinformation", cat: "digital", desc: "Umbrella node for coordinated disinformation campaigns. Includes false claims (rape at Global College, Hilton ownership), AI deepfakes, and strategic falsehoods designed to amplify chaos. Multiple influencers and media outlets participated. Commission: 76.17% of misinformation originates from media and social media itself.", section: "§14.10" },
   { id: "netakhor", label: "netakhor.vercel.app", cat: "digital", desc: "Web platform identified in security intelligence reports as used for mapping attack sites during Bhadra 24. Commission notes this as evidence of coordinated targeting.", section: "§5.2" },
   { id: "bts_data", label: "BTS / CDR Data", cat: "digital", desc: "Commission obtained actual cell tower (BTS) data and Call Detail Records (CDR) for all senior officials. NCELL data showed 39,212 SIM users at key sites during events. CDR mapped entire crisis communication network.", section: "§12.6" },
   { id: "nepo_baby", label: "#NepoBaby Campaigns", cat: "digital", desc: "Pre-march TikTok/Reddit/X campaigns: #NepoBaby, #NepoBabies, #EnoughIsEnough, #NoNotAgain, #AntiCorruption. Weeks of digital organising before any physical march.", section: "§14" },
@@ -132,127 +133,168 @@ const nodes = [
   { id: "crypto_emergency", label: "Crypto Seizure Emergency", cat: "outcome", desc: "Commission: Nepal has no government crypto wallet. When suspects arrested, co-conspirators can drain wallets remotely before trial. No MLAT for digital assets. Commission recommends Nepal Rastra Bank establish government crypto wallet 'immediately or national security will be affected.'", section: "§14" },
   { id: "political_recycling", label: "30 PMs in 35 Years", cat: "outcome", desc: "Commission documents: 30 Prime Ministers in 35 years (1990–2025). Zero completed full 5-year term. Koirala and Deuba: 5 terms each. KP Oli: 4 terms. Prachanda: 3 terms. CPI score: 34/100, rank 107/180.", section: "§14.1" },
   { id: "sushila_appointed", label: "Karki Appointed PM", cat: "outcome", desc: "Discord GenZ vote winner Sushila Karki was subsequently actually appointed Prime Minister of Nepal. The digital democracy created inside a gaming platform produced a real-world outcome.", section: "§12.13, post-events" },
-  { id: "ekta_scholarship", label: "Ekta Shah Gets Scholarship", cat: "outcome", desc: "Commission lobbied government for Ekta Shah (shot in knee, took MBBS exam on stretcher, scored 57.5%) to receive MBBS scholarship. Government accepted. Commission decision 2082/10/15/5.", section: "§13.2" },
+  { id: "ekta_scholarship", label: "Ekta Shah Gets Scholarship", cat: "outcome", desc: "Commission lobbied government for Ekta Shah (shot in knee, took MBBS exam on stretcher, scored 57.5%) to receive MBBS scholarship. Government accepted.", section: "§13.2" },
 ];
 
 const links = [
   // Event chains
-  { source: "ban26", target: "bhadra23", label: "triggered" },
-  { source: "bhadra23", target: "bhadra24", label: "led to" },
-  { source: "bhadra23", target: "commission", label: "caused formation of" },
-  { source: "bhadra23", target: "curfew", label: "led to" },
-  { source: "bhadra23", target: "pm_resign", label: "eventually caused" },
-  { source: "bhadra24", target: "singha_durbar_burn", label: "includes" },
-  { source: "bhadra24", target: "hilton_burn", label: "includes" },
-  { source: "bhadra24", target: "global_college_burn", label: "includes" },
-  { source: "bhadra24", target: "prison_collapse", label: "caused" },
-  { source: "bhadra24", target: "weapons_looted", label: "caused" },
-  { source: "bhadra24", target: "damage_npc", label: "caused" },
-  { source: "discord_servers", target: "bhadra24", label: "coordinated" },
-  { source: "discord_servers", target: "discord_vote", label: "hosted" },
-  { source: "discord_vote", target: "sushila_appointed", label: "outcome was" },
-  { source: "airport_attack", target: "nepal_army", label: "thwarted by" },
+  { source: "ban26", target: "bhadra23", label: "triggered", labelReverse: "was triggered by" },
+  { source: "bhadra23", target: "bhadra24", label: "led to", labelReverse: "resulted from" },
+  { source: "bhadra23", target: "commission", label: "caused formation of", labelReverse: "was formed because of" },
+  { source: "bhadra23", target: "curfew", label: "led to", labelReverse: "resulted from" },
+  { source: "bhadra23", target: "pm_resign", label: "eventually caused", labelReverse: "resulted from" },
+  { source: "bhadra24", target: "singha_durbar_burn", label: "includes", labelReverse: "included in" },
+  { source: "bhadra24", target: "hilton_burn", label: "includes", labelReverse: "included in" },
+  { source: "bhadra24", target: "global_college_burn", label: "includes", labelReverse: "included in" },
+  { source: "bhadra24", target: "prison_collapse", label: "caused", labelReverse: "was caused by" },
+  { source: "bhadra24", target: "weapons_looted", label: "caused", labelReverse: "was caused by" },
+  { source: "bhadra24", target: "damage_npc", label: "caused", labelReverse: "was caused by" },
+  { source: "discord_servers", target: "bhadra24", label: "coordinated", labelReverse: "coordinated by" },
+  { source: "discord_servers", target: "discord_vote", label: "hosted", labelReverse: "was hosted on" },
+  { source: "discord_vote", target: "sushila_appointed", label: "outcome was", labelReverse: "outcome of" },
+  { source: "airport_attack", target: "nepal_army", label: "thwarted by", labelReverse: "thwarted" },
 
   // Person → Event
-  { source: "kp_oli", target: "bhadra23", label: "commanded during" },
-  { source: "lekhak", target: "bhadra23", label: "commanded during" },
-  { source: "khapung", target: "bhadra23", label: "commanded during" },
-  { source: "sudan_gurung", target: "bhadra23", label: "organised" },
-  { source: "raksha_bam", target: "bhadra23", label: "organised" },
-  { source: "anil_baniya", target: "bhadra23", label: "organised" },
-  { source: "bablu_gupta", target: "bhadra23", label: "organised" },
-  { source: "tob_leader", target: "bhadra23", label: "infiltrated" },
-  { source: "prasai", target: "bhadra24", label: "interest groups in" },
-  { source: "discord_tony", target: "global_college_burn", label: "caused via false claim" },
-  { source: "dilbhushan", target: "hilton_burn", label: "caused via false claim" },
-  { source: "discord_idke", target: "molotov_356", label: "started cascade" },
-  { source: "diwakar_dulal", target: "singha_durbar_burn", label: "tried to stop (87 times)" },
-  { source: "sushila_karki", target: "discord_vote", label: "won" },
-  { source: "ekta_shah", target: "ekta_scholarship", label: "received" },
-  { source: "nagata_shah", target: "bhadra24", label: "heroism during" },
-  { source: "shivaram_bada", target: "bhadra24", label: "heroism during" },
+  { source: "kp_oli", target: "bhadra23", label: "security command during", labelReverse: "security commanded by" },
+  { source: "lekhak", target: "bhadra23", label: "security command during", labelReverse: "security commanded by" },
+  { source: "khapung", target: "bhadra23", label: "security command during", labelReverse: "security commanded by" },
+  { source: "sudan_gurung", target: "bhadra23", label: "organised", labelReverse: "was organised by" },
+  { source: "raksha_bam", target: "bhadra23", label: "organised", labelReverse: "was organised by" },
+  { source: "anil_baniya", target: "bhadra23", label: "organised", labelReverse: "was organised by" },
+  { source: "bablu_gupta", target: "bhadra23", label: "organised", labelReverse: "was organised by" },
+  { source: "tob_leader", target: "bhadra23", label: "infiltrated", labelReverse: "infiltrated by" },
+  { source: "prasai", target: "bhadra24", label: "interest groups in", labelReverse: "had interest groups of" },
+  { source: "discord_tony", target: "global_college_burn", label: "caused via false claim", labelReverse: "caused by false claim from" },
+  { source: "dilbhushan", target: "hilton_burn", label: "caused via false claim", labelReverse: "caused by false claim from" },
+  { source: "discord_idke", target: "molotov_356", label: "started cascade", labelReverse: "cascade started by" },
+  { source: "diwakar_dulal", target: "singha_durbar_burn", label: "tried to stop (87 times)", labelReverse: "opposition from (87 times)" },
+  { source: "sushila_karki", target: "discord_vote", label: "won", labelReverse: "won by" },
+  { source: "ekta_shah", target: "ekta_scholarship", label: "received", labelReverse: "awarded to" },
+  { source: "nagata_shah", target: "bhadra24", label: "heroism during", labelReverse: "hero in" },
+  { source: "shivaram_bada", target: "bhadra24", label: "heroism during", labelReverse: "hero in" },
 
   // Person → Legal charges
-  { source: "kp_oli", target: "pc181", label: "charged under" },
-  { source: "kp_oli", target: "pc182", label: "charged under" },
-  { source: "lekhak", target: "pc181", label: "charged under" },
-  { source: "lekhak", target: "pc182", label: "charged under" },
-  { source: "khapung", target: "pc181", label: "charged under" },
-  { source: "khapung", target: "pc182", label: "charged under" },
-  { source: "dubadi", target: "pc182", label: "charged under" },
-  { source: "ayal", target: "pc182", label: "charged under" },
-  { source: "hut_raj", target: "pc182", label: "charged under" },
-  { source: "rijal", target: "pc182", label: "charged under" },
-  { source: "shah_aigp", target: "police_act9", label: "action under" },
-  { source: "om_rana", target: "police_act9", label: "action under" },
-  { source: "bishwa", target: "police_act9", label: "action under" },
-  { source: "kaki_igp", target: "police_act9", label: "action under" },
-  { source: "baidwar", target: "army105", label: "action under" },
-  { source: "diwakar_khadka", target: "army105", label: "action under" },
-  { source: "ganesh_khadka", target: "army105", label: "action under" },
-  { source: "santosh_dhungel", target: "army105", label: "action under" },
-  { source: "paudel_apf", target: "apf112", label: "action under" },
-  { source: "shrestha_apf", target: "apf112", label: "action under" },
-  { source: "jeevan_kc", target: "apf112", label: "action under" },
-  { source: "khanal_nid", target: "ssa_rule10", label: "action under" },
-  { source: "gachhadar", target: "ssa_rule10", label: "action under" },
-  { source: "tob_leader", target: "pc35", label: "prosecution recommended" },
+  { source: "kp_oli", target: "pc181", label: "charged under", labelReverse: "charges against" },
+  { source: "kp_oli", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "lekhak", target: "pc181", label: "charged under", labelReverse: "charges against" },
+  { source: "lekhak", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "khapung", target: "pc181", label: "charged under", labelReverse: "charges against" },
+  { source: "khapung", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "dubadi", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "ayal", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "hut_raj", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "rijal", target: "pc182", label: "charged under", labelReverse: "charges against" },
+  { source: "shah_aigp", target: "police_act9", label: "action under", labelReverse: "action against" },
+  { source: "om_rana", target: "police_act9", label: "action under", labelReverse: "action against" },
+  { source: "bishwa", target: "police_act9", label: "action under", labelReverse: "action against" },
+  { source: "kaki_igp", target: "police_act9", label: "action under", labelReverse: "action against" },
+  { source: "baidwar", target: "army105", label: "action under", labelReverse: "action against" },
+  { source: "diwakar_khadka", target: "army105", label: "action under", labelReverse: "action against" },
+  { source: "ganesh_khadka", target: "army105", label: "action under", labelReverse: "action against" },
+  { source: "santosh_dhungel", target: "army105", label: "action under", labelReverse: "action against" },
+  { source: "paudel_apf", target: "apf112", label: "action under", labelReverse: "action against" },
+  { source: "shrestha_apf", target: "apf112", label: "action under", labelReverse: "action against" },
+  { source: "jeevan_kc", target: "apf112", label: "action under", labelReverse: "action against" },
+  { source: "khanal_nid", target: "ssa_rule10", label: "action under", labelReverse: "action against" },
+  { source: "gachhadar", target: "ssa_rule10", label: "action under", labelReverse: "action against" },
+  { source: "tob_leader", target: "pc35", label: "prosecution recommended", labelReverse: "prosecution recommended for" },
 
   // Org → Event
-  { source: "hami_nepal", target: "bhadra23", label: "permitted + organised" },
-  { source: "hami_nepal", target: "discord_servers", label: "admin of" },
-  { source: "nepal_police", target: "bhadra23", label: "deployed at" },
-  { source: "apf", target: "bhadra23", label: "deployed at" },
-  { source: "nepal_army", target: "bhadra24", label: "deployed at" },
-  { source: "nid", target: "bhadra23", label: "intelligence failed for" },
+  { source: "hami_nepal", target: "bhadra23", label: "permitted + organised", labelReverse: "permitted and organised by" },
+  { source: "hami_nepal", target: "discord_servers", label: "admin of", labelReverse: "administered by" },
+  { source: "nepal_police", target: "bhadra23", label: "deployed at", labelReverse: "deployed" },
+  { source: "apf", target: "bhadra23", label: "deployed at", labelReverse: "deployed" },
+  { source: "nepal_army", target: "bhadra24", label: "deployed at", labelReverse: "deployed" },
+  { source: "nid", target: "bhadra23", label: "intelligence failed for", labelReverse: "intelligence failure of" },
 
   // Findings
-  { source: "commission", target: "no_cabinet_decision", label: "found" },
-  { source: "commission", target: "command_vacuum", label: "found" },
-  { source: "commission", target: "bullet_accounting", label: "found gap" },
-  { source: "commission", target: "aimed_fire", label: "found" },
-  { source: "commission", target: "all_bullets_nepal", label: "confirmed" },
-  { source: "commission", target: "bhadra24_organised", label: "concluded" },
-  { source: "commission", target: "organiser_goodfaith", label: "concluded" },
-  { source: "bts_data", target: "command_vacuum", label: "revealed" },
-  { source: "aimed_fire", target: "76_dead", label: "caused" },
-  { source: "all_bullets_nepal", target: "aimed_fire", label: "supports" },
-  { source: "chemicals_india", target: "bhadra24_organised", label: "supports" },
+  { source: "commission", target: "no_cabinet_decision", label: "found", labelReverse: "was found by" },
+  { source: "commission", target: "command_vacuum", label: "found", labelReverse: "was found by" },
+  { source: "commission", target: "bullet_accounting", label: "found gap", labelReverse: "gap found by" },
+  { source: "commission", target: "aimed_fire", label: "found", labelReverse: "was found by" },
+  { source: "commission", target: "all_bullets_nepal", label: "confirmed", labelReverse: "confirmed by" },
+  { source: "commission", target: "bhadra24_organised", label: "concluded", labelReverse: "concluded by" },
+  { source: "commission", target: "organiser_goodfaith", label: "concluded", labelReverse: "concluded by" },
+  { source: "bts_data", target: "command_vacuum", label: "revealed", labelReverse: "revealed by" },
+  { source: "aimed_fire", target: "76_dead", label: "caused", labelReverse: "was caused by" },
+  { source: "all_bullets_nepal", target: "aimed_fire", label: "supports", labelReverse: "supported by" },
+  { source: "chemicals_india", target: "bhadra24_organised", label: "supports", labelReverse: "supported by" },
 
   // Outcomes
-  { source: "bhadra23", target: "76_dead", label: "caused" },
-  { source: "bhadra23", target: "2522_injured", label: "caused" },
-  { source: "kp_oli", target: "no_cabinet_decision", label: "responsible for" },
-  { source: "lekhak", target: "no_cabinet_decision", label: "responsible for" },
-  { source: "political_recycling", target: "nepo_baby", label: "triggered" },
-  { source: "nepo_baby", target: "bhadra23", label: "built momentum for" },
-  { source: "fatf_greylist", target: "political_recycling", label: "result of" },
-  { source: "commission", target: "compensation_paid", label: "recommended" },
-  { source: "commission", target: "ekta_scholarship", label: "secured" },
-  { source: "prison_collapse", target: "banke_prison", label: "worst case" },
+  { source: "bhadra23", target: "76_dead", label: "caused", labelReverse: "was caused by" },
+  { source: "bhadra23", target: "2522_injured", label: "caused", labelReverse: "was caused by" },
+  { source: "kp_oli", target: "no_cabinet_decision", label: "responsible for", labelReverse: "responsibility of" },
+  { source: "lekhak", target: "no_cabinet_decision", label: "responsible for", labelReverse: "responsibility of" },
+  { source: "political_recycling", target: "nepo_baby", label: "triggered", labelReverse: "was triggered by" },
+  { source: "nepo_baby", target: "bhadra23", label: "built momentum for", labelReverse: "momentum from" },
+  { source: "fatf_greylist", target: "political_recycling", label: "result of", labelReverse: "resulted in" },
+  { source: "commission", target: "compensation_paid", label: "recommended", labelReverse: "recommended by" },
+  { source: "commission", target: "ekta_scholarship", label: "secured", labelReverse: "secured by" },
+  { source: "prison_collapse", target: "banke_prison", label: "worst case", labelReverse: "worst case of" },
 
   // Digital connections
-  { source: "discord_servers", target: "nepo_baby", label: "amplified" },
-  { source: "discord_servers", target: "molotov_356", label: "contains" },
-  { source: "discord_servers", target: "discord_tony_claim", label: "hosted" },
-  { source: "discord_tony_claim", target: "global_college_burn", label: "caused" },
-  { source: "deepfakes", target: "deepfake_first", label: "is" },
-  { source: "netakhor", target: "bhadra24", label: "used to map attacks" },
-  { source: "cyabra", target: "discord_servers", label: "analysed" },
+  { source: "discord_servers", target: "nepo_baby", label: "amplified", labelReverse: "amplified by" },
+  { source: "discord_servers", target: "molotov_356", label: "contains", labelReverse: "contained in" },
+  { source: "discord_servers", target: "discord_tony_claim", label: "hosted", labelReverse: "was hosted on" },
+  { source: "discord_tony_claim", target: "global_college_burn", label: "caused", labelReverse: "was caused by" },
+  { source: "deepfakes", target: "deepfake_first", label: "is", labelReverse: "is" },
+  { source: "netakhor", target: "bhadra24", label: "used to map attacks", labelReverse: "mapped using" },
+  { source: "cyabra", target: "discord_servers", label: "analysed", labelReverse: "analysed by" },
 
   // Place connections
-  { source: "maitighar", target: "bhadra23", label: "start of" },
-  { source: "baneswor", target: "bhadra23", label: "scene of escalation" },
-  { source: "parliament", target: "bhadra23", label: "target of" },
-  { source: "singha_durbar", target: "singha_durbar_burn", label: "site of" },
-  { source: "baluwatar", target: "pm_resign", label: "residence of" },
-  { source: "shital_niwas", target: "bhadra24", label: "attacked in" },
-  { source: "supreme_court", target: "bhadra24", label: "burned in" },
-  { source: "civil_hospital", target: "76_dead", label: "treated victims of" },
+  { source: "maitighar", target: "bhadra23", label: "start of", labelReverse: "started from" },
+  { source: "baneswor", target: "bhadra23", label: "scene of escalation", labelReverse: "escalation at" },
+  { source: "parliament", target: "bhadra23", label: "target of", labelReverse: "targeted" },
+  { source: "singha_durbar", target: "singha_durbar_burn", label: "site of", labelReverse: "occurred at" },
+  { source: "baluwatar", target: "pm_resign", label: "residence of", labelReverse: "residence in" },
+  { source: "shital_niwas", target: "bhadra24", label: "attacked in", labelReverse: "attacks on" },
+  { source: "supreme_court", target: "bhadra24", label: "burned in", labelReverse: "burned" },
+  { source: "civil_hospital", target: "76_dead", label: "treated victims in", labelReverse: "treated victims at" },
 
   // Prasai's previous andolan connection
-  { source: "prev_andolan", target: "prasai", label: "led by" },
-  { source: "prev_andolan", target: "bhadra23", label: "mistake pattern repeated in" },
+  { source: "prev_andolan", target: "prasai", label: "led by", labelReverse: "led" },
+  { source: "prev_andolan", target: "bhadra23", label: "mistake pattern repeated in", labelReverse: "pattern repeated from" },
+
+  // Person → Organisation connections
+  { source: "kp_oli", target: "political_recycling", label: "part of cycle of", labelReverse: "exemplified by" },
+  { source: "pm_resign", target: "kp_oli", label: "resignation of", labelReverse: "resigned during" },
+  { source: "sudan_gurung", target: "hami_nepal", label: "founder + president of", labelReverse: "founded and led by" },
+
+  // APF people → APF organisation
+  { source: "paudel_apf", target: "apf", label: "commander of", labelReverse: "commanded by" },
+  { source: "shrestha_apf", target: "apf", label: "commander of", labelReverse: "commanded by" },
+  { source: "jeevan_kc", target: "apf", label: "specialist in", labelReverse: "includes" },
+
+  // Army people → Nepal Army organisation
+  { source: "baidwar", target: "nepal_army", label: "commander in", labelReverse: "commanded by" },
+  { source: "diwakar_khadka", target: "nepal_army", label: "commander in", labelReverse: "commanded by" },
+  { source: "ganesh_khadka", target: "nepal_army", label: "commander in", labelReverse: "commanded by" },
+  { source: "santosh_dhungel", target: "nepal_army", label: "commander in", labelReverse: "commanded by" },
+
+  // NID people → NID organisation
+  { source: "khanal_nid", target: "nid", label: "joint director of", labelReverse: "led by" },
+  { source: "gachhadar", target: "nid", label: "joint director of", labelReverse: "led by" },
+
+  // Police people → Nepal Police organisation
+  { source: "khapung", target: "nepal_police", label: "IGP of", labelReverse: "led by" },
+  { source: "shah_aigp", target: "nepal_police", label: "AIGP in", labelReverse: "includes" },
+  { source: "om_rana", target: "nepal_police", label: "DIGP in", labelReverse: "includes" },
+  { source: "bishwa", target: "nepal_police", label: "DIGP in", labelReverse: "includes" },
+  { source: "kaki_igp", target: "nepal_police", label: "IGP of", labelReverse: "led by" },
+  { source: "deep_samsher", target: "nepal_police", label: "DSP in", labelReverse: "includes" },
+  { source: "kandel", target: "nepal_police", label: "DSP in", labelReverse: "includes" },
+
+  // Place → Event connection
+  { source: "baluwatar", target: "bhadra24", label: "burned in", labelReverse: "burned" },
+
+  // Disinformation node connections
+  { source: "disinformation", target: "tanka_dhakal", label: "spread by", labelReverse: "spreader of" },
+  { source: "disinformation", target: "deepfakes", label: "includes", labelReverse: "included in" },
+  { source: "disinformation", target: "cmr", label: "studied by", labelReverse: "researcher of" },
+  { source: "disinformation", target: "subhash_bhandari", label: "fraudulent tactics used by", labelReverse: "user of fraudulent tactics" },
+  { source: "disinformation", target: "discord_tony_claim", label: "includes", labelReverse: "included in" },
+  { source: "disinformation", target: "dilbhushan", label: "spread by", labelReverse: "spreader of" },
+  { source: "disinformation", target: "himalayan_airlines", label: "target of false claim by", labelReverse: "falsely claimed about" },
 ];
 
 // Layout
@@ -278,18 +320,116 @@ Object.entries(CATEGORIES).forEach(([key, cat]) => {
     .attr("stroke-linecap", "round").attr("stroke-linejoin", "round");
 });
 
+// Define key nodes that should be larger
+const keyNodes = new Set([
+  "pm_karki",
+  "kp_oli",
+  "sudan_gurung",
+  "lekhak",
+  "hami_nepal",
+  "discord_servers",
+  "discord_vote",
+  "command_vacuum",
+  "aimed_fire",
+  "total_deaths",
+  "karki_pm",
+  "pm_resign"
+]);
+
+// Define critical event nodes that should have special styling
+const criticalEvents = new Set([
+  "bhadra23",
+  "bhadra24"
+]);
+
+// Calculate node degrees for hub identification
+const nodeDegrees = {};
+nodes.forEach(n => {
+  nodeDegrees[n.id] = links.filter(l => {
+    const srcId = typeof l.source === "string" ? l.source : l.source.id;
+    const tgtId = typeof l.target === "string" ? l.target : l.target.id;
+    return srcId === n.id || tgtId === n.id;
+  }).length;
+});
+
+// Identify hub nodes (top 10 by degree) - these become galaxy centers
+const hubNodes = nodes
+  .map(n => ({ ...n, degree: nodeDegrees[n.id] }))
+  .sort((a, b) => b.degree - a.degree)
+  .slice(0, 10)
+  .map(n => n.id);
+
+// Initialize hub nodes at distant positions to prevent violent repulsion jitter at load
+const peripheryPositions = [
+  { x: W * 0.85, y: H / 2 },      // right
+  { x: W / 2, y: H * 0.15 },      // top
+  { x: W * 0.15, y: H / 2 },      // left
+  { x: W / 2, y: H * 0.85 },      // bottom
+  { x: W * 0.75, y: H * 0.25 },   // top-right
+  { x: W * 0.25, y: H * 0.25 },   // top-left
+  { x: W * 0.75, y: H * 0.75 },   // bottom-right
+  { x: W * 0.25, y: H * 0.75 },   // bottom-left
+  { x: W * 0.85, y: H * 0.85 },   // far bottom-right
+  { x: W * 0.15, y: H * 0.15 },   // far top-left
+];
+
+hubNodes.forEach((hubId, idx) => {
+  const node = nodes.find(n => n.id === hubId);
+  if (node && idx < peripheryPositions.length) {
+    node.x = peripheryPositions[idx].x;
+    node.y = peripheryPositions[idx].y;
+  }
+});
+
 // Simulation
 const sim = d3.forceSimulation(nodes)
   .force("link", d3.forceLink(links).id(d => d.id).distance(d => {
     const cats = new Set([d.source.cat || "finding", d.target.cat || "finding"]);
-    if (cats.has("legal") || cats.has("finding")) return 80;
-    if (cats.has("outcome")) return 100;
-    return 120;
-  }).strength(0.3))
-  .force("charge", d3.forceManyBody().strength(-300).distanceMax(400))
-  .force("center", d3.forceCenter(W / 2, H / 2))
-  .force("collision", d3.forceCollide(28));
+    if (cats.has("legal") || cats.has("finding")) return 100;
+    if (cats.has("outcome")) return 120;
+    return 140;
+  }).strength(0.2))
+  .force("charge", d3.forceManyBody().strength(-600).distanceMax(600))
+  .force("center", d3.forceCenter(W / 2, H / 2).strength(0.15))
+  .force("collision", d3.forceCollide(d => {
+    const linkCount = links.filter(l => {
+      const srcId = typeof l.source === "string" ? l.source : l.source.id;
+      const tgtId = typeof l.target === "string" ? l.target : l.target.id;
+      return srcId === d.id || tgtId === d.id;
+    }).length;
+    const nodeRadius = Math.max(8, Math.min(75, 8 + Math.pow(linkCount, 1.5) * 0.6));
+    return nodeRadius + 80;
+  }))
+  .force("hubRepulsion", () => {
+    // Strong repulsion between hub nodes to keep them as distinct galaxies
+    // Strength scales with node size - larger nodes push harder
+    for (let i = 0; i < hubNodes.length; i++) {
+      for (let j = i + 1; j < hubNodes.length; j++) {
+        const n1 = nodes.find(n => n.id === hubNodes[i]);
+        const n2 = nodes.find(n => n.id === hubNodes[j]);
+        if (!n1 || !n2) continue;
 
+        const dx = n2.x - n1.x;
+        const dy = n2.y - n1.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+        // Scale repulsion based on average node size
+        const sizeWeight = (nodeDegrees[n1.id] + nodeDegrees[n2.id]) / 2;
+        const minDist = 500 + sizeWeight * 18; // Much larger minimum distance for big nodes
+        const forceStrength = 0.6 + sizeWeight * 0.06; // Much stronger repulsion force
+
+        if (dist < minDist) {
+          const force = ((minDist - dist) / dist) * forceStrength;
+          n1.vx -= force * dx;
+          n1.vy -= force * dy;
+          n2.vx += force * dx;
+          n2.vy += force * dy;
+        }
+      }
+    }
+  });
+
+// Create selections immediately (before warm-up, so they're ready to render)
 const linkSel = g.append("g").selectAll("line").data(links).join("line")
   .attr("stroke-width", 0.8).attr("stroke-opacity", 0.5)
   .attr("stroke", d => {
@@ -315,23 +455,66 @@ const nodeSel = g.append("g").selectAll("g").data(nodes).join("g")
 nodeSel.append("circle")
   .attr("r", d => {
     const linkCount = links.filter(l => l.source === d.id || l.target === d.id || (l.source.id === d.id) || (l.target.id === d.id)).length;
-    return Math.max(8, Math.min(22, 8 + linkCount * 1.2));
+    let radius = Math.max(14, Math.min(80, 8 + Math.pow(linkCount, 1.35) * 0.65));
+    // Critical events get +18px size boost
+    if (criticalEvents.has(d.id)) {
+      radius = Math.min(105, radius + 18);
+    }
+    // Key nodes get +25px size boost
+    else if (keyNodes.has(d.id)) {
+      radius = Math.min(110, radius + 25);
+    }
+    return radius;
   })
-  .attr("fill", d => CATEGORIES[d.cat]?.color + "cc" || "#88878088")
-  .attr("stroke", d => CATEGORIES[d.cat]?.color || "#888")
-  .attr("stroke-width", 1.5);
+  .attr("fill", d => {
+    if (criticalEvents.has(d.id)) return "#E91E6388"; // Hot pink with transparency
+    return CATEGORIES[d.cat]?.color + "cc" || "#88878088";
+  })
+  .attr("stroke", d => {
+    if (criticalEvents.has(d.id)) return "#E91E63"; // Hot pink
+    return CATEGORIES[d.cat]?.color || "#888";
+  })
+  .attr("stroke-width", d => criticalEvents.has(d.id) ? 3 : 1.5);
 
 nodeSel.append("text")
   .attr("text-anchor", "middle").attr("dy", "0.35em")
-  .attr("font-size", 9).attr("font-family", "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif")
+  .attr("font-size", d => {
+    const linkCount = links.filter(l => l.source === d.id || l.target === d.id || (l.source.id === d.id) || (l.target.id === d.id)).length;
+    let fontSize = Math.max(12, Math.min(20, 8 + Math.pow(linkCount, 1.35) * 0.35));
+    // Key nodes get larger text
+    if (keyNodes.has(d.id)) {
+      fontSize = Math.min(26, fontSize + 5);
+    }
+    return fontSize;
+  })
+  .attr("font-family", "'DM Sans', system-ui, sans-serif")
   .attr("fill", d => CATEGORIES[d.cat]?.color || "#888")
   .attr("font-weight", "500")
   .attr("pointer-events", "none")
   .attr("y", d => {
     const linkCount = links.filter(l => l.source === d.id || l.target === d.id || (l.source.id === d.id) || (l.target.id === d.id)).length;
-    return Math.max(8, Math.min(22, 8 + linkCount * 1.2)) + 11;
+    let radius = Math.max(14, Math.min(80, 8 + Math.pow(linkCount, 1.35) * 0.65));
+    let gap = 18;
+    if (criticalEvents.has(d.id)) {
+      radius = Math.min(105, radius + 18);
+      gap = 24;
+    } else if (keyNodes.has(d.id)) {
+      radius = Math.min(110, radius + 25);
+      gap = 28;
+    }
+    return radius + gap;
   })
   .text(d => d.label.length > 18 ? d.label.slice(0, 16) + "…" : d.label);
+
+// Warm-up phase: run simulation in background to pre-position nodes
+for (let i = 0; i < 150; i++) sim.tick();
+sim.stop();
+
+// Render the warm-up state before attaching the tick listener
+linkSel
+  .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+  .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
 
 sim.on("tick", () => {
   linkSel
@@ -339,6 +522,42 @@ sim.on("tick", () => {
     .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
   nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
 });
+
+// Restart simulation after tick listener is attached
+sim.restart();
+
+// Hide loading overlay after warm-up
+setTimeout(() => {
+  const loadingEl = document.getElementById('loading');
+  if (loadingEl) loadingEl.classList.add('hidden');
+}, 150);
+
+// Center view on midpoint between Bhadra 23 and Bhadra 24, with bias toward graph center of mass
+setTimeout(() => {
+  const bhadra23 = nodes.find(n => n.id === "bhadra23");
+  const bhadra24 = nodes.find(n => n.id === "bhadra24");
+
+  if (bhadra23 && bhadra24) {
+    // Calculate center of mass of all nodes
+    const centerOfMassX = nodes.reduce((sum, n) => sum + n.x, 0) / nodes.length;
+    const centerOfMassY = nodes.reduce((sum, n) => sum + n.y, 0) / nodes.length;
+
+    // Midpoint between Bhadra nodes
+    const bhadraX = (bhadra23.x + bhadra24.x) / 2;
+    const bhadraY = (bhadra23.y + bhadra24.y) / 2;
+
+    // Blend with 60% weight toward center of mass, 40% toward Bhadra midpoint
+    const finalCenterX = centerOfMassX * 0.6 + bhadraX * 0.4;
+    const finalCenterY = centerOfMassY * 0.6 + bhadraY * 0.4;
+
+    // Apply zoom transform: zoom to 0.45x and center on the blended point
+    const k = 0.45; // zoom level
+    const x = W/2 - finalCenterX * k;
+    const y = H/2 - finalCenterY * k;
+    const transform = d3.zoomIdentity.translate(x, y).scale(k);
+    svg.call(zoom.transform, transform); // Immediate, no transition
+  }
+}, 50);
 
 // Filters
 const filtersEl = document.getElementById("filters");
@@ -412,8 +631,10 @@ function showPanel(d) {
     const tid = typeof l.target === "string" ? l.target : l.target.id;
     const other = sid === d.id ? tid : sid;
     const otherNode = nodes.find(n => n.id === other);
+    const isReverse = sid !== d.id;
+    const displayLabel = isReverse && l.labelReverse ? l.labelReverse : l.label;
     const dir = sid === d.id ? "→" : "←";
-    return `<div class="conn-item"><span class="conn-arrow">${dir}</span><span>${l.label} <strong>${otherNode?.label || other}</strong></span></div>`;
+    return `<div class="conn-item"><span class="conn-arrow">${dir}</span><span>${displayLabel} <strong>${otherNode?.label || other}</strong></span></div>`;
   }).join("");
 
   content.innerHTML = `

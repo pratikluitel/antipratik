@@ -1140,28 +1140,28 @@ body {
  * dark-mode design system tokens used by the accountability dashboard.
  */
 :root {
-  --kg-bg:      #ffffff;
-  --kg-bg2:     #f5f4f2;
-  --kg-border:  #e0deda;
-  --kg-text:    #1a1916;
-  --kg-text2:   #73726c;
-  --kg-text3:   #a3a198;
+  --kg-bg:      #F7F5F0;
+  --kg-bg2:     #EDEAE2;
+  --kg-border:  #C8C0B4;
+  --kg-text:    #0F1118;
+  --kg-text2:   #4A5860;
+  --kg-text3:   #7A7268;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --kg-bg:     #1a1916;
-    --kg-bg2:    #242220;
-    --kg-border: #3a3835;
-    --kg-text:   #e8e6e0;
-    --kg-text2:  #9c9a92;
-    --kg-text3:  #73726c;
+    --kg-bg:     #0F1118;
+    --kg-bg2:    #181D28;
+    --kg-border: #2E3748;
+    --kg-text:   #EEF2F0;
+    --kg-text2:  #8BACC4;
+    --kg-text3:  #7A9AB4;
   }
 }
 
 /* Graph page layout */
 .kg-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   background: var(--kg-bg);
   color: var(--kg-text);
   overflow: hidden;
@@ -1170,15 +1170,15 @@ body {
   flex-direction: column;
 }
 
-/* Top bar — 3-zone layout */
+/* Top bar — header row + filter row */
 .kg-topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
   border-bottom: .5px solid var(--kg-border);
   flex-shrink: 0;
-  min-height: 44px;
 }
 
 .kg-topbar-left {
@@ -1186,17 +1186,19 @@ body {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  order: 1;
 }
 .kg-topbar-left h1 { font-size: 13px; font-weight: 500; white-space: nowrap; }
 
 .kg-topbar-controls {
-  flex: 1;
+  order: 3;
+  width: 100%;
   display: flex;
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  padding: 0 4px;
+  padding: 4px 0;
 }
 .kg-topbar-controls::-webkit-scrollbar { display: none; }
 
@@ -1206,6 +1208,7 @@ body {
   gap: 8px;
   flex-shrink: 0;
   margin-left: auto;
+  order: 2;
 }
 
 .kg-search-wrap { position: relative; }
@@ -1350,6 +1353,20 @@ body {
 /* Canvas area */
 .kg-canvas-wrap { flex: 1; position: relative; overflow: hidden; }
 svg#graph { width: 100%; height: 100%; touch-action: none; }
+
+/* Loading overlay */
+.kg-loading {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--kg-bg);
+  z-index: 200;
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
+}
+.kg-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
 /* Tooltip */
 .kg-tooltip {
