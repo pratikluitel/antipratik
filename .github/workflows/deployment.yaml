@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy:
+    name: Deploy sidequests
     runs-on: ubuntu-latest
     permissions:
       contents: read
