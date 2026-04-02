@@ -1,12 +1,12 @@
 const CATEGORIES = {
-  person:   { label: "Person",       color: "#E24B4A", light: "#FCEBEB" },
-  org:      { label: "Organisation", color: "#378ADD", light: "#E6F1FB" },
-  event:    { label: "Event",        color: "#E4A135", light: "#FAEEDA" },
-  place:    { label: "Place",        color: "#1D9E75", light: "#EAF3DE" },
-  legal:    { label: "Legal",        color: "#7F77DD", light: "#EEEDFE" },
-  finding:  { label: "Finding",      color: "#888780", light: "#F2F1EF" },
-  outcome:  { label: "Outcome",      color: "#D4537E", light: "#FBEAF0" },
-  digital:  { label: "Digital",      color: "#0F6E56", light: "#E1F5EE" },
+  person: { label: "Person", color: "#E24B4A", light: "#FCEBEB" },
+  org: { label: "Organisation", color: "#378ADD", light: "#E6F1FB" },
+  event: { label: "Event", color: "#E4A135", light: "#FAEEDA" },
+  place: { label: "Place", color: "#1D9E75", light: "#EAF3DE" },
+  legal: { label: "Legal", color: "#7F77DD", light: "#EEEDFE" },
+  finding: { label: "Finding", color: "#888780", light: "#F2F1EF" },
+  outcome: { label: "Outcome", color: "#D4537E", light: "#FBEAF0" },
+  digital: { label: "Digital", color: "#0F6E56", light: "#E1F5EE" },
 };
 
 const nodes = [
@@ -31,7 +31,7 @@ const nodes = [
   { id: "lekhak", label: "Home Min. Ramesh Lekhak", cat: "person", desc: "Home Minister. Charged: §181 + §182 (Reckless + Negligent killing). Communicated through his PA rather than direct command to security forces. No corrective order to stop firing.", section: "§13.1" },
   { id: "khapung", label: "IGP Chandra Kuber Khapung", cat: "person", desc: "Inspector General of Nepal Police. Charged: §181 + §182. Highest police authority. 42 calls on CDR with DIGP Bishwa Adhikari during crisis. Issued no stop-firing order for ~4 hours.", section: "§13.1" },
   { id: "dubadi", label: "Home Secretary Dubadi", cat: "person", desc: "Gokarnaman Dubadi. Charged: §182 (Negligent killing). Senior civil servant at Home Ministry. Mobile number 9851322222.", section: "§13.2" },
-  { id: "ayal", label: "APF IGP Raju Ayal", cat: "person", desc: "Armed Police Force Inspector General. Charged: §182 (Negligent killing). Issued Victor Control orders during Bhadra 24 including prisoner release order.", section: "§13.2" },
+  { id: "ayal", label: "APF IGP Raju Aryal", cat: "person", desc: "Armed Police Force Inspector General. Charged: §182 (Negligent killing). Issued Victor Control orders during Bhadra 24 including prisoner release order.", section: "§13.2" },
   { id: "hut_raj", label: "NID Chief Hut Raj Thapa", cat: "person", desc: "National Investigation Department Chief. Charged: §182. Failed to provide timely intelligence. CDR shows only 8 calls during 2-day crisis.", section: "§13.2" },
   { id: "rijal", label: "CDO Khaviraj Rijal", cat: "person", desc: "Chief District Officer, Kathmandu. Charged: §182. Issued curfew and gave sequential force orders verbally. Said in testimony that 'even during curfew the PJA can give shoot orders' — claiming he didn't give one.", section: "§13.2" },
   { id: "shah_aigp", label: "AIGP Siddha Vikram Shah", cat: "person", desc: "Nepal Police Operations Chief. Departmental action recommended (Police Act §9(4)). CDR: 69 calls with senior officers during 2-day crisis.", section: "§13.2" },
@@ -352,7 +352,7 @@ Object.entries(CATEGORIES).forEach(([key, cat]) => {
 
   const leg = document.createElement("div");
   leg.className = "kg-leg";
-  leg.innerHTML = `<div class="kg-leg-dot" style="background:${cat.color}"></div>${cat.label} (${nodes.filter(n=>n.cat===key).length})`;
+  leg.innerHTML = `<div class="kg-leg-dot" style="background:${cat.color}"></div>${cat.label} (${nodes.filter(n => n.cat === key).length})`;
   legendEl.appendChild(leg);
 });
 document.getElementById("count").textContent = `${nodes.length} nodes · ${links.length} connections`;
@@ -388,7 +388,7 @@ function updateVisibility() {
 const tt = document.getElementById("tooltip");
 function showTooltip(e, d) {
   tt.style.display = "block";
-  tt.innerHTML = `<div class="kg-tt-type" style="color:${CATEGORIES[d.cat]?.color}">${CATEGORIES[d.cat]?.label}</div><div class="kg-tt-title">${d.label}</div><div class="kg-tt-body">${d.desc.slice(0,120)}${d.desc.length>120?"…":""}</div><div class="kg-tt-links">Click for full details · §${d.section?.split("§")[1]||""}</div>`;
+  tt.innerHTML = `<div class="kg-tt-type" style="color:${CATEGORIES[d.cat]?.color}">${CATEGORIES[d.cat]?.label}</div><div class="kg-tt-title">${d.label}</div><div class="kg-tt-body">${d.desc.slice(0, 120)}${d.desc.length > 120 ? "…" : ""}</div><div class="kg-tt-links">Click for full details · §${d.section?.split("§")[1] || ""}</div>`;
   positionTooltip(e);
 }
 function hideTooltip() { tt.style.display = "none"; }
@@ -421,7 +421,7 @@ function showPanel(d) {
     <h3>${d.label}</h3>
     <p>${d.desc}</p>
     ${d.section ? `<p style="font-size:10px;color:var(--kg-text3)">${d.section}</p>` : ""}
-    ${connectedLinks.length ? `<div class="connections"><h4>${connectedLinks.length} connections</h4>${connItems}${connectedLinks.length > 8 ? `<div style="font-size:10px;color:var(--kg-text3)">+${connectedLinks.length-8} more</div>` : ""}</div>` : ""}
+    ${connectedLinks.length ? `<div class="connections"><h4>${connectedLinks.length} connections</h4>${connItems}${connectedLinks.length > 8 ? `<div style="font-size:10px;color:var(--kg-text3)">+${connectedLinks.length - 8} more</div>` : ""}</div>` : ""}
   `;
   panel.style.display = "block";
 
@@ -446,7 +446,7 @@ function closePanel() {
 
 function toggleHelp() {
   const panel = document.getElementById("help-panel");
-  const btn   = document.getElementById("helpBtn");
+  const btn = document.getElementById("helpBtn");
   const isOpen = panel.classList.toggle("open");
   btn.classList.toggle("active", isOpen);
 }
