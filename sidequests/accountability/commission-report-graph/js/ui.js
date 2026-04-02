@@ -97,6 +97,47 @@ function showPanel(d) {
     const tid = typeof l.target === "string" ? l.target : l.target.id;
     return connIds.has(sid) && connIds.has(tid) ? 0.8 : 0.04;
   });
+
+  // Calculate local bounding box for the target and its connections
+  const localNodes = nodes.filter(n => connIds.has(n.id));
+  const minX = d3.min(localNodes, n => n.x);
+  const maxX = d3.max(localNodes, n => n.x);
+  const minY = d3.min(localNodes, n => n.y);
+  const maxY = d3.max(localNodes, n => n.y);
+
+  if (minX !== undefined && maxX !== undefined) {
+    const dx = maxX - minX || 1;
+    const dy = maxY - minY || 1;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const curW = window.innerWidth;
+    const curH = window.innerHeight - 60;
+    const isMobile = curW <= 640;
+    
+    // Calculate visible viewport dimensions (excluding the info panel)
+    let viewW = curW;
+    let viewH = curH;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (isMobile) {
+      // Panel is at bottom (up to 55vh). Reserve top 45% for the graph.
+      viewH = curH * 0.45;
+      offsetY = -(curH - viewH) / 2; // Shift optical center UP
+    } else {
+      // Panel is at right (260px wide + padding). Reserve left area.
+      viewW = curW - 280;
+      offsetX = -(curW - viewW) / 2; // Shift optical center LEFT
+    }
+
+    const scale = Math.max(0.2, Math.min(1.5, 0.75 / Math.max(dx / viewW, dy / viewH)));
+    const targetX = (curW / 2) + offsetX - cx * scale;
+    const targetY = (curH / 2) + offsetY - cy * scale;
+
+    const transform = d3.zoomIdentity.translate(targetX, targetY).scale(scale);
+    svg.transition().duration(750).call(zoom.transform, transform);
+  }
 }
 
 function closePanel() {
