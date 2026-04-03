@@ -167,55 +167,43 @@
 }
 
 .themeToggle {
-  background: none;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  padding: 0;
+  border-radius: 20px;
+  padding: 8px 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.toggleTrack {
-  width: 36px;
-  height: 20px;
-  border-radius: 10px;
-  background: var(--color-border-dark);
-  border: 0.5px solid var(--color-border-dark);
-  position: relative;
-  display: block;
+[data-theme='light'] .themeToggle {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .toggleTrack {
-    transition: background 250ms ease-in-out, border-color 250ms ease-in-out;
+  .themeToggle {
+    transition: background var(--motion-fast);
   }
 }
 
-[data-theme='light'] .toggleTrack {
-  background: var(--color-text-muted-light);
-  border-color: var(--color-text-muted-light);
+.themeToggle:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.toggleThumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--color-text-primary-dark);
+[data-theme='light'] .themeToggle:hover {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.themeIcon {
   display: block;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted-dark);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .toggleThumb {
-    transition: transform 250ms ease-in-out, background 250ms ease-in-out;
-  }
-}
-
-[data-theme='light'] .toggleThumb {
-  transform: translateX(16px);
-  background: #ffffff;
+[data-theme='light'] .themeIcon {
+  color: var(--color-text-muted-light);
 }
 
 /* Dark mode — Himalayan Dusk */
