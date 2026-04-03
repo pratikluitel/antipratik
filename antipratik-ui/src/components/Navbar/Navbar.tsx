@@ -23,6 +23,20 @@ function SunSVG() {
   );
 }
 
+function ChevronUpSVG() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M3 10.5L8 5.5L13 10.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function MoonSVG() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className={styles.themeIcon}>
@@ -112,6 +126,15 @@ export default function Navbar() {
         </div>
 
         <div className={styles.controls}>
+          {/* Scroll-to-top — desktop article view only */}
+          <button
+            className={styles.scrollToTop}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Scroll to top"
+          >
+            <ChevronUpSVG />
+          </button>
+
           {/* Desktop theme toggle */}
           <button
             className={styles.themeToggle}
