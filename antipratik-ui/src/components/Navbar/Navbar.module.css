@@ -175,14 +175,14 @@
   align-items: center;
 }
 
-@keyframes fadeInRotate {
+@keyframes fadeInSpin {
   from {
     opacity: 0;
-    transform: rotate(-180deg);
+    transform: scale(0.5) rotate(-180deg);
   }
   to {
     opacity: 1;
-    transform: rotate(0deg);
+    transform: scale(1) rotate(0deg);
   }
 }
 
@@ -205,7 +205,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .themeIcon {
-    animation: fadeInRotate var(--motion-default) ease-in-out;
+    animation: fadeInSpin var(--motion-default) ease-in-out;
     transition: color var(--motion-fast);
   }
 }
