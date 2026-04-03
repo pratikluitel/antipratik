@@ -116,7 +116,10 @@ export default function Navbar() {
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             aria-pressed={theme === 'light'}
           >
-            {theme === 'dark' ? <SunSVG /> : <MoonSVG />}
+            <div className={styles.iconWrapper}>
+              <SunSVG />
+              <MoonSVG />
+            </div>
           </button>
 
           {/* Hamburger — mobile only */}
@@ -156,7 +159,10 @@ export default function Navbar() {
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               aria-pressed={theme === 'light'}
             >
-              {theme === 'dark' ? <SunSVG /> : <MoonSVG />}
+              <div className={styles.iconWrapper}>
+                <SunSVG />
+                <MoonSVG />
+              </div>
             </button>
           </div>
         </div>

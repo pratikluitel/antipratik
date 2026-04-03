@@ -175,20 +175,20 @@
   align-items: center;
 }
 
-@keyframes fadeInSpin {
-  from {
-    opacity: 0;
-    transform: scale(0.5) rotate(-180deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
+.iconWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
 }
 
 .themeIcon {
   display: block;
+  position: absolute;
   color: var(--color-text-muted-dark);
+  opacity: 1;
 }
 
 [data-theme='light'] .themeIcon {
@@ -203,10 +203,26 @@
   color: var(--color-text-primary-light);
 }
 
+/* Hide/show icons based on theme */
+[data-theme='dark'] .themeIcon:first-child {
+  opacity: 1;
+}
+
+[data-theme='dark'] .themeIcon:last-child {
+  opacity: 0;
+}
+
+[data-theme='light'] .themeIcon:first-child {
+  opacity: 0;
+}
+
+[data-theme='light'] .themeIcon:last-child {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .themeIcon {
-    animation: fadeInSpin var(--motion-default) ease-in-out;
-    transition: color var(--motion-fast);
+    transition: opacity var(--motion-default) ease-in-out, color var(--motion-fast);
   }
 }
 
