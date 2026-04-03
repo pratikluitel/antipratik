@@ -9,9 +9,26 @@ interface Props {
   onOpen: (images: PhotoPost['images'], startIndex: number) => void;
 }
 
+const MultiImageIcon = () => (
+  <svg 
+    width="20" 
+    height="20" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+  </svg>
+);
+
 export default function PhotoCard({ post, onOpen }: Props) {
   const { images } = post;
   const count = images.length;
+  const mainImage = images[0];
 
   const date = new Date(post.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -19,71 +36,23 @@ export default function PhotoCard({ post, onOpen }: Props) {
     year: 'numeric',
   });
 
-  const gridClass =
-    count === 1 ? styles.single : count === 2 ? styles.double : styles.triple;
-  const visibleImages = images.slice(0, 3);
-  const extraCount = count > 3 ? count - 3 : 0;
-
   return (
     <article className={styles.card}>
-      <div className={`${styles.imageGrid} ${gridClass}`}>
-        {count <= 2
-          ? visibleImages.map((img, i) => (
-              <div
-                key={img.url}
-                className={styles.imageWrapper}
-                onClick={() => onOpen(images, i)}
-              >
-                <Image
-                  src={img.url}
-                  alt={img.alt}
-                  fill
-                  sizes="(max-width: 680px) 50vw, 340px"
-                />
-              </div>
-            ))
-          : (
-            <>
-              <div
-                className={styles.imageWrapperMain}
-                onClick={() => onOpen(images, 0)}
-              >
-                <Image
-                  src={visibleImages[0].url}
-                  alt={visibleImages[0].alt}
-                  fill
-                  sizes="(max-width: 680px) 60vw, 408px"
-                />
-              </div>
-              <div className={styles.imageStack}>
-                {visibleImages.slice(1).map((img, i) => (
-                  <div
-                    key={img.url}
-                    className={styles.imageWrapper}
-                    onClick={() => onOpen(images, i + 1)}
-                  >
-                    <Image
-                      src={img.url}
-                      alt={img.alt}
-                      fill
-                      sizes="(max-width: 680px) 40vw, 272px"
-                    />
-                    {i === 1 && extraCount > 0 && (
-                      <div
-                        className={styles.countOverlay}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpen(images, i + 1);
-                        }}
-                      >
-                        +{extraCount} more
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+      <div 
+        className={styles.imageWrapper}
+        onClick={() => onOpen(images, 0)}
+      >
+        <Image
+          src={mainImage.url}
+          alt={mainImage.alt}
+          fill
+          sizes="(max-width: 680px) 100vw, 680px"
+        />
+        {count > 1 && (
+          <div className={styles.galleryIndicator}>
+            <MultiImageIcon />
+          </div>
+        )}
       </div>
 
       <div className={styles.body}>

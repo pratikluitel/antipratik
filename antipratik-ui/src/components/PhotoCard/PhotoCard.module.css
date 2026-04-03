@@ -2,45 +2,12 @@
   composes: card from '../FeedCard/FeedCard.module.css';
 }
 
-/* ── Image grid — edge-to-edge at top ── */
-
-.imageGrid {
-  display: flex;
-  gap: var(--photo-grid-gap);
-  overflow: hidden;
-  border-radius: 16px 16px 0 0;
-}
-
-.imageGrid.single .imageWrapper {
-  width: 100%;
-  aspect-ratio: var(--photo-ratio);
-}
-
-.imageGrid.double .imageWrapper {
-  width: 50%;
-  aspect-ratio: 1 / 1;
-}
-
-.imageGrid.triple .imageWrapperMain {
-  width: 60%;
-  aspect-ratio: 1 / 1;
-}
-
-.imageGrid.triple .imageStack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--photo-grid-gap);
-  width: 40%;
-}
-
-.imageGrid.triple .imageWrapper {
-  flex: 1;
-  aspect-ratio: 1 / 1;
-}
-
 .imageWrapper {
   position: relative;
+  width: 100%;
+  aspect-ratio: var(--photo-ratio);
   overflow: hidden;
+  border-radius: 16px 16px 0 0;
   cursor: pointer;
 }
 
@@ -51,21 +18,23 @@
   display: block;
 }
 
-.countOverlay {
+.galleryIndicator {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-sans);
-  font-size: var(--text-ui);
-  font-weight: 500;
   color: var(--color-snow);
-  cursor: pointer;
+  pointer-events: none; /* Let clicks pass through to wrapper */
+  opacity: 0.9;
 }
-
-/* ── Card body ── */
 
 .body {
   padding: 12px 16px 14px;
