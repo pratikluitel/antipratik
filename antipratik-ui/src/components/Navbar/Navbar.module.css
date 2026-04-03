@@ -133,8 +133,13 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .navLink::after {
-    transition: transform 200ms ease-in-out;
+    transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
   }
+}
+
+.navLink:hover::after {
+  transform: translateX(-50%) scale(1);
+  opacity: 0.4;
 }
 
 .navLink.active {
@@ -151,6 +156,7 @@
 
 .navLink.active::after {
   transform: translateX(-50%) scale(1);
+  opacity: 1;
 }
 
 .controls {
@@ -304,8 +310,14 @@
   flex-shrink: 0;
 }
 
+.mobileMenu .navLink:hover::after {
+  transform: scale(1);
+  opacity: 0.4;
+}
+
 .mobileMenu .navLink.active::after {
   transform: scale(1);
+  opacity: 1;
 }
 
 .mobileMenuDivider {
