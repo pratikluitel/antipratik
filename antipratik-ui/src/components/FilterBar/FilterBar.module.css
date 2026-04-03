@@ -89,6 +89,12 @@
 .bar[data-mode="dark"] .pillVideo { color: var(--pill-text-videos-dark); }
 .bar[data-mode="dark"] .pillLink  { color: var(--pill-text-links-dark); }
 
+/* ─── Pill hover — dark mode ───────────────────── */
+
+.bar[data-mode="dark"] .pill:not(.selected):hover {
+  background: var(--pill-hover-bg-dark);
+}
+
 /* ─── Pill colours — light mode ──────────────── */
 
 .bar[data-mode="light"] .pillAll   { color: var(--color-text-muted-light); }
@@ -98,6 +104,12 @@
 .bar[data-mode="light"] .pillPhoto { color: var(--pill-text-photos-light); }
 .bar[data-mode="light"] .pillVideo { color: var(--pill-text-videos-light); }
 .bar[data-mode="light"] .pillLink  { color: var(--pill-text-links-light); }
+
+/* ─── Pill hover — light mode ──────────────── */
+
+.bar[data-mode="light"] .pill:not(.selected):hover {
+  background: var(--pill-hover-bg-light);
+}
 
 /* ─── Selected state ──────────────────────────── */
 
@@ -112,10 +124,10 @@
 .pillPhoto.selected  { background: var(--accent-photos); }
 .pillVideo.selected  { background: var(--accent-videos); }
 .pillLink.selected   { background: var(--accent-links); }
-.pillAll.selected    { background: var(--color-elevated-dark); }
+.pillAll.selected    { background: var(--pill-all-selected-bg-dark); }
 
 .bar[data-mode="light"] .pillAll.selected {
-  background: var(--color-border-light);
+  background: var(--pill-all-selected-bg-light);
   color: var(--color-snow) !important;
 }
 
