@@ -173,49 +173,70 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .toggleTrack {
-  width: 36px;
-  height: 20px;
-  border-radius: 10px;
-  background: var(--color-border-dark);
-  border: 0.5px solid var(--color-border-dark);
   position: relative;
-  display: block;
+  width: var(--nav-toggle-width);
+  height: var(--nav-toggle-height);
+  background: var(--toggle-track-bg-dark);
+  border-radius: var(--nav-toggle-radius);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--nav-toggle-padding-x);
+}
+
+[data-theme='light'] .toggleTrack {
+  background: var(--toggle-track-bg-light);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .toggleTrack {
-    transition: background 250ms ease-in-out, border-color 250ms ease-in-out;
+    transition: background var(--motion-fast);
   }
 }
 
-[data-theme='light'] .toggleTrack {
-  background: var(--color-text-muted-light);
-  border-color: var(--color-text-muted-light);
+.themeToggle:hover .toggleTrack {
+  background: var(--toggle-track-hover-bg-dark);
+}
+
+[data-theme='light'] .themeToggle:hover .toggleTrack {
+  background: var(--toggle-track-hover-bg-light);
 }
 
 .toggleThumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
+  width: var(--nav-toggle-thumb-size);
+  height: var(--nav-toggle-thumb-size);
+  background: var(--toggle-thumb-bg-dark);
   border-radius: 50%;
-  background: var(--color-text-primary-dark);
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: var(--nav-toggle-thumb-offset-dark);
+}
+
+[data-theme='light'] .toggleThumb {
+  background: var(--toggle-thumb-bg-light);
+  left: var(--nav-toggle-thumb-offset-light);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .toggleThumb {
-    transition: transform 250ms ease-in-out, background 250ms ease-in-out;
+    transition: left var(--motion-default), background var(--motion-fast);
   }
 }
 
-[data-theme='light'] .toggleThumb {
-  transform: translateX(16px);
-  background: #ffffff;
+.themeIcon {
+  display: block;
+  width: var(--nav-toggle-icon-size);
+  height: var(--nav-toggle-icon-size);
+  color: var(--color-text-muted-dark);
+}
+
+[data-theme='light'] .themeIcon {
+  color: var(--color-text-muted-light);
 }
 
 /* Dark mode — Himalayan Dusk */
