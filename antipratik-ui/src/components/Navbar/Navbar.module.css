@@ -308,6 +308,8 @@
   display: inline-block;
   transform: scale(0);
   flex-shrink: 0;
+  margin-left: auto;
+  margin-right: var(--space-2);
 }
 
 .mobileMenu .navLink:hover::after {
