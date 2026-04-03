@@ -167,38 +167,71 @@
 }
 
 .themeToggle {
-  background: rgba(255, 255, 255, 0.08);
+  background: none;
   border: none;
-  border-radius: 20px;
-  padding: 8px 12px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-[data-theme='light'] .themeToggle {
+.toggleTrack {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+[data-theme='light'] .toggleTrack {
   background: rgba(0, 0, 0, 0.06);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .themeToggle {
+  .toggleTrack {
     transition: background var(--motion-fast);
   }
 }
 
-.themeToggle:hover {
+.themeToggle:hover .toggleTrack {
   background: rgba(255, 255, 255, 0.12);
 }
 
-[data-theme='light'] .themeToggle:hover {
+[data-theme='light'] .themeToggle:hover .toggleTrack {
   background: rgba(0, 0, 0, 0.10);
+}
+
+.toggleThumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: 2px;
+}
+
+[data-theme='light'] .toggleThumb {
+  background: rgba(0, 0, 0, 0.12);
+  left: 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toggleThumb {
+    transition: left var(--motion-default), background var(--motion-fast);
+  }
 }
 
 .themeIcon {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   color: var(--color-text-muted-dark);
 }
 
