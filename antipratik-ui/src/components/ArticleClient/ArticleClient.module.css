@@ -1,15 +1,29 @@
-/* ── Reading progress — fixed right sidebar ─────────────────────────────── */
+/* ── Reading progress + scroll-to-top — fixed right sidebar ─────────────── */
 
-.progressTrack {
+.sideControls {
   position: fixed;
   right: var(--progress-float-right);
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  z-index: 10;
+}
+
+/* Desktop only */
+@media (max-width: 767px) {
+  .sideControls {
+    display: none;
+  }
+}
+
+.progressTrack {
   width: var(--progress-float-width);
   height: var(--progress-float-height);
   background: var(--progress-float-track-dark);
   border-radius: 2px;
-  z-index: 10;
 }
 
 [data-theme='light'] .progressTrack {
@@ -21,13 +35,6 @@
   background: var(--progress-float-fill);
   border-radius: 2px;
   transition: var(--progress-transition);
-}
-
-/* Desktop only */
-@media (max-width: 767px) {
-  .progressTrack {
-    display: none;
-  }
 }
 
 /* ── Back button — fixed left ───────────────────────────────────────────── */
@@ -58,6 +65,40 @@
   .backBtn {
     display: none;
   }
+}
+
+/* ── Scroll-to-top button — fixed right, below navbar ──────────────────── */
+
+.scrollToTop {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  cursor: pointer;
+  color: var(--color-text-muted-dark);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme='light'] .scrollToTop {
+  color: var(--color-text-muted-light);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scrollToTop {
+    transition: opacity var(--motion-default), color var(--motion-fast);
+  }
+}
+
+.scrollToTopVisible {
+  opacity: 0.75;
+  pointer-events: auto;
+}
+
+.scrollToTopVisible:hover {
+  opacity: 1;
 }
 
 /* ── Article layout ─────────────────────────────────────────────────────── */

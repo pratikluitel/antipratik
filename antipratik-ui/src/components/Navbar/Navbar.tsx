@@ -7,6 +7,8 @@ import { useTheme } from '../ThemeProvider';
 import { useNavbarContext } from '../NavbarContext';
 import styles from './Navbar.module.css';
 
+const ARTICLE_TITLE_THRESHOLD = 80; // px — matches --nav-scroll-threshold
+
 function SunSVG() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className={styles.themeIcon}>
@@ -36,6 +38,7 @@ function MoonSVG() {
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
@@ -46,13 +49,15 @@ export default function Navbar() {
     if (typeof window === 'undefined') return;
 
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
+      const y = window.scrollY;
+      const isScrolled = y > 20;
       setScrolled(isScrolled);
+      setShowTitle(y > ARTICLE_TITLE_THRESHOLD);
       document.documentElement.setAttribute('data-scrolled', isScrolled ? 'true' : 'false');
     };
 
     handleScroll(); // set initial state
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -73,8 +78,7 @@ export default function Navbar() {
     setMenuOpen(false);
   }, [pathname]);
 
-  const showArticleTitle =
-    articleTitle && scrolled && typeof window !== 'undefined' && window.scrollY > 80;
+  const showArticleTitle = !!articleTitle && showTitle;
 
   function navLinkClass(href: string) {
     return pathname === href
@@ -88,16 +92,17 @@ export default function Navbar() {
       className={styles.navbar}
       data-scrolled={scrolled ? 'true' : 'false'}
     >
-      <div className={styles.inner}>
+      <div
+        className={styles.inner}
+        data-article={showArticleTitle ? 'true' : 'false'}
+        data-has-article={articleTitle ? 'true' : 'false'}
+      >
         <Link href="/" className={styles.logo}>
           antipratik
         </Link>
 
         {articleTitle && (
-          <span
-            className={styles.articleTitle}
-            data-show={showArticleTitle ? 'true' : 'false'}
-          >
+          <span className={styles.articleTitle}>
             {articleTitle}
           </span>
         )}

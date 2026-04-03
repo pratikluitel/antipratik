@@ -57,17 +57,22 @@
   font-size: 14px;
   font-family: var(--font-serif);
   opacity: 0;
+  pointer-events: none;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .articleTitle {
-    transition: opacity 300ms ease;
+    transition: opacity var(--motion-default);
   }
 }
 
-.articleTitle[data-show='true'] {
+.inner[data-article='true'] .articleTitle {
   opacity: 1;
+  pointer-events: auto;
 }
 
 [data-theme='dark'] .articleTitle {
@@ -83,6 +88,17 @@
   gap: 24px;
   align-items: center;
   justify-self: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navLinks {
+    transition: opacity var(--motion-default);
+  }
+}
+
+.inner[data-article='true'] .navLinks {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .navLink {
@@ -385,7 +401,28 @@
     display: none;
   }
 
-  /* Hide desktop theme toggle, show hamburger */
+  /* When on an article page, show title between logo and hamburger */
+  .inner[data-has-article='true'] {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .inner[data-has-article='true'] .articleTitle {
+    display: block;
+    position: static;
+    transform: none;
+    left: auto;
+    opacity: 1;
+    pointer-events: auto;
+    justify-self: center;
+    text-align: center;
+    min-width: 0;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hide desktop-only controls */
   .controls .themeToggle {
     display: none;
   }
