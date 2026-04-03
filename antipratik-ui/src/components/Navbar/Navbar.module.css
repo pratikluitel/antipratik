@@ -180,7 +180,7 @@
   position: relative;
   width: 44px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--toggle-track-bg-dark);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -188,7 +188,7 @@
 }
 
 [data-theme='light'] .toggleTrack {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--toggle-track-bg-light);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -198,18 +198,18 @@
 }
 
 .themeToggle:hover .toggleTrack {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--toggle-track-hover-bg-dark);
 }
 
 [data-theme='light'] .themeToggle:hover .toggleTrack {
-  background: rgba(0, 0, 0, 0.10);
+  background: var(--toggle-track-hover-bg-light);
 }
 
 .toggleThumb {
   position: absolute;
   width: 20px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--toggle-thumb-bg-dark);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -218,7 +218,7 @@
 }
 
 [data-theme='light'] .toggleThumb {
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--toggle-thumb-bg-light);
   left: 22px;
 }
 

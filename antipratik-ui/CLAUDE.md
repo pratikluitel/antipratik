@@ -152,6 +152,12 @@ These tokens were added or modified during implementation (not in the original d
 | `--pill-hover-bg-light` | `#D8D4CA` | FilterBar pill hover state bg in light mode (no existing token matches) |
 | `--pill-all-selected-bg-dark` | `var(--color-border-dark)` | FilterBar "All" pill when all tags selected, dark mode |
 | `--pill-all-selected-bg-light` | `var(--color-stone)` | FilterBar "All" pill when all tags selected, light mode |
+| `--toggle-track-bg-dark` | `rgba(255, 255, 255, 0.08)` | Glassy pill toggle track bg in dark mode |
+| `--toggle-track-bg-light` | `rgba(0, 0, 0, 0.06)` | Glassy pill toggle track bg in light mode |
+| `--toggle-track-hover-bg-dark` | `rgba(255, 255, 255, 0.12)` | Toggle track hover bg in dark mode |
+| `--toggle-track-hover-bg-light` | `rgba(0, 0, 0, 0.10)` | Toggle track hover bg in light mode |
+| `--toggle-thumb-bg-dark` | `rgba(255, 255, 255, 0.15)` | Toggle thumb bg in dark mode |
+| `--toggle-thumb-bg-light` | `rgba(0, 0, 0, 0.12)` | Toggle thumb bg in light mode |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 

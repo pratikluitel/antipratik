@@ -182,6 +182,12 @@
 --nav-dot-size:                      3px;
 --nav-toggle-width:                  32px;
 --nav-toggle-height:                 18px;
+--toggle-track-bg-dark:              rgba(255, 255, 255, 0.08);
+--toggle-track-bg-light:             rgba(0, 0, 0, 0.06);
+--toggle-track-hover-bg-dark:        rgba(255, 255, 255, 0.12);
+--toggle-track-hover-bg-light:       rgba(0, 0, 0, 0.10);
+--toggle-thumb-bg-dark:              rgba(255, 255, 255, 0.15);
+--toggle-thumb-bg-light:             rgba(0, 0, 0, 0.12);
 --nav-menu-bg:                       #181D28;
 --nav-mobile-breakpoint:             767px;
 --nav-article-title-threshold:       200px;
