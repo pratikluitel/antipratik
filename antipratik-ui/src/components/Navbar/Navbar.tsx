@@ -62,9 +62,9 @@ export default function Navbar() {
       data-scrolled={scrolled ? 'true' : 'false'}
     >
       <div className={styles.inner}>
-        <a href="/" className={styles.logo}>
+        <Link href="/" className={styles.logo}>
           antipratik
-        </a>
+        </Link>
 
         {articleTitle && (
           <span

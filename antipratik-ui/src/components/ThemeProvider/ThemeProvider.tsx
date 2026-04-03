@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const initial = stored || 'dark';
       setTheme(initial);
       document.documentElement.dataset.theme = initial;
-    } catch (e) {
+    } catch {
       // localStorage unavailable
       document.documentElement.dataset.theme = 'dark';
     }
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.dataset.theme = next;
       try {
         localStorage.setItem('ap-theme', next);
-      } catch (e) {
+      } catch {
         // localStorage unavailable
       }
       return next;
