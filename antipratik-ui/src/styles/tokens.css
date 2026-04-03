@@ -1,0 +1,501 @@
+/* DO NOT EDIT — source of truth is .claude/antipratik-design-system.html
+ *
+ * antipratik.com — Design System Tokens
+ * All values finalized. Do not modify without updating the design system document.
+ * Last updated: 2026
+ *
+ * This file is imported ONCE in src/app/layout.tsx.
+ * Never import it anywhere else.
+ */
+
+:root {
+
+/* ═══════════════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════════════ */
+--font-serif:                        'DM Serif Display', Georgia, serif;
+--font-sans:                         'DM Sans', system-ui, sans-serif;
+
+/* Type scale — base 16px × major third (1.250) */
+--text-display:                      39px;
+--text-h1:                           31px;
+--text-h2:                           25px;
+--text-h3:                           20px;
+--text-body:                         16px;
+--text-ui:                           15px;
+--text-meta:                         13px;
+--text-label:                        11px;
+--text-micro:                        10px;
+--text-nano:                         9px;
+
+/* Mobile type scale */
+--text-display-mobile:               25px;
+--text-h1-mobile:                    20px;
+--text-h2-mobile:                    18px;
+--text-h3-mobile:                    16px;
+--text-body-mobile:                  15px;
+
+/* Line heights */
+--lh-display:                        1.1;
+--lh-heading:                        1.2;
+--lh-subheading:                     1.3;
+--lh-body:                           1.8;
+--lh-ui:                             1.65;
+--lh-meta:                           1.5;
+
+/* Letter spacing */
+--ls-display:                        -0.02em;
+--ls-heading:                        -0.01em;
+--ls-label:                          0.08em;
+--ls-tag:                            0.09em;
+--ls-uppercase:                      0.10em;
+
+/* Measure (max line length) */
+--measure-long:                      65ch;
+--measure-short:                     55ch;
+--measure-article:                   560px;
+
+/* ═══════════════════════════════════════════════
+   SPACING — 8px base grid
+═══════════════════════════════════════════════ */
+--space-1:                           8px;
+--space-2:                           16px;
+--space-3:                           24px;
+--space-4:                           32px;
+--space-6:                           48px;
+--space-8:                           64px;
+--space-10:                          80px;
+--space-16:                          128px;
+
+/* ═══════════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════════ */
+--grid-cols-desktop:                 12;
+--grid-cols-tablet:                  6;
+--grid-cols-mobile:                  4;
+--gutter-desktop:                    24px;
+--gutter-tablet:                     20px;
+--gutter-mobile:                     16px;
+--margin-desktop:                    80px;
+--margin-tablet:                     32px;
+--margin-mobile:                     20px;
+--content-max-width:                 1200px;
+--breakpoint-desktop:                1280px;
+--breakpoint-tablet:                 768px;
+--breakpoint-mobile:                 767px;
+
+/* ═══════════════════════════════════════════════
+   PRAYER FLAG ACCENTS — content type mapping
+   These colours are LOCKED to their content type.
+   Do not use Music red for anything except music.
+═══════════════════════════════════════════════ */
+--accent-music:                      #E03E35;  /* red — fire/energy */
+--accent-essays:                     #4A7FBB;  /* blue — sky/thought */
+--accent-short:                      #D4A832;  /* yellow — sun/quick flash */
+--accent-photos:                     #5E9E6A;  /* green — forest/life */
+--accent-videos:                     #4A7C6F;  /* teal — distinct from photos */
+--accent-links:                      #7A8890;  /* bone/slate — wind/carried word */
+--accent-social:                     #D4A832;  /* yellow — same as short posts */
+
+/* Pill text colours — dark mode */
+--pill-text-essays-dark:             #6AA4C8;
+--pill-text-short-dark:              #D4A832;
+--pill-text-music-dark:              #E03E35;
+--pill-text-photos-dark:             #5E9E6A;
+--pill-text-videos-dark:             #4A9E8A;
+--pill-text-links-dark:              #8BACC4;
+
+/* Pill text colours — light mode (darkened for #EDEAE2 contrast) */
+--pill-text-essays-light:            #2A5A8A;
+--pill-text-short-light:             #8A6010;
+--pill-text-music-light:             #B02820;
+--pill-text-photos-light:            #2A6838;
+--pill-text-videos-light:            #1E5850;
+--pill-text-links-light:             #3D3830;
+
+/* ═══════════════════════════════════════════════
+   DARK MODE SURFACES — Himalayan Dusk
+═══════════════════════════════════════════════ */
+--color-deepest:                     #0A0E14;  /* player bar, newsletter, footer */
+--color-bg-dark:                     #0F1118;  /* page background */
+--color-surface-dark:                #181D28;  /* cards, filter bar, dropdowns */
+--color-elevated-dark:               #1E2535;  /* hover states, focused inputs */
+--color-border-dark:                 #2E3748;  /* all borders in dark mode */
+--color-border-subtle-dark:          #1E2535;  /* subtler borders, dividers */
+
+/* Dark mode text */
+--color-text-primary-dark:           #EEF2F0;  /* snow — headings, primary text */
+--color-text-sub-dark:               #C8D8E8;  /* sub-headings */
+--color-text-body-dark:              #8BACC4;  /* long-form body copy */
+--color-text-muted-dark:             #7A9AB4;  /* album names, meta, dates */
+--color-text-subtle-dark:            #4A6A84;  /* subtle — meta, hints */
+
+/* ═══════════════════════════════════════════════
+   LIGHT MODE SURFACES — Parchment
+═══════════════════════════════════════════════ */
+--color-surface-light:               #F7F5F0;  /* parchment — cards, navbar */
+--color-canvas-light:                #EDEAE2;  /* canvas — feed bg, filter bar */
+--color-border-light:                #C8C0B4;  /* all borders in light mode */
+--color-ink-light:                   #0F1118;  /* ink — primary text */
+
+/* Light mode text */
+--color-text-primary-light:          #0F1118;
+--color-text-body-light:             #2A3A4A;  /* slightly blue-grey — not pure black */
+--color-text-muted-light:            #4A5860;
+--color-text-subtle-light:           #7A7268;
+
+/* Mountain landscape */
+--color-night-sky:                   #2A4A66;
+--color-day-sky:                     #3B6B8C;
+--color-stone:                       #1C2B3A;
+--color-earth:                       #C4A882;
+--color-snow:                        #EEF2F0;
+
+/* ═══════════════════════════════════════════════
+   MOTION
+═══════════════════════════════════════════════ */
+--motion-fast:                       200ms ease-in-out;
+--motion-default:                    400ms ease-in-out;
+--motion-slow:                       500ms ease-in-out;
+--motion-breathe:                    600ms ease-in-out;
+
+/* ═══════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════ */
+--z-navbar:                          100;
+--z-filterbar:                       90;
+--nav-height:                        48px;
+--nav-height-default:                48px;
+--nav-height-compact:                40px;
+--nav-scroll-threshold:              80px;
+--nav-transition:                    500ms ease-in-out;
+--nav-padding-x-desktop:             32px;
+--nav-padding-x-mobile:              20px;
+--nav-bg-dark:                       #0F1118;
+--nav-bg-light:                      #F7F5F0;
+--nav-logo-size-default:             18px;
+--nav-logo-size-compact:             14px;
+--nav-link-size:                     13px;
+--nav-link-size-compact:             12px;
+--nav-link-gap:                      28px;
+--nav-dot-color:                     #5E9E6A;
+--nav-dot-size:                      3px;
+--nav-toggle-width:                  32px;
+--nav-toggle-height:                 18px;
+--nav-menu-bg:                       #181D28;
+--nav-mobile-breakpoint:             767px;
+--nav-article-title-threshold:       200px;
+
+/* ═══════════════════════════════════════════════
+   FILTER BAR
+═══════════════════════════════════════════════ */
+--filter-bar-height:                 48px;
+--filter-bar-bg-dark:                #181D28;
+--filter-bar-bg-light:               #EDEAE2;
+--filter-bar-border-dark:            0.5px solid #2E3748;
+--filter-bar-border-light:           1px solid #C8C0B4;
+--filter-bar-padding-x-desktop:      32px;
+--filter-bar-padding-x-mobile:       16px;
+--pill-height:                       28px;
+--pill-height-mobile:                26px;
+--pill-border-radius:                14px;
+--pill-font-size:                    12px;
+--pill-font-size-mobile:             11px;
+--pill-transition:                   350ms ease-in-out;
+--pill-hover-bg-dark:                var(--color-elevated-dark);
+--pill-hover-bg-light:               #D8D4CA;
+--pill-all-selected-bg-dark:         var(--color-border-dark);
+--pill-all-selected-bg-light:        var(--color-stone);
+--tags-active-color-dark:            #5E9E6A;
+--tags-active-color-light:           #3D6B47;
+--tags-active-badge-dark:            #5E9E6A;
+--tags-active-badge-light:           #3D6B47;
+--summary-bg-dark:                   #181D28;
+--summary-bg-light:                  #EDEAE2;
+--summary-border-dark:               #2E3748;
+--summary-border-light:              #C8C0B4;
+--summary-chip-bg-dark:              #1A2535;
+--summary-chip-bg-light:             #D8D2C4;
+--summary-chip-tag-color-dark:       #8BACC4;
+--summary-chip-tag-color-light:      #5A7060;
+
+/* ═══════════════════════════════════════════════
+   CARDS — shared base
+═══════════════════════════════════════════════ */
+--card-radius:                       14px;
+--card-padding:                      14px 16px 13px;
+--card-border-dark:                  0.5px solid #2E3748;
+--card-border-light:                 0.5px solid #C8C0B4;
+--card-bg-dark:                      #181D28;
+--card-bg-light:                     #F7F5F0;
+--card-transition:                   400ms ease-in-out;
+--card-hover-lift:                   translateY(-2px);
+--card-hover-bg-dark:                #1E2535;
+--card-hover-bg-light:               #FDFCF8;
+--card-hover-border-dark:            #3A4A5E;
+--card-hover-border-light:           #B0A898;
+--card-tag-title-gap:                6px;
+--card-title-excerpt-gap:            5px;
+--card-excerpt-meta-gap:             12px;
+
+/* Essay card */
+--essay-img-height:                  160px;
+--essay-no-img-border:               3px solid #4A7FBB;
+--essay-no-img-padding-top:          16px;
+
+/* Short post card */
+--short-text-size:                   14px;
+--short-text-dark:                   #C8D8E8;
+--short-text-light:                  #0F1118;
+--short-padding:                     15px 17px;
+--hashtag-color-dark:                #5E9E6A;
+--hashtag-color-light:               #2A6838;
+--hashtag-hover-dark:                #7DC48A;
+--hashtag-hover-light:               #3D8050;
+
+/* Music card */
+--music-thumb-size:                  52px;
+--music-thumb-radius:                10px;
+--music-card-padding:                13px 15px;
+--waveform-expand-duration:          300ms ease-in-out;
+--waveform-collapse-delay:           800ms;
+--waveform-played-color:             #E03E35;
+--waveform-unplayed-dark:            #2E3748;
+--waveform-unplayed-light:           #C8C0B4;
+
+/* Photo card */
+--photo-card-radius:                 6px;
+--photo-ratio:                       4 / 3;
+--photo-grid-gap:                    4px;
+
+/* Video card */
+--video-ratio:                       16 / 9;
+--video-scrim:                       rgba(0,0,0,0.25);
+--video-scrim-hover:                 rgba(0,0,0,0.15);
+
+/* Link card */
+--link-card-padding:                 13px 15px;
+--link-og-thumb-size:                52px;
+--link-og-thumb-radius:              8px;
+
+/* Lightbox */
+--lightbox-bg:                       rgba(10,12,18,0.96);
+--lightbox-transition:               opacity 400ms ease-in-out;
+
+/* ═══════════════════════════════════════════════
+   MUSIC PLAYER
+═══════════════════════════════════════════════ */
+--player-bar-height:                 64px;
+--player-bar-bg:                     #0A0E14;  /* always dark, both modes */
+--player-bar-border-top:             0.5px solid #2E3748;
+--player-bar-padding-desktop:        0 20px;
+--player-bar-padding-mobile:         0 16px;
+--player-enter-duration:             400ms ease-in-out;
+--player-art-size-bar:               40px;
+--player-art-size-drawer:            56px;
+--player-art-size-mobile:            36px;
+--player-btn-main-size-bar:          34px;
+--player-btn-main-size-drawer:       48px;
+--player-btn-main-bg:                #EEF2F0;
+--player-progress-height:            3px;
+--player-progress-bg:                #1E2535;
+--player-progress-fill:              #E03E35;
+--player-time-color:                 #2E3748;
+
+/* Drawer */
+--drawer-bg:                         #0D1219;
+--drawer-border-top:                 0.5px solid #2E3748;
+--drawer-max-height:                 280px;
+--drawer-transition:                 max-height 500ms ease-in-out;
+--drawer-padding-desktop:            20px 24px 24px;
+--drawer-padding-mobile:             16px;
+--waveform-height:                   40px;
+--waveform-height-mobile:            32px;
+--waveform-bar-width:                3px;
+--waveform-bar-gap:                  2px;
+--waveform-bar-count:                35;
+
+/* ═══════════════════════════════════════════════
+   ARTICLE READING VIEW
+═══════════════════════════════════════════════ */
+--article-column-width:              560px;
+--article-padding-desktop:           40px 24px 80px;
+--article-padding-mobile:            24px 20px 60px;
+--article-title-size-desktop:        28px;
+--article-title-size-mobile:         22px;
+--article-title-tracking:            -0.01em;
+--back-btn-opacity-rest:             0.6;
+--back-btn-margin-bottom:            32px;
+--meta-bar-border-dark:              0.5px solid #1E2535;
+--meta-bar-border-light:             0.5px solid #D8D2C4;
+--hero-height:                       200px;
+--hero-radius:                       10px;
+--hero-margin-bottom:                28px;
+--body-size-desktop:                 16px;
+--body-size-mobile:                  15px;
+--body-weight:                       300;
+--body-line-height:                  1.8;
+--body-color-dark:                   #8BACC4;
+--body-color-light:                  #2A3A4A;
+--body-paragraph-gap:                20px;
+--art-h2-size:                       22px;
+--art-h2-color-dark:                 #C8D8E8;
+--art-h2-color-light:                #0F1118;
+--art-h2-margin-top:                 32px;
+--art-h2-margin-bottom:              12px;
+--art-h3-size:                       18px;
+--art-h3-color-dark:                 #B0C8DC;
+--art-h3-color-light:                #1A2A3A;
+--art-h3-margin-top:                 24px;
+--art-h3-margin-bottom:              10px;
+--blockquote-border:                 3px solid #4A7FBB;
+--blockquote-padding:                4px 0 4px 20px;
+--blockquote-size:                   17px;
+--blockquote-line-height:            1.7;
+--blockquote-color-dark:             #6AA4C8;
+--blockquote-color-light:            #2A5A8A;
+--blockquote-margin:                 24px 0;
+
+/* Floating progress indicator */
+--progress-float-width:              3px;
+--progress-float-height:             120px;
+--progress-float-right:              16px;
+--progress-float-track-dark:         #1E2535;
+--progress-float-track-light:        #D8D2C4;
+--progress-float-fill:               #E03E35;
+--progress-appear-threshold:         200px;
+--progress-disappear-threshold:      100px;  /* px from article end */
+--progress-transition:               opacity 400ms ease-in-out;
+
+/* ═══════════════════════════════════════════════
+   NEWSLETTER BLOCK
+═══════════════════════════════════════════════ */
+--nl-bg:                             #0A0E14;  /* fallback only — overridden per theme below */
+--nl-padding-desktop:                64px 32px;
+--nl-padding-mobile:                 48px 24px;
+--nl-border-gradient:                linear-gradient(90deg, transparent 0%, #E03E35 20%, #4A7FBB 40%, #D4A832 60%, #5E9E6A 80%, transparent 100%);
+--nl-border-opacity:                 0.4;
+--nl-copy-size:                      14px;
+--nl-copy-color:                     #4A6A84;
+--nl-copy-max-width:                 420px;
+--nl-form-height:                    46px;   /* single source of truth — set on wrapper only */
+--nl-form-radius:                    10px;
+--nl-input-bg:                       #181D28;
+--nl-input-bg-focus:                 #1E2535;
+--nl-input-color:                    #EEF2F0;
+--nl-input-placeholder:              #4A6A84;  /* not #2E3748 — must be visible */
+--nl-input-bg-error:                 #1E1515;
+--nl-input-color-error:              #E03E35;
+--nl-btn-bg:                         #EEF2F0;
+--nl-btn-bg-hover:                   #ffffff;
+--nl-btn-bg-active:                  #D8D2C4;
+--nl-btn-color:                      #0F1118;
+--nl-legal-color:                    #607D96;
+--nl-legal-size:                     11px;
+--nl-error-color:                    #E03E35;
+--nl-success-icon-color:             #5E9E6A;
+
+/* Footer compact variant */
+--nl-footer-padding:                 32px;
+--nl-footer-form-height:             40px;
+--nl-footer-form-radius:             8px;
+--nl-footer-border-top:              0.5px solid #1E2535;
+--nl-footer-copy-color:              #3A5068;
+
+/* ═══════════════════════════════════════════════
+   EXTERNAL LINKS BLOCK
+═══════════════════════════════════════════════ */
+--link-row-padding:                  14px 16px;
+--link-row-padding-mobile:           11px 12px;
+--link-row-radius:                   12px;
+--link-row-gap:                      14px;
+--link-row-bg-dark:                  #181D28;
+--link-row-bg-light:                 #F7F5F0;
+--link-row-border-dark:              0.5px solid #2E3748;
+--link-row-border-light:             0.5px solid #C8C0B4;
+--link-row-hover-bg-dark:            #1E2535;
+--link-row-hover-bg-light:           #FDFCF8;
+--link-row-hover-border-dark:        #3A4A5E;
+--link-row-hover-border-light:       #B0A898;
+--link-row-transition:               350ms ease-in-out;
+--link-icon-size:                    40px;
+--link-icon-size-homepage:           36px;
+--link-icon-radius:                  10px;
+--link-title-size:                   15px;
+--link-title-size-homepage:          14px;
+--link-desc-size:                    12px;
+--link-desc-color-dark:              #3A5068;
+--link-desc-color-light:             #A0A090;
+--link-domain-size:                  10px;
+--link-domain-color-dark:            #4A6A84;
+--link-domain-color-light:           #8A8070;
+--link-accent-music:                 #E03E35;
+--link-accent-writing:               #4A7FBB;
+--link-accent-video:                 #5E9E6A;
+--link-accent-social:                #D4A832;
+--link-accent-width:                 2.5px;
+--link-arrow-opacity-rest:           0.35;
+--link-arrow-opacity-hover:          0.90;
+--link-arrow-shift-hover:            translate(2px, -2px);
+--links-homepage-max:                4;  /* max links shown in homepage snippet */
+
+/* ═══════════════════════════════════════════════
+   ABOUT PAGE
+═══════════════════════════════════════════════ */
+--about-hero-height:                 220px;
+--about-name-size:                   28px;
+--about-name-tracking:               -0.01em;
+
+}
+
+/* ═══════════════════════════════════════════════
+   THEME — DARK (Himalayan Dusk)
+   Semantic aliases for theme-aware components.
+   These override the defaults set in :root.
+═══════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:                              var(--color-bg-dark);
+  --surface:                         var(--color-surface-dark);
+  --surface-elevated:                var(--color-elevated-dark);
+  --border:                          var(--color-border-dark);
+  --border-subtle:                   var(--color-border-subtle-dark);
+  --text-primary:                    var(--color-text-primary-dark);
+  --text-sub:                        var(--color-text-sub-dark);
+  --text-body:                       var(--color-text-body-dark);
+  --text-muted:                      var(--color-text-muted-dark);
+  --text-subtle:                     var(--color-text-subtle-dark);
+  --nav-bg:                          var(--nav-bg-dark);
+  --filter-bar-bg:                   var(--filter-bar-bg-dark);
+  --card-bg:                         var(--card-bg-dark);
+  --card-border:                     var(--card-border-dark);
+  --card-hover-bg:                   var(--card-hover-bg-dark);
+  --card-hover-border:               var(--card-hover-border-dark);
+  --nl-bg:                           var(--color-surface-dark);    /* #181D28 — raised surface, visible against page bg #0F1118 */
+  --nl-input-bg:                     var(--color-bg-dark);          /* #0F1118 — inputs darker than block = inset feel */
+  --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 5.9:1 on new block bg */
+}
+
+/* ═══════════════════════════════════════════════
+   THEME — LIGHT (Parchment Morning)
+   Semantic aliases for theme-aware components.
+═══════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:                              var(--color-canvas-light);
+  --surface:                         var(--color-surface-light);
+  --surface-elevated:                var(--color-surface-light);
+  --border:                          var(--color-border-light);
+  --border-subtle:                   var(--color-border-light);
+  --text-primary:                    var(--color-text-primary-light);
+  --text-sub:                        var(--color-text-primary-light);
+  --text-body:                       var(--color-text-body-light);
+  --text-muted:                      var(--color-text-muted-light);
+  --text-subtle:                     var(--color-text-subtle-light);
+  --nav-bg:                          var(--nav-bg-light);
+  --filter-bar-bg:                   var(--filter-bar-bg-light);
+  --card-bg:                         var(--card-bg-light);
+  --card-border:                     var(--card-border-light);
+  --card-hover-bg:                   var(--card-hover-bg-light);
+  --card-hover-border:               var(--card-hover-border-light);
+  --nl-bg:                           var(--color-stone);            /* #1C2B3A — warmer dark, less jarring on parchment */
+  --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 4.9:1 on new block bg */
+}
