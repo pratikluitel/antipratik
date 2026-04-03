@@ -7,6 +7,8 @@ import { useTheme } from '../ThemeProvider';
 import { useNavbarContext } from '../NavbarContext';
 import styles from './Navbar.module.css';
 
+const ARTICLE_TITLE_THRESHOLD = 80; // px — matches --nav-scroll-threshold
+
 function SunSVG() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className={styles.themeIcon}>
@@ -50,7 +52,7 @@ export default function Navbar() {
       const y = window.scrollY;
       const isScrolled = y > 20;
       setScrolled(isScrolled);
-      setShowTitle(y > 80);
+      setShowTitle(y > ARTICLE_TITLE_THRESHOLD);
       document.documentElement.setAttribute('data-scrolled', isScrolled ? 'true' : 'false');
     };
 
