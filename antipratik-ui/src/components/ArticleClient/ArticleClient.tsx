@@ -11,6 +11,20 @@ interface Props {
   post: EssayPost;
 }
 
+function ChevronUpSVG() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M3 10.5L8 5.5L13 10.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 // The body markdown is author-controlled content from a trusted backend.
 // dangerouslySetInnerHTML is acceptable here.
 const CATEGORY_LABEL = 'Essay';
@@ -49,18 +63,27 @@ export default function ArticleClient({ post }: Props) {
 
   return (
     <>
-      {/* Reading progress — desktop only, fixed right */}
-      <div className={styles.progressTrack} aria-hidden="true">
-        <div
-          className={styles.progressFill}
-          style={{ height: `${progress * 100}%` }}
-        />
-      </div>
-
       {/* Back button — desktop only, fixed left */}
       <Link href="/feed" className={styles.backBtn}>
         ← Feed
       </Link>
+
+      {/* Reading progress + scroll-to-top — desktop only, fixed right */}
+      <div className={styles.sideControls}>
+        <button
+          className={`${styles.scrollToTop}${progress > 0 ? ` ${styles.scrollToTopVisible}` : ''}`}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Scroll to top"
+        >
+          <ChevronUpSVG />
+        </button>
+        <div className={styles.progressTrack} aria-hidden="true">
+          <div
+            className={styles.progressFill}
+            style={{ height: `${progress * 100}%` }}
+          />
+        </div>
+      </div>
 
       <article className={styles.article}>
         <header className={styles.header}>
