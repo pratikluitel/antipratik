@@ -1,4 +1,3 @@
-.claude
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -25,6 +24,7 @@ build
 # misc
 .DS_Store
 *.pem
+.claude
 
 # debug
 npm-debug.log*

@@ -152,6 +152,14 @@ These tokens were added or modified during implementation (not in the original d
 | `--pill-hover-bg-light` | `#D8D4CA` | FilterBar pill hover state bg in light mode (no existing token matches) |
 | `--pill-all-selected-bg-dark` | `var(--color-border-dark)` | FilterBar "All" pill when all tags selected, dark mode |
 | `--pill-all-selected-bg-light` | `var(--color-stone)` | FilterBar "All" pill when all tags selected, light mode |
+| `--nav-toggle-width` | `44px` | **Updated from `32px`** — glassy pill toggle track width |
+| `--nav-toggle-height` | `24px` | **Updated from `18px`** — glassy pill toggle track height |
+| `--nav-toggle-radius` | `12px` | Toggle track border-radius |
+| `--nav-toggle-padding-x` | `2px` | Toggle track horizontal padding (thumb inset) |
+| `--nav-toggle-thumb-size` | `20px` | Toggle thumb diameter |
+| `--nav-toggle-thumb-offset-dark` | `2px` | Thumb `left` position in dark mode |
+| `--nav-toggle-thumb-offset-light` | `22px` | Thumb `left` position in light mode |
+| `--nav-toggle-icon-size` | `12px` | Sun/moon icon size inside thumb |
 | `--toggle-track-bg-dark` | `rgba(255, 255, 255, 0.08)` | Glassy pill toggle track bg in dark mode |
 | `--toggle-track-bg-light` | `rgba(0, 0, 0, 0.06)` | Glassy pill toggle track bg in light mode |
 | `--toggle-track-hover-bg-dark` | `rgba(255, 255, 255, 0.12)` | Toggle track hover bg in dark mode |

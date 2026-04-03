@@ -178,13 +178,13 @@
 
 .toggleTrack {
   position: relative;
-  width: 44px;
-  height: 24px;
+  width: var(--nav-toggle-width);
+  height: var(--nav-toggle-height);
   background: var(--toggle-track-bg-dark);
-  border-radius: 12px;
+  border-radius: var(--nav-toggle-radius);
   display: flex;
   align-items: center;
-  padding: 0 2px;
+  padding: 0 var(--nav-toggle-padding-x);
 }
 
 [data-theme='light'] .toggleTrack {
@@ -207,19 +207,19 @@
 
 .toggleThumb {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: var(--nav-toggle-thumb-size);
+  height: var(--nav-toggle-thumb-size);
   background: var(--toggle-thumb-bg-dark);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  left: 2px;
+  left: var(--nav-toggle-thumb-offset-dark);
 }
 
 [data-theme='light'] .toggleThumb {
   background: var(--toggle-thumb-bg-light);
-  left: 22px;
+  left: var(--nav-toggle-thumb-offset-light);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -230,8 +230,8 @@
 
 .themeIcon {
   display: block;
-  width: 12px;
-  height: 12px;
+  width: var(--nav-toggle-icon-size);
+  height: var(--nav-toggle-icon-size);
   color: var(--color-text-muted-dark);
 }
 
