@@ -148,6 +148,10 @@ These tokens were added or modified during implementation (not in the original d
 | `--color-text-subtle-light` | `#7A7268` | **Changed from `#C8C0B4`** — was too close to parchment bg, near-invisible |
 | `--link-domain-color-light` | `#8A8070` | **Changed from `#C8C0B4`** — domain text in ExternalLinksBlock (light mode) was unreadable |
 | `--color-text-muted-light` | `#4A5860` | **Changed from `#7A8890`** — navbar links and section meta on parchment bg were below WCAG AA |
+| `--pill-hover-bg-dark` | `var(--color-elevated-dark)` | FilterBar pill hover state bg in dark mode |
+| `--pill-hover-bg-light` | `#D8D4CA` | FilterBar pill hover state bg in light mode (no existing token matches) |
+| `--pill-all-selected-bg-dark` | `var(--color-border-dark)` | FilterBar "All" pill when all tags selected, dark mode |
+| `--pill-all-selected-bg-light` | `var(--color-stone)` | FilterBar "All" pill when all tags selected, light mode |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 

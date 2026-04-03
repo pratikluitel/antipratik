@@ -202,6 +202,10 @@
 --pill-font-size:                    12px;
 --pill-font-size-mobile:             11px;
 --pill-transition:                   350ms ease-in-out;
+--pill-hover-bg-dark:                var(--color-elevated-dark);
+--pill-hover-bg-light:               #D8D4CA;
+--pill-all-selected-bg-dark:         var(--color-border-dark);
+--pill-all-selected-bg-light:        var(--color-stone);
 --tags-active-color-dark:            #5E9E6A;
 --tags-active-color-light:           #3D6B47;
 --tags-active-badge-dark:            #5E9E6A;
