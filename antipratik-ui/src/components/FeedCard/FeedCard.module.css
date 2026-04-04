@@ -62,13 +62,46 @@
 
 /* ── Per-type card accents ──────────────────────────────── */
 
-.cardEssay { border-left: 3px solid var(--accent-essays); }
-.cardShort { border-left: 3px solid var(--accent-short); }
-.cardMusic { border-left: 3px solid var(--accent-music); }
-.cardPhoto { border-left: 3px solid var(--accent-photos); }
-.cardVideo { border-left: 3px solid var(--accent-videos); }
-.cardLink  { border-left: 3px solid var(--accent-links); }
+/* Left accent bar — ::after overlays content so no gap with full-bleed images */
+.cardEssay::after,
+.cardShort::after,
+.cardMusic::after,
+.cardPhoto::after,
+.cardVideo::after,
+.cardLink::after  {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  opacity: 1;
+}
 
+@media (prefers-reduced-motion: no-preference) {
+  .cardEssay::after,
+  .cardShort::after,
+  .cardMusic::after,
+  .cardPhoto::after,
+  .cardVideo::after,
+  .cardLink::after  { transition: opacity var(--motion-default); }
+}
+
+.cardEssay:hover::after,
+.cardShort:hover::after,
+.cardMusic:hover::after,
+.cardPhoto:hover::after,
+.cardVideo:hover::after,
+.cardLink:hover::after  { opacity: 0; }
+
+.cardEssay::after { background: var(--accent-essays); }
+.cardShort::after { background: var(--accent-short); }
+.cardMusic::after { background: var(--accent-music); }
+.cardPhoto::after { background: var(--accent-photos); }
+.cardVideo::after { background: var(--accent-videos); }
+.cardLink::after  { background: var(--accent-links); }
+
+/* Hover tint overlay */
 .cardEssay::before,
 .cardShort::before,
 .cardMusic::before,
@@ -105,3 +138,4 @@
 .cardPhoto:hover::before,
 .cardVideo:hover::before,
 .cardLink:hover::before  { opacity: 0.06; }
+
