@@ -10,10 +10,11 @@
 import type { Post, EssayPost, ExternalLink, FilterState } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const IS_API_DISABLED = !API_URL;
 
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not set. Create .env.local with NEXT_PUBLIC_API_URL=http://localhost:8080');
-}
+// During isolated UI builds without a backend, we still compile the app.
+// Pages will render with empty collections, and actual data loading requires
+// NEXT_PUBLIC_API_URL to be configured at runtime.
 
 // ─── POSTS ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,10 @@ if (!API_URL) {
  * @param filter - Optional filter state with activeTypes and activeTags
  */
 export async function getPosts(filter?: FilterState): Promise<Post[]> {
+  if (IS_API_DISABLED) {
+    return [];
+  }
+
   const params = new URLSearchParams();
   if (filter?.activeTypes?.length) {
     filter.activeTypes.forEach((t) => params.append('type', t));
@@ -46,6 +51,10 @@ export async function getPosts(filter?: FilterState): Promise<Post[]> {
  * @param slug - The URL slug of the essay
  */
 export async function getPost(slug: string): Promise<EssayPost | null> {
+  if (IS_API_DISABLED) {
+    return null;
+  }
+
   const response = await fetch(`${API_URL}/api/posts/${slug}`);
   if (response.status === 404) return null;
   if (!response.ok) {
@@ -61,6 +70,10 @@ export async function getPost(slug: string): Promise<EssayPost | null> {
  * Returns all external links.
  */
 export async function getLinks(): Promise<ExternalLink[]> {
+  if (IS_API_DISABLED) {
+    return [];
+  }
+
   const response = await fetch(`${API_URL}/api/links`);
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getLinks`);
@@ -73,6 +86,10 @@ export async function getLinks(): Promise<ExternalLink[]> {
  * Returns up to 4 featured external links for the homepage snippet.
  */
 export async function getFeaturedLinks(): Promise<ExternalLink[]> {
+  if (IS_API_DISABLED) {
+    return [];
+  }
+
   const response = await fetch(`${API_URL}/api/links/featured`);
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getFeaturedLinks`);
