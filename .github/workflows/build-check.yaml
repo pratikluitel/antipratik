@@ -27,4 +27,10 @@ jobs:
 
       - name: Build
         working-directory: app/antipratik-ui
+        env:
+          # Disable static export for isolated UI build checks so the workflow
+          # can verify the UI compiles without requiring the backend-driven
+          # dynamic route params for /[slug].
+          # TODO: In the future, consider running the build check with a full dummy backend environment so we can keep static export enabled for better build-time checks.
+          NEXT_DISABLE_EXPORT: '1'
         run: npm run build
