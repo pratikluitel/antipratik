@@ -80,6 +80,7 @@
 --margin-tablet:                     32px;
 --margin-mobile:                     20px;
 --content-max-width:                 1200px;
+--content-column-width:              860px;
 --breakpoint-desktop:                1280px;
 --breakpoint-tablet:                 768px;
 --breakpoint-mobile:                 767px;

@@ -108,7 +108,7 @@ All tokens live in `src/styles/tokens.css`. Never import tokens.css anywhere exc
 | `--measure-*` | Max line lengths (ch/px) |
 | `--space-1` through `--space-16` | 8px-grid spacing scale |
 | `--gutter-*`, `--margin-*` | Grid gutters and margins |
-| `--content-max-width`, `--breakpoint-*` | Layout bounds |
+| `--content-max-width`, `--content-column-width`, `--breakpoint-*` | Layout bounds |
 | `--accent-music/essays/short/photos/videos/links/social` | Prayer flag accents |
 | `--pill-text-*-dark/light` | Pill text colours per mode |
 | `--color-deepest`, `--color-bg-dark`, `--color-surface-dark` | Dark mode surfaces |
@@ -134,6 +134,7 @@ These tokens were added or modified during implementation (not in the original d
 
 | Token | Value | Note |
 |---|---|---|
+| `--content-column-width` | `860px` | Main content column max-width — widened from 680px to use 2 more grid columns (1 each side) per issue #5 |
 | `--nav-height` | `48px` | FilterBar needs this for sticky top positioning |
 | `--nav-height-compact` | `40px` | Navbar compact state on scroll |
 | `--nav-height-default` | `48px` | Alias for clarity in FilterBar CSS |

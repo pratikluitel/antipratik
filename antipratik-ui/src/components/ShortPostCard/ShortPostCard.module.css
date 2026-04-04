@@ -14,7 +14,6 @@
   font-size: var(--text-ui);
   color: var(--color-text-sub-dark);
   line-height: var(--lh-ui);
-  max-width: var(--measure-short);
   margin: 0;
 }
 
