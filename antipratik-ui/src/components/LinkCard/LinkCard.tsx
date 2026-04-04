@@ -6,6 +6,15 @@ interface Props {
   post: LinkPost;
 }
 
+function cardAccentClass(category: LinkPost['category']): string {
+  switch (category) {
+    case 'music':   return styles.cardMusic;
+    case 'writing': return styles.cardEssay;
+    case 'video':   return styles.cardVideo;
+    default:        return styles.cardDefault;
+  }
+}
+
 function tagClass(category: LinkPost['category']): string | undefined {
   switch (category) {
     case 'music':   return `${styles.tag} ${styles.tagMusic}`;
@@ -34,7 +43,7 @@ export default function LinkCard({ post }: Props) {
   });
 
   return (
-    <article className={styles.card}>
+    <article className={cardAccentClass(post.category)}>
       <a
         href={post.url}
         target="_blank"

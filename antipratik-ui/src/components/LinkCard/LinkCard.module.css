@@ -2,6 +2,11 @@
   composes: card from '../FeedCard/FeedCard.module.css';
 }
 
+.cardMusic   { composes: card cardMusic from '../FeedCard/FeedCard.module.css'; }
+.cardEssay   { composes: card cardEssay from '../FeedCard/FeedCard.module.css'; }
+.cardVideo   { composes: card cardVideo from '../FeedCard/FeedCard.module.css'; }
+.cardDefault { composes: card cardLink  from '../FeedCard/FeedCard.module.css'; }
+
 .link {
   display: flex;
   align-items: center;

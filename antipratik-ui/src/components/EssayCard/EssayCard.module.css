@@ -1,5 +1,5 @@
 .card {
-  composes: card from '../FeedCard/FeedCard.module.css';
+  composes: card cardEssay from '../FeedCard/FeedCard.module.css';
 }
 
 .inner {

@@ -59,3 +59,49 @@
 [data-theme="light"] .tagPhoto  { color: var(--pill-text-photos-light); }
 [data-theme="light"] .tagVideo  { color: var(--pill-text-videos-light); }
 [data-theme="light"] .tagLink   { color: var(--pill-text-links-light); }
+
+/* ── Per-type card accents ──────────────────────────────── */
+
+.cardEssay { border-left: 3px solid var(--accent-essays); }
+.cardShort { border-left: 3px solid var(--accent-short); }
+.cardMusic { border-left: 3px solid var(--accent-music); }
+.cardPhoto { border-left: 3px solid var(--accent-photos); }
+.cardVideo { border-left: 3px solid var(--accent-videos); }
+.cardLink  { border-left: 3px solid var(--accent-links); }
+
+.cardEssay::before,
+.cardShort::before,
+.cardMusic::before,
+.cardPhoto::before,
+.cardVideo::before,
+.cardLink::before  {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.cardEssay::before { background: var(--accent-essays); }
+.cardShort::before { background: var(--accent-short); }
+.cardMusic::before { background: var(--accent-music); }
+.cardPhoto::before { background: var(--accent-photos); }
+.cardVideo::before { background: var(--accent-videos); }
+.cardLink::before  { background: var(--accent-links); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cardEssay::before,
+  .cardShort::before,
+  .cardMusic::before,
+  .cardPhoto::before,
+  .cardVideo::before,
+  .cardLink::before  { transition: opacity var(--motion-default); }
+}
+
+.cardEssay:hover::before,
+.cardShort:hover::before,
+.cardMusic:hover::before,
+.cardPhoto:hover::before,
+.cardVideo:hover::before,
+.cardLink:hover::before  { opacity: 0.06; }
