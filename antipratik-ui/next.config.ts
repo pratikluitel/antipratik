@@ -8,5 +8,5 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 
 module.exports = {
-  allowedDevOrigins: ['dev.antipratik.com']
+  allowedDevOrigins: ['test.antipratik.com']
 }
