@@ -30,9 +30,9 @@ jobs:
       - name: Start backend
         run: |
           cd app/antipratik-api
-          nohup go run . > /tmp/antipratik-api.log 2>&1 &
+          nohup ANTIPRATIK_PORT=8081 go run . > /tmp/antipratik-api.log 2>&1 &
           for i in $(seq 1 20); do
-            if curl -sSf http://127.0.0.1:8080/api/posts >/dev/null 2>&1; then
+            if curl -sSf http://127.0.0.1:8081/api/posts >/dev/null 2>&1; then
               echo "Backend ready"
               exit 0
             fi
@@ -48,5 +48,5 @@ jobs:
       - name: Build
         working-directory: app/antipratik-ui
         env:
-          NEXT_PUBLIC_API_URL: http://127.0.0.1:8080
+          NEXT_PUBLIC_API_URL: http://127.0.0.1:8081
         run: npm run build
