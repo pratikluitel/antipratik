@@ -1,0 +1,495 @@
+package store
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"strings"
+
+	"github.com/pratikluitel/antipratik/models"
+)
+
+// SQLitePostStore implements PostStore using a SQLite database.
+type SQLitePostStore struct {
+	db *sql.DB
+}
+
+// NewPostStore creates a new SQLitePostStore backed by db.
+func NewPostStore(db *sql.DB) *SQLitePostStore {
+	return &SQLitePostStore{db: db}
+}
+
+// ── Public methods ────────────────────────────────────────────────────────────
+
+// GetPosts returns all posts matching the optional type and tag filters.
+func (s *SQLitePostStore) GetPosts(ctx context.Context, types, tags []string) ([]models.Post, error) {
+	baseRows, err := s.queryBaseRows(ctx, types, tags)
+	if err != nil {
+		return nil, err
+	}
+	if len(baseRows) == 0 {
+		return []models.Post{}, nil
+	}
+
+	ids := extractIDs(baseRows)
+	byType := groupByType(baseRows)
+
+	tagsMap, err := s.fetchTagsMap(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.assembleAll(ctx, baseRows, byType, tagsMap)
+}
+
+// GetPostBySlug returns the essay with the given slug, or nil if not found.
+func (s *SQLitePostStore) GetPostBySlug(ctx context.Context, slug string) (*models.EssayPost, error) {
+	const q = `
+		SELECT p.id, p.created_at,
+		       e.title, e.slug, e.excerpt, e.body, e.reading_time_minutes
+		FROM posts p
+		JOIN essay_posts e ON p.id = e.post_id
+		WHERE e.slug = ?`
+
+	row := s.db.QueryRowContext(ctx, q, slug)
+	var (
+		id, createdAt, title, slugVal, excerpt, body string
+		readingTime                                   int
+	)
+	if err := row.Scan(&id, &createdAt, &title, &slugVal, &excerpt, &body, &readingTime); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("GetPostBySlug: %w", err)
+	}
+
+	tags, err := s.fetchTagsMap(ctx, []string{id})
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.EssayPost{
+		ID:                 id,
+		Type:               "essay",
+		CreatedAt:          createdAt,
+		Tags:               coalesceStringSlice(tags[id]),
+		Title:              title,
+		Slug:               slugVal,
+		Excerpt:            excerpt,
+		Body:               body,
+		ReadingTimeMinutes: readingTime,
+	}, nil
+}
+
+// ── Internal query helpers ────────────────────────────────────────────────────
+
+type baseRow struct {
+	ID        string
+	Type      string
+	CreatedAt string
+}
+
+// queryBaseRows fetches (id, type, created_at) rows matching filters.
+func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []string) ([]baseRow, error) {
+	var sb strings.Builder
+	var args []any
+
+	if len(tags) > 0 {
+		sb.WriteString("SELECT DISTINCT p.id, p.type, p.created_at FROM posts p JOIN post_tags pt ON p.id = pt.post_id")
+	} else {
+		sb.WriteString("SELECT id, p_alias.type, p_alias.created_at FROM posts p_alias")
+		// rewrite to avoid aliasing issue — use plain
+		sb.Reset()
+		sb.WriteString("SELECT id, type, created_at FROM posts")
+	}
+
+	var conditions []string
+	if len(types) > 0 {
+		if len(tags) > 0 {
+			conditions = append(conditions, "p.type IN ("+placeholders(len(types))+")")
+		} else {
+			conditions = append(conditions, "type IN ("+placeholders(len(types))+")")
+		}
+		for _, t := range types {
+			args = append(args, t)
+		}
+	}
+	if len(tags) > 0 {
+		conditions = append(conditions, "pt.tag IN ("+placeholders(len(tags))+")")
+		for _, t := range tags {
+			args = append(args, t)
+		}
+	}
+
+	if len(conditions) > 0 {
+		sb.WriteString(" WHERE ")
+		sb.WriteString(strings.Join(conditions, " AND "))
+	}
+	sb.WriteString(" ORDER BY created_at DESC")
+
+	rows, err := s.db.QueryContext(ctx, sb.String(), args...)
+	if err != nil {
+		return nil, fmt.Errorf("queryBaseRows: %w", err)
+	}
+	defer rows.Close()
+
+	var result []baseRow
+	for rows.Next() {
+		var r baseRow
+		if err := rows.Scan(&r.ID, &r.Type, &r.CreatedAt); err != nil {
+			return nil, fmt.Errorf("queryBaseRows scan: %w", err)
+		}
+		result = append(result, r)
+	}
+	return result, rows.Err()
+}
+
+// fetchTagsMap returns a map of post_id → []tag for the given post IDs.
+func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[string][]string, error) {
+	if len(ids) == 0 {
+		return map[string][]string{}, nil
+	}
+	q := "SELECT post_id, tag FROM post_tags WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id"
+	args := stringsToAny(ids)
+	rows, err := s.db.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchTagsMap: %w", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string][]string)
+	for rows.Next() {
+		var postID, tag string
+		if err := rows.Scan(&postID, &tag); err != nil {
+			return nil, fmt.Errorf("fetchTagsMap scan: %w", err)
+		}
+		result[postID] = append(result[postID], tag)
+	}
+	return result, rows.Err()
+}
+
+// ── Per-type fetchers ─────────────────────────────────────────────────────────
+
+type essayData struct {
+	title, slug, excerpt, body string
+	readingTimeMinutes         int
+}
+
+func (s *SQLitePostStore) fetchEssayData(ctx context.Context, ids []string) (map[string]essayData, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, title, slug, excerpt, body, reading_time_minutes FROM essay_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchEssayData: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]essayData)
+	for rows.Next() {
+		var id string
+		var d essayData
+		if err := rows.Scan(&id, &d.title, &d.slug, &d.excerpt, &d.body, &d.readingTimeMinutes); err != nil {
+			return nil, fmt.Errorf("fetchEssayData scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+type shortData struct{ body string }
+
+func (s *SQLitePostStore) fetchShortData(ctx context.Context, ids []string) (map[string]shortData, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, body FROM short_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchShortData: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]shortData)
+	for rows.Next() {
+		var id string
+		var d shortData
+		if err := rows.Scan(&id, &d.body); err != nil {
+			return nil, fmt.Errorf("fetchShortData scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+type musicData struct {
+	title, albumArt, audioURL string
+	duration                  int
+	album                     *string
+}
+
+func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map[string]musicData, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, title, album_art, audio_url, duration, album FROM music_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchMusicData: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]musicData)
+	for rows.Next() {
+		var id string
+		var d musicData
+		if err := rows.Scan(&id, &d.title, &d.albumArt, &d.audioURL, &d.duration, &d.album); err != nil {
+			return nil, fmt.Errorf("fetchMusicData scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+type photoMeta struct{ location *string }
+
+func (s *SQLitePostStore) fetchPhotoMeta(ctx context.Context, ids []string) (map[string]photoMeta, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, location FROM photo_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchPhotoMeta: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]photoMeta)
+	for rows.Next() {
+		var id string
+		var d photoMeta
+		if err := rows.Scan(&id, &d.location); err != nil {
+			return nil, fmt.Errorf("fetchPhotoMeta scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (map[string][]models.PhotoImage, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, url, alt, caption FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchPhotoImages: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string][]models.PhotoImage)
+	for rows.Next() {
+		var postID string
+		var img models.PhotoImage
+		if err := rows.Scan(&postID, &img.URL, &img.Alt, &img.Caption); err != nil {
+			return nil, fmt.Errorf("fetchPhotoImages scan: %w", err)
+		}
+		m[postID] = append(m[postID], img)
+	}
+	return m, rows.Err()
+}
+
+type videoData struct {
+	title, thumbnailURL, videoURL string
+	duration                      int
+	playlist                      *string
+}
+
+func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map[string]videoData, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, title, thumbnail_url, video_url, duration, playlist FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchVideoData: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]videoData)
+	for rows.Next() {
+		var id string
+		var d videoData
+		if err := rows.Scan(&id, &d.title, &d.thumbnailURL, &d.videoURL, &d.duration, &d.playlist); err != nil {
+			return nil, fmt.Errorf("fetchVideoData scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+type linkPostData struct {
+	title, url, domain string
+	description        *string
+	thumbnailURL       *string
+	category           *string
+}
+
+func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (map[string]linkPostData, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	q := "SELECT post_id, title, url, domain, description, thumbnail_url, category FROM link_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
+	if err != nil {
+		return nil, fmt.Errorf("fetchLinkPostData: %w", err)
+	}
+	defer rows.Close()
+
+	m := make(map[string]linkPostData)
+	for rows.Next() {
+		var id string
+		var d linkPostData
+		if err := rows.Scan(&id, &d.title, &d.url, &d.domain, &d.description, &d.thumbnailURL, &d.category); err != nil {
+			return nil, fmt.Errorf("fetchLinkPostData scan: %w", err)
+		}
+		m[id] = d
+	}
+	return m, rows.Err()
+}
+
+// ── Assembly ──────────────────────────────────────────────────────────────────
+
+func (s *SQLitePostStore) assembleAll(
+	ctx context.Context,
+	baseRows []baseRow,
+	byType map[string][]string,
+	tagsMap map[string][]string,
+) ([]models.Post, error) {
+	essayMap, err := s.fetchEssayData(ctx, byType["essay"])
+	if err != nil {
+		return nil, err
+	}
+	shortMap, err := s.fetchShortData(ctx, byType["short"])
+	if err != nil {
+		return nil, err
+	}
+	musicMap, err := s.fetchMusicData(ctx, byType["music"])
+	if err != nil {
+		return nil, err
+	}
+	photoMeta, err := s.fetchPhotoMeta(ctx, byType["photo"])
+	if err != nil {
+		return nil, err
+	}
+	photoImages, err := s.fetchPhotoImages(ctx, byType["photo"])
+	if err != nil {
+		return nil, err
+	}
+	videoMap, err := s.fetchVideoData(ctx, byType["video"])
+	if err != nil {
+		return nil, err
+	}
+	linkPostMap, err := s.fetchLinkPostData(ctx, byType["link"])
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]models.Post, 0, len(baseRows))
+	for _, r := range baseRows {
+		tags := coalesceStringSlice(tagsMap[r.ID])
+		var post models.Post
+
+		switch r.Type {
+		case "essay":
+			d := essayMap[r.ID]
+			post = models.EssayPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Title: d.title, Slug: d.slug, Excerpt: d.excerpt, Body: d.body,
+				ReadingTimeMinutes: d.readingTimeMinutes,
+			}
+		case "short":
+			d := shortMap[r.ID]
+			post = models.ShortPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Body: d.body,
+			}
+		case "music":
+			d := musicMap[r.ID]
+			post = models.MusicPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Title: d.title, AlbumArt: d.albumArt, AudioURL: d.audioURL,
+				Duration: d.duration, Album: d.album,
+			}
+		case "photo":
+			meta := photoMeta[r.ID]
+			imgs := photoImages[r.ID]
+			if imgs == nil {
+				imgs = []models.PhotoImage{}
+			}
+			post = models.PhotoPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Images: imgs, Location: meta.location,
+			}
+		case "video":
+			d := videoMap[r.ID]
+			post = models.VideoPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Title: d.title, ThumbnailURL: d.thumbnailURL, VideoURL: d.videoURL,
+				Duration: d.duration, Playlist: d.playlist,
+			}
+		case "link":
+			d := linkPostMap[r.ID]
+			post = models.LinkPost{
+				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
+				Title: d.title, URL: d.url, Domain: d.domain,
+				Description: d.description, ThumbnailURL: d.thumbnailURL, Category: d.category,
+			}
+		default:
+			continue
+		}
+		result = append(result, post)
+	}
+	return result, nil
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+func placeholders(n int) string {
+	if n == 0 {
+		return ""
+	}
+	return strings.Repeat("?,", n-1) + "?"
+}
+
+func stringsToAny(ss []string) []any {
+	out := make([]any, len(ss))
+	for i, s := range ss {
+		out[i] = s
+	}
+	return out
+}
+
+func extractIDs(rows []baseRow) []string {
+	ids := make([]string, len(rows))
+	for i, r := range rows {
+		ids[i] = r.ID
+	}
+	return ids
+}
+
+func groupByType(rows []baseRow) map[string][]string {
+	m := make(map[string][]string)
+	for _, r := range rows {
+		m[r.Type] = append(m[r.Type], r.ID)
+	}
+	return m
+}
+
+func coalesceStringSlice(s []string) []string {
+	if s == nil {
+		return []string{}
+	}
+	return s
+}
