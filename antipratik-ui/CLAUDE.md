@@ -135,6 +135,8 @@ These tokens were added or modified during implementation (not in the original d
 | Token | Value | Note |
 |---|---|---|
 | `--content-column-width` | `860px` | Main content column max-width — widened from 680px to use 2 more grid columns (1 each side) per issue #5 |
+| `--article-column-width` | `680px` | Article reading view max-width — intentionally narrower than feed (860px) for prose comfort (~65ch at 16px body) |
+| `--measure-article` | `680px` | Matches `--article-column-width`; kept in sync |
 | `--nav-height` | `48px` | FilterBar needs this for sticky top positioning |
 | `--nav-height-compact` | `40px` | Navbar compact state on scroll |
 | `--nav-height-default` | `48px` | Alias for clarity in FilterBar CSS |
