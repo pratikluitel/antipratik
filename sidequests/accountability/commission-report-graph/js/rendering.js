@@ -1,7 +1,6 @@
 // Create selections immediately (before warm-up, so they're ready to render)
 const linkSel = g.append("g").selectAll("line").data(links).join("line")
   .attr("stroke-width", 0.8).attr("stroke-opacity", 0.5)
-  .attr("shape-rendering", "crispEdges") // Hardware optimization for straight lines
   .attr("stroke", d => {
     const src = nodes.find(n => n.id === (typeof d.source === "string" ? d.source : d.source.id));
     return src ? CATEGORIES[src.cat]?.color || "#888" : "#888";
