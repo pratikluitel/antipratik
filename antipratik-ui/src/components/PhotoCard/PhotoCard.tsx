@@ -46,7 +46,7 @@ export default function PhotoCard({ post, onOpen }: Props) {
           src={mainImage.url}
           alt={mainImage.alt}
           fill
-          sizes="(max-width: 680px) 100vw, 680px"
+          sizes="(max-width: 860px) 100vw, 860px"
         />
         {count > 1 && (
           <div className={styles.galleryIndicator}>

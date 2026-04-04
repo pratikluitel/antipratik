@@ -32,7 +32,7 @@ export default function VideoCard({ post }: Props) {
             src={post.thumbnailUrl}
             alt={post.title}
             fill
-            sizes="(max-width: 680px) 100vw, 680px"
+            sizes="(max-width: 860px) 100vw, 860px"
           />
           <div className={styles.scrim} />
           <div className={styles.playButton} aria-hidden="true">

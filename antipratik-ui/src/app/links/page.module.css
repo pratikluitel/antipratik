@@ -1,5 +1,5 @@
 .page {
-  max-width: 680px;
+  max-width: var(--content-column-width);
   margin: 0 auto;
   padding: calc(var(--nav-height) + var(--space-8)) 20px var(--space-16);
 }

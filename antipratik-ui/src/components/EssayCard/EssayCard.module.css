@@ -19,7 +19,6 @@
   color: var(--color-text-primary-dark);
   letter-spacing: var(--ls-heading);
   line-height: var(--lh-heading);
-  max-width: var(--measure-short);
   margin: 0;
 }
 
@@ -34,7 +33,6 @@
   color: var(--color-text-body-dark);
   line-height: var(--lh-ui);
   margin-top: 10px;
-  max-width: var(--measure-short);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
