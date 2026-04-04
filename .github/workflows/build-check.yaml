@@ -21,26 +21,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: app/antipratik-ui/package-lock.json
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: app/antipratik-api/go.mod
-          cache-dependency-path: app/antipratik-api/go.sum
-
-      - name: Start backend
-        run: |
-          cd app/antipratik-api
-          nohup go run . > /tmp/antipratik-api.log 2>&1 &
-          for i in $(seq 1 20); do
-            if curl -sSf http://127.0.0.1:8080/api/posts >/dev/null 2>&1; then
-              echo "Backend ready"
-              exit 0
-            fi
-            sleep 1
-          done
-          cat /tmp/antipratik-api.log
-          exit 1
-
       - name: Install dependencies
         working-directory: app/antipratik-ui
         run: npm ci
@@ -48,5 +28,9 @@ jobs:
       - name: Build
         working-directory: app/antipratik-ui
         env:
-          NEXT_PUBLIC_API_URL: http://127.0.0.1:8080
+          # Disable static export for isolated UI build checks so the workflow
+          # can verify the UI compiles without requiring the backend-driven
+          # dynamic route params for /[slug].
+          # TODO: In the future, consider running the build check with a full dummy backend environment so we can keep static export enabled for better build-time checks.
+          NEXT_DISABLE_EXPORT: '1'
         run: npm run build

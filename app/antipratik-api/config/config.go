@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
@@ -43,6 +44,19 @@ func Load(path string) (*Config, error) {
 	if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("decode config %q: %w", path, err)
 	}
+
+	if portStr := os.Getenv("ANTIPRATIK_PORT"); portStr != "" {
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			return nil, fmt.Errorf("parse ANTIPRATIK_PORT %q: %w", portStr, err)
+		}
+		cfg.Server.Port = port
+	}
+
+	if host := os.Getenv("ANTIPRATIK_HOST"); host != "" {
+		cfg.Server.Host = host
+	}
+
 	return &cfg, nil
 }
 
