@@ -104,7 +104,7 @@
 /* ── Article layout ─────────────────────────────────────────────────────── */
 
 .article {
-  max-width: var(--content-column-width);
+  max-width: var(--article-column-width);
   margin: 0 auto;
   padding: var(--article-padding-desktop);
   padding-top: calc(var(--nav-height) + 40px);

@@ -53,7 +53,7 @@
 /* Measure (max line length) */
 --measure-long:                      65ch;
 --measure-short:                     55ch;
---measure-article:                   560px;
+--measure-article:                   680px;
 
 /* ═══════════════════════════════════════════════
    SPACING — 8px base grid
@@ -331,7 +331,7 @@
 /* ═══════════════════════════════════════════════
    ARTICLE READING VIEW
 ═══════════════════════════════════════════════ */
---article-column-width:              560px;
+--article-column-width:              680px;
 --article-padding-desktop:           40px 24px 80px;
 --article-padding-mobile:            24px 20px 60px;
 --article-title-size-desktop:        28px;

@@ -20,8 +20,7 @@ const essays: EssayPost[] = [
     excerpt:
       'A sound exists only in the moment it is heard. A function exists only as long as the runtime allows. These are not different things.',
     readingTimeMinutes: 7,
-    body: `# On Impermanence and Code
-
+    body: `
 A sound exists only in the moment it is heard. Unlike a painting, which persists on its canvas across centuries, a piece of music is always already disappearing — each note a small act of vanishing. This is not a flaw in the medium. It is the medium.
 
 I've been thinking about this since spending a week at a gompa above Langtang, watching monks build a sand mandala. Three days of careful work, every grain placed with intention. On the fourth morning, they swept it into a bowl and poured it into the river.
@@ -68,8 +67,7 @@ I try to make music that knows this about itself.`,
     excerpt:
       'A musician who truly knows their instrument stops thinking about the instrument. The same is true for a developer who has made the terminal their own.',
     readingTimeMinutes: 5,
-    body: `# The Terminal as a Musical Instrument
-
+    body: `
 There's a guitarist I know who has played the same guitar for twelve years. He doesn't think about the instrument anymore. He thinks about the music, and the instrument disappears.
 
 I've been using the same terminal configuration for four years. I barely notice it. This is the goal.
