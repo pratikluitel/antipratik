@@ -36,16 +36,23 @@ func main() {
 
 	postStore := store.NewPostStore(db)
 	linkStore := store.NewLinkStore(db)
+	userStore := store.NewUserStore(db)
+
+	jwtSecret, err := store.GetOrCreateJWTSecret(db)
+	if err != nil {
+		log.Fatalf("jwt secret: %v", err)
+	}
+
 	postLogic := logic.NewPostService(postStore)
 	linkLogic := logic.NewLinkService(linkStore)
+	authService := logic.NewAuthService(userStore, jwtSecret)
+
 	postH := api.NewPostHandler(postLogic)
 	linkH := api.NewLinkHandler(linkLogic)
+	authH := api.NewAuthHandler(authService)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
-	mux.HandleFunc("GET /api/posts", postH.GetPosts)
-	mux.HandleFunc("GET /api/links/featured", linkH.GetFeaturedLinks)
-	mux.HandleFunc("GET /api/links", linkH.GetLinks)
+	api.RegisterRoutes(mux, postH, linkH, authH, authService, "api/openapi.yaml", "api/swagger.html")
 
 	handler := api.CORSMiddleware(mux)
 

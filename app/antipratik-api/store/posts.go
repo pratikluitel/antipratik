@@ -9,6 +9,257 @@ import (
 	"github.com/pratikluitel/antipratik/models"
 )
 
+// ── Write methods ─────────────────────────────────────────────────────────────
+
+func (s *SQLitePostStore) CreatePost(ctx context.Context, postType string, id string, createdAt string) error {
+	_, err := s.db.ExecContext(ctx, `INSERT INTO posts (id, type, created_at) VALUES (?, ?, ?)`, id, postType, createdAt)
+	return err
+}
+
+func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string, tags []string) error {
+	for _, tag := range tags {
+		_, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id, tag) VALUES (?, ?)`, id, tag)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input models.CreateEssayPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO essay_posts (post_id, title, slug, excerpt, body, reading_time_minutes) VALUES (?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.Slug, input.Excerpt, input.Body, input.ReadingTimeMinutes)
+	if err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input models.CreateShortPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO short_posts (post_id, body) VALUES (?, ?)`, id, input.Body)
+	if err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input models.CreateMusicPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO music_posts (post_id, title, album_art, audio_url, duration, album) VALUES (?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.AlbumArt, input.AudioURL, input.Duration, input.Album)
+	if err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input models.CreatePhotoPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO photo_posts (post_id, location) VALUES (?, ?)`, id, input.Location)
+	if err != nil {
+		return err
+	}
+	for i, img := range input.Images {
+		_, err = tx.ExecContext(ctx, `INSERT INTO photo_images (post_id, url, alt, caption, sort_order) VALUES (?, ?, ?, ?, ?)`,
+			id, img.URL, img.Alt, img.Caption, i)
+		if err != nil {
+			return err
+		}
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input models.CreateVideoPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.ThumbnailURL, input.VideoURL, input.Duration, input.Playlist)
+	if err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, input models.CreateLinkPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `INSERT INTO link_posts (post_id, title, url, domain, description, thumbnail_url, category) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.Category)
+	if err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `UPDATE essay_posts SET title=?, slug=?, excerpt=?, body=?, reading_time_minutes=? WHERE post_id=?`,
+		input.Title, input.Slug, input.Excerpt, input.Body, input.ReadingTimeMinutes, id)
+	if err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE short_posts SET body=? WHERE post_id=?`, input.Body, id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE music_posts SET title=?, album_art=?, audio_url=?, duration=?, album=? WHERE post_id=?`,
+		input.Title, input.AlbumArt, input.AudioURL, input.Duration, input.Album, id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE photo_posts SET location=? WHERE post_id=?`, input.Location, id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM photo_images WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	for i, img := range input.Images {
+		if _, err = tx.ExecContext(ctx, `INSERT INTO photo_images (post_id, url, alt, caption, sort_order) VALUES (?, ?, ?, ?, ?)`,
+			id, img.URL, img.Alt, img.Caption, i); err != nil {
+			return err
+		}
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
+		input.Title, input.ThumbnailURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE link_posts SET title=?, url=?, domain=?, description=?, thumbnail_url=?, category=? WHERE post_id=?`,
+		input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.Category, id); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
+		return err
+	}
+	if err := s.insertTags(ctx, tx, id, input.Tags); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func (s *SQLitePostStore) DeletePost(ctx context.Context, id string) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM posts WHERE id=?`, id)
+	return err
+}
+
 // SQLitePostStore implements PostStore using a SQLite database.
 type SQLitePostStore struct {
 	db *sql.DB

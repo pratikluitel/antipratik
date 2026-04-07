@@ -32,6 +32,33 @@ func (s *SQLiteLinkStore) GetFeaturedLinks(ctx context.Context) ([]models.Extern
 	return s.queryLinks(ctx, q)
 }
 
+func (s *SQLiteLinkStore) CreateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
+	featured := 0
+	if input.Featured {
+		featured = 1
+	}
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO links (id, title, url, domain, description, featured, category) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.URL, input.Domain, input.Description, featured, input.Category)
+	return err
+}
+
+func (s *SQLiteLinkStore) UpdateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
+	featured := 0
+	if input.Featured {
+		featured = 1
+	}
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE links SET title=?, url=?, domain=?, description=?, featured=?, category=? WHERE id=?`,
+		input.Title, input.URL, input.Domain, input.Description, featured, input.Category, id)
+	return err
+}
+
+func (s *SQLiteLinkStore) DeleteLink(ctx context.Context, id string) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM links WHERE id=?`, id)
+	return err
+}
+
 func (s *SQLiteLinkStore) queryLinks(ctx context.Context, query string, args ...any) ([]models.ExternalLink, error) {
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {

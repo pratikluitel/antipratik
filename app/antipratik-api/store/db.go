@@ -1,8 +1,10 @@
 package store
 
 import (
+	"crypto/rand"
 	"database/sql"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"io/fs"
 	"os"
@@ -24,7 +26,7 @@ func Open(path string) (*sql.DB, error) {
 		return nil, fmt.Errorf("create db directory: %w", err)
 	}
 
-	dsn := fmt.Sprintf("file:%s?_journal_mode=WAL&_busy_timeout=5000", path)
+	dsn := fmt.Sprintf("file:%s?_journal_mode=WAL&_busy_timeout=5000&_foreign_keys=on", path)
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
@@ -110,4 +112,28 @@ func recordMigration(db *sql.DB, name string) error {
 		return fmt.Errorf("record migration %s: %w", name, err)
 	}
 	return nil
+}
+
+// GetOrCreateJWTSecret returns the persisted JWT secret from the settings table,
+// generating and storing a new one if none exists yet.
+func GetOrCreateJWTSecret(db *sql.DB) (string, error) {
+	var secret string
+	err := db.QueryRow(`SELECT value FROM settings WHERE key='jwt_secret'`).Scan(&secret)
+	if err == nil {
+		return secret, nil
+	}
+	if err != sql.ErrNoRows {
+		return "", fmt.Errorf("read jwt_secret: %w", err)
+	}
+
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("generate jwt_secret: %w", err)
+	}
+	secret = hex.EncodeToString(b)
+
+	if _, err := db.Exec(`INSERT INTO settings (key, value) VALUES ('jwt_secret', ?)`, secret); err != nil {
+		return "", fmt.Errorf("store jwt_secret: %w", err)
+	}
+	return secret, nil
 }

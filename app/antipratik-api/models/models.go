@@ -122,3 +122,62 @@ type FilterState struct {
 	ActiveTypes []string
 	ActiveTags  []string
 }
+
+// ── Create/Update input types ─────────────────────────────────────────────────
+
+type CreateEssayPost struct {
+	Title              string   `json:"title"`
+	Slug               string   `json:"slug"`
+	Excerpt            string   `json:"excerpt"`
+	Body               string   `json:"body"`
+	ReadingTimeMinutes int      `json:"readingTimeMinutes"`
+	Tags               []string `json:"tags"`
+}
+
+type CreateShortPost struct {
+	Body string   `json:"body"`
+	Tags []string `json:"tags"`
+}
+
+type CreateMusicPost struct {
+	Title    string   `json:"title"`
+	AlbumArt string   `json:"albumArt"`
+	AudioURL string   `json:"audioURL"`
+	Duration int      `json:"duration"`
+	Album    *string  `json:"album,omitempty"`
+	Tags     []string `json:"tags"`
+}
+
+type CreatePhotoPost struct {
+	Images   []PhotoImage `json:"images"`
+	Location *string      `json:"location,omitempty"`
+	Tags     []string     `json:"tags"`
+}
+
+type CreateVideoPost struct {
+	Title        string   `json:"title"`
+	ThumbnailURL string   `json:"thumbnailURL"`
+	VideoURL     string   `json:"videoURL"`
+	Duration     int      `json:"duration"`
+	Playlist     *string  `json:"playlist,omitempty"`
+	Tags         []string `json:"tags"`
+}
+
+type CreateLinkPost struct {
+	Title        string   `json:"title"`
+	URL          string   `json:"url"`
+	Domain       string   `json:"domain"`
+	Description  *string  `json:"description,omitempty"`
+	ThumbnailURL *string  `json:"thumbnailURL,omitempty"`
+	Category     *string  `json:"category,omitempty"`
+	Tags         []string `json:"tags"`
+}
+
+type CreateExternalLink struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Domain      string `json:"domain"`
+	Description string `json:"description"`
+	Featured    bool   `json:"featured"`
+	Category    string `json:"category"`
+}

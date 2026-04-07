@@ -1,0 +1,893 @@
+openapi: "3.0.3"
+info:
+  title: antipratik API
+  version: "1.0.0"
+  description: REST API for antipratik.com
+
+servers:
+  - url: /api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    IDResponse:
+      type: object
+      properties:
+        id:
+          type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    PhotoImage:
+      type: object
+      properties:
+        url:
+          type: string
+        alt:
+          type: string
+        caption:
+          type: string
+          nullable: true
+
+    EssayPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [essay]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        body:
+          type: string
+        readingTimeMinutes:
+          type: integer
+
+    ShortPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [short]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+
+    MusicPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [music]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        albumArt:
+          type: string
+        audioUrl:
+          type: string
+        duration:
+          type: integer
+        album:
+          type: string
+          nullable: true
+
+    PhotoPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [photo]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/PhotoImage"
+        location:
+          type: string
+          nullable: true
+
+    VideoPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [video]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        thumbnailUrl:
+          type: string
+        videoUrl:
+          type: string
+        duration:
+          type: integer
+        playlist:
+          type: string
+          nullable: true
+
+    LinkPost:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [link]
+        createdAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        url:
+          type: string
+        domain:
+          type: string
+        description:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+
+    Post:
+      oneOf:
+        - $ref: "#/components/schemas/EssayPost"
+        - $ref: "#/components/schemas/ShortPost"
+        - $ref: "#/components/schemas/MusicPost"
+        - $ref: "#/components/schemas/PhotoPost"
+        - $ref: "#/components/schemas/VideoPost"
+        - $ref: "#/components/schemas/LinkPost"
+      discriminator:
+        propertyName: type
+
+    ExternalLink:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        domain:
+          type: string
+        description:
+          type: string
+        featured:
+          type: boolean
+        category:
+          type: string
+
+    CreateEssayPost:
+      type: object
+      required: [title, slug, excerpt, body, readingTimeMinutes]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        body:
+          type: string
+        readingTimeMinutes:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreateShortPost:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreateMusicPost:
+      type: object
+      required: [title, albumArt, audioURL, duration]
+      properties:
+        title:
+          type: string
+        albumArt:
+          type: string
+        audioURL:
+          type: string
+        duration:
+          type: integer
+        album:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreatePhotoPost:
+      type: object
+      required: [images]
+      properties:
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/PhotoImage"
+        location:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreateVideoPost:
+      type: object
+      required: [title, thumbnailURL, videoURL, duration]
+      properties:
+        title:
+          type: string
+        thumbnailURL:
+          type: string
+        videoURL:
+          type: string
+        duration:
+          type: integer
+        playlist:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreateLinkPost:
+      type: object
+      required: [title, url, domain]
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        domain:
+          type: string
+        description:
+          type: string
+          nullable: true
+        thumbnailURL:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    CreateExternalLink:
+      type: object
+      required: [title, url, domain, description, category]
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        domain:
+          type: string
+        description:
+          type: string
+        featured:
+          type: boolean
+        category:
+          type: string
+
+paths:
+  /auth/login:
+    post:
+      summary: Login and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts:
+    get:
+      summary: List posts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [essay, short, music, photo, video, link]
+          style: form
+          explode: true
+        - name: tag
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+      responses:
+        "200":
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+
+  /posts/{slug}:
+    get:
+      summary: Get essay by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Essay post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EssayPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/essay:
+    post:
+      summary: Create essay post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/essay/{id}:
+    put:
+      summary: Update essay post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEssayPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/short:
+    post:
+      summary: Create short post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShortPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/short/{id}:
+    put:
+      summary: Update short post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShortPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/music:
+    post:
+      summary: Create music post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMusicPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/music/{id}:
+    put:
+      summary: Update music post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMusicPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/photo:
+    post:
+      summary: Create photo post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePhotoPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/photo/{id}:
+    put:
+      summary: Update photo post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePhotoPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/video:
+    post:
+      summary: Create video post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVideoPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/video/{id}:
+    put:
+      summary: Update video post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVideoPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/link:
+    post:
+      summary: Create link post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLinkPost"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/link/{id}:
+    put:
+      summary: Update link post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLinkPost"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/{id}:
+    delete:
+      summary: Delete any post by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /links:
+    get:
+      summary: List all external links
+      responses:
+        "200":
+          description: List of links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExternalLink"
+    post:
+      summary: Create external link
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExternalLink"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /links/featured:
+    get:
+      summary: List featured external links (up to 4)
+      responses:
+        "200":
+          description: Featured links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExternalLink"
+
+  /links/{id}:
+    put:
+      summary: Update external link
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExternalLink"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IDResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete external link
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
