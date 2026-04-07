@@ -37,7 +37,29 @@ func (s *LinkService) GetFeaturedLinks(ctx context.Context) ([]models.ExternalLi
 	return links, nil
 }
 
+func validateExternalLink(input models.CreateExternalLink) error {
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("url", input.URL); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("domain", input.Domain); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("description", input.Description); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("category", input.Category); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExternalLink) (string, error) {
+	if err := validateExternalLink(input); err != nil {
+		return "", err
+	}
 	id := uuid.New().String()
 	if err := s.store.CreateLink(ctx, id, input); err != nil {
 		return "", fmt.Errorf("LinkService.CreateLink: %w", err)
@@ -46,6 +68,12 @@ func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExterna
 }
 
 func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := validateExternalLink(input); err != nil {
+		return err
+	}
 	return s.store.UpdateLink(ctx, id, input)
 }
 

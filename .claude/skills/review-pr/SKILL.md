@@ -31,53 +31,84 @@ gh pr view $ARGUMENTS --repo pratikluitel/antipratik --json files --jq '[.files[
 gh pr diff $ARGUMENTS --repo pratikluitel/antipratik -- path/to/file
 ```
 
-### 2. Read relevant source files locally
+### 2. Determine scope from changed file paths
 
-Read for full context:
-- `CLAUDE.md` — rules every change must follow
-- `src/styles/tokens.css` — for styling changes, verify the full token hierarchy
+Inspect the list of changed files — this is the authoritative scope signal:
+- Any path under `app/antipratik-ui/` → **FE**
+- Any path under `app/antipratik-api/` → **BE**
+- Both present → **FE + BE**
 
-### 3. Review against these criteria
+Record the scope — it determines which CLAUDE.md(s) to read and which rules to enforce.
+
+### 3. Read relevant source files locally
+
+**Always read the relevant CLAUDE.md(s) — these are the rules every change must follow.**
+
+**If FE (or both):**
+- Read `app/antipratik-ui/CLAUDE.md`
+- Read `app/antipratik-ui/src/styles/tokens.css` for any styling changes (verify full token hierarchy)
+
+**If BE (or both):**
+- Read `app/antipratik-api/CLAUDE.md`
+- Read local copies of changed files under `app/antipratik-api/` for full context
+
+### 4. Review against these criteria
 
 **Correctness**
 - Does the change fix or implement what the PR/linked issue describes?
-- Are new values/logic sound? (e.g. for colour tokens: verify contrast ratios)
+- Are new values/logic sound?
 
 **Completeness**
 - Does the PR address everything in the linked issue?
 - Are there related cases that were missed?
 
 **Side effects**
-- Do changes unintentionally affect other components or tokens?
-- For token changes: trace which components consume the token and confirm none are broken
+- Do changes unintentionally affect other components, tokens, or endpoints?
 
-**CLAUDE.md compliance** — check every Sacred Rule that applies:
-- No hardcoded hex/px values (Rule 1)
+---
+
+**FE CLAUDE.md compliance** *(check only if scope includes FE):*
+- No hardcoded hex/px values — use `var(--token)` (Rule 1)
 - No Tailwind classes (Rule 3)
-- No direct `fetch()` in components (Rule 4)
-- No `--accent-*` on UI chrome (Rule 6)
+- No direct `fetch()` in components — all data through `src/lib/api.ts` (Rule 4)
+- No `--accent-*` tokens on UI chrome (Rule 6)
 - Text contrast ≥ 4.5:1 normal / ≥ 3:1 large (Rule 16)
 - Typography not crossed: serif = content, sans = interface (Rule 9)
+- If tokens were changed: is the Token Additions & Modifications table in `CLAUDE.md` updated?
+
+**BE CLAUDE.md compliance** *(check only if scope includes BE):*
+- All input parameters validated in the logic layer before reaching the store (Rule 1 & 2)
+- Validation errors return descriptive messages via `ValidationError`; handlers use `logic.IsValidationError` for 400 vs 500 (Rule 3)
+- JWT middleware on all POST/PUT/DELETE endpoints (Rule 4)
+- No database access in the API layer — must delegate to logic → store (Rule 5)
+- `context.Context` passed through all layers (Rule 6)
+- Errors logged with operation context; no passwords/tokens in logs (Rule 7)
+- New error types defined in `errors.go` of the owning package (Rule 8)
+- No `panic` — errors returned instead (Guardrail 9)
+- No ignored errors (Guardrail 7)
+
+---
 
 **CLAUDE.md hygiene**
-- If tokens were changed, is the Token Additions & Modifications table updated?
-- If a new pattern was introduced, should a rule be added?
+- If a new pattern was introduced, should a rule be added to the relevant `CLAUDE.md`?
 
 **Out-of-scope findings**
 - Note pre-existing issues spotted in the diff that are NOT part of this PR — flag as candidates for follow-up, not as blockers.
 
-### 4. Form a verdict
+### 5. Form a verdict
 
 One of:
 - **Ready to merge** — no issues found
 - **Minor notes** — small things to be aware of, not blocking
 - **Needs changes** — something incorrect or non-compliant that must be fixed before merging
 
-### 5. Post the review comment
+### 6. Post the review comment
 
 ```bash
 gh pr comment $ARGUMENTS --repo pratikluitel/antipratik --body "$(cat <<'EOF'
 <verdict line with emoji: ✅ ready / ⚠️ minor notes / ❌ needs changes>
+
+**Scope:** FE / BE / Both
 
 **<filename>** — <one-line summary of changes and assessment>
 **<filename>** — <one-line summary of changes and assessment>

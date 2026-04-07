@@ -2,8 +2,6 @@
 
 Read this file at the start of every session before writing any code.
 
-> **See [Checkpoints.md](./Checkpoints.md) for all decisions, deviations, and fixes made during implementation. When this file and CLAUDE.md conflict, the checkpoint wins.**
-
 ---
 
 ## Project Overview & Philosophy

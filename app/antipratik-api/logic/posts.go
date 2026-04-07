@@ -56,10 +56,23 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 
 // ── Write methods ─────────────────────────────────────────────────────────────
 
-func newID() string     { return uuid.New().String() }
-func nowUTC() string    { return time.Now().UTC().Format(time.RFC3339) }
+func newID() string  { return uuid.New().String() }
+func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
 
 func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (string, error) {
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("slug", input.Slug); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("body", input.Body); err != nil {
+		return "", err
+	}
+	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
+		return "", err
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "essay", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateEssay: %w", err)
@@ -71,6 +84,10 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 }
 
 func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortPost) (string, error) {
+	if err := requireNonEmpty("body", input.Body); err != nil {
+		return "", err
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "short", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateShort: %w", err)
@@ -82,6 +99,21 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 }
 
 func (s *PostService) CreateMusic(ctx context.Context, input models.CreateMusicPost) (string, error) {
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return "", err
+	}
+	if input.Album != nil && *input.Album != "" {
+		if err := requireNonEmpty("albumArt", input.AlbumArt); err != nil {
+			return "", err
+		}
+	}
+	if err := requireNonEmpty("audioURL", input.AudioURL); err != nil {
+		return "", err
+	}
+	if err := requirePositive("duration", input.Duration); err != nil {
+		return "", err
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "music", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateMusic: %w", err)
@@ -93,6 +125,15 @@ func (s *PostService) CreateMusic(ctx context.Context, input models.CreateMusicP
 }
 
 func (s *PostService) CreatePhoto(ctx context.Context, input models.CreatePhotoPost) (string, error) {
+	if len(input.Images) == 0 {
+		return "", validationErr("images cannot be empty")
+	}
+	for i, img := range input.Images {
+		if err := requireNonEmpty(fmt.Sprintf("images[%d].url", i), img.URL); err != nil {
+			return "", err
+		}
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "photo", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreatePhoto: %w", err)
@@ -104,6 +145,16 @@ func (s *PostService) CreatePhoto(ctx context.Context, input models.CreatePhotoP
 }
 
 func (s *PostService) CreateVideo(ctx context.Context, input models.CreateVideoPost) (string, error) {
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("videoURL", input.VideoURL); err != nil {
+		return "", err
+	}
+	if err := requirePositive("duration", input.Duration); err != nil {
+		return "", err
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "video", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateVideo: %w", err)
@@ -115,6 +166,16 @@ func (s *PostService) CreateVideo(ctx context.Context, input models.CreateVideoP
 }
 
 func (s *PostService) CreateLinkPost(ctx context.Context, input models.CreateLinkPost) (string, error) {
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("url", input.URL); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("domain", input.Domain); err != nil {
+		return "", err
+	}
+
 	id := newID()
 	if err := s.store.CreatePost(ctx, "link", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateLinkPost: %w", err)
@@ -126,29 +187,105 @@ func (s *PostService) CreateLinkPost(ctx context.Context, input models.CreateLin
 }
 
 func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("slug", input.Slug); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("body", input.Body); err != nil {
+		return err
+	}
+	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
+		return err
+	}
 	return s.store.UpdateEssay(ctx, id, input)
 }
 
 func (s *PostService) UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("body", input.Body); err != nil {
+		return err
+	}
 	return s.store.UpdateShort(ctx, id, input)
 }
 
 func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return err
+	}
+	if input.Album != nil && *input.Album != "" {
+		if err := requireNonEmpty("albumArt", input.AlbumArt); err != nil {
+			return err
+		}
+	}
+	if err := requireNonEmpty("audioURL", input.AudioURL); err != nil {
+		return err
+	}
+	if err := requirePositive("duration", input.Duration); err != nil {
+		return err
+	}
 	return s.store.UpdateMusic(ctx, id, input)
 }
 
 func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if len(input.Images) == 0 {
+		return validationErr("images cannot be empty")
+	}
+	for i, img := range input.Images {
+		if err := requireNonEmpty(fmt.Sprintf("images[%d].url", i), img.URL); err != nil {
+			return err
+		}
+	}
 	return s.store.UpdatePhoto(ctx, id, input)
 }
 
 func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("videoURL", input.VideoURL); err != nil {
+		return err
+	}
+	if err := requirePositive("duration", input.Duration); err != nil {
+		return err
+	}
 	return s.store.UpdateVideo(ctx, id, input)
 }
 
 func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("title", input.Title); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("url", input.URL); err != nil {
+		return err
+	}
+	if err := requireNonEmpty("domain", input.Domain); err != nil {
+		return err
+	}
 	return s.store.UpdateLinkPost(ctx, id, input)
 }
 
 func (s *PostService) DeletePost(ctx context.Context, id string) error {
+	if err := requireNonEmpty("id", id); err != nil {
+		return err
+	}
 	return s.store.DeletePost(ctx, id)
 }

@@ -18,38 +18,67 @@ gh issue view $ARGUMENTS --repo pratikluitel/antipratik \
   --jq '{title, body, labels: [.labels[].name], comments: [.comments[].body]}'
 ```
 
-Extract: title, body, labels, and comments. Identify affected areas and any specific tokens, components, or files mentioned.
+Extract: title, body, labels, and comments. Identify affected areas and any specific tokens, components, layers, or files mentioned.
 
-### 2. Explore the codebase
+### 2. Determine scope: FE, BE, or both
 
-Launch an Explore agent (or read files directly) to understand the affected code:
-- Always read `CLAUDE.md` first — it contains inviolable rules and known token deviations
-- Read `src/styles/tokens.css` if the issue touches styling or tokens
-- Read the relevant component `.module.css` and `.tsx` files
-- Check `Checkpoints.md` for prior decisions that may be relevant
+**Check labels first** (authoritative):
+- Labels containing `frontend`, `fe`, `ui` → **FE only**
+- Labels containing `backend`, `be`, `api` → **BE only**
+- Both present, or no matching labels → scan title + body for keywords:
+  - FE signals: component, style, token, CSS, page, layout, UI, design, frontend validation
+  - BE signals: endpoint, route, store, migration, database, SQL, Go, API, auth, api/backend validation
+- If signals are mixed or absent → treat as **both**
 
-### 3. Plan before coding (use Plan mode)
+Record the scope decision — it controls every subsequent step.
+
+### 3. Explore the codebase
+
+**Always read the relevant CLAUDE.md(s) first — they contain inviolable rules.**
+
+**If FE (or both):**
+- Read `app/antipratik-ui/CLAUDE.md`
+- Read `app/antipratik-ui/src/styles/tokens.css` if the issue touches styling or tokens
+- Read the relevant component `.module.css` and `.tsx` files under `app/antipratik-ui/src/`
+
+**If BE (or both):**
+- Read `app/antipratik-api/CLAUDE.md`
+- Read the relevant files under `app/antipratik-api/` — `api/`, `logic/`, `store/`, `models/`
+
+### 4. Plan before coding (use Plan mode)
 
 Enter plan mode. Write a concise plan that covers:
-- Root cause / what is wrong
+- Root cause / what is wrong / what needs to change
 - Exact files to change and what to change in each
+- Which scope (FE/BE/both) is being touched and why
 - Verification steps
 
 Exit plan mode only after the plan is approved.
 
-### 4. Implement
+### 5. Implement
 
-Make the changes. Follow all rules in `CLAUDE.md`:
+Make the changes. Apply **only the rules relevant to the scope**:
+
+**FE rules (from `antipratik-ui/CLAUDE.md`):**
 - No hardcoded hex/px values — use `var(--token)`
 - No Tailwind, no direct `fetch()`, no inline styles
 - All data through `src/lib/api.ts`
 - Token changes in `tokens.css` only; never in component CSS
 
-### 5. Update CLAUDE.md if needed
+**BE rules (from `antipratik-api/CLAUDE.md`):**
+- All input parameters must be validated in the logic layer before reaching the store
+- Return descriptive `ValidationError` messages; use `logic.IsValidationError` in handlers for 400 vs 500
+- JWT middleware on all write endpoints (POST/PUT/DELETE)
+- No database access in the API layer — always delegate to logic → store
+- Pass `context.Context` through all layers
+- Log errors with operation context; never log passwords or tokens
+- New error types belong in the `errors.go` of the owning package
 
-If the fix introduces or modifies tokens, updates a Sacred Rule, or records a design decision, update the relevant section of `CLAUDE.md`. Change only what is required.
+### 6. Update CLAUDE.md if needed
 
-### 6. Create a branch and commit locally
+If the fix introduces or modifies tokens (FE), updates a Sacred Rule, or records a design decision, update the relevant `CLAUDE.md`. Change only what is required.
+
+### 7. Create a branch and commit locally
 
 ```bash
 # Create and switch to the branch
@@ -70,7 +99,7 @@ EOF
 git push -u origin <short-description>-$ARGUMENTS
 ```
 
-### 7. Open a Pull Request
+### 8. Open a Pull Request
 
 ```bash
 gh pr create \
@@ -83,6 +112,9 @@ Closes #$ARGUMENTS
 
 ## Summary
 - <bullet: what changed and why>
+
+## Scope
+FE / BE / Both — <one line explaining why>
 
 ## Test plan
 - [ ] <thing to verify manually>
