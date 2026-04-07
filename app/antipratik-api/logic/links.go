@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
@@ -34,4 +35,20 @@ func (s *LinkService) GetFeaturedLinks(ctx context.Context) ([]models.ExternalLi
 		return nil, fmt.Errorf("LinkService.GetFeaturedLinks: %w", err)
 	}
 	return links, nil
+}
+
+func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExternalLink) (string, error) {
+	id := uuid.New().String()
+	if err := s.store.CreateLink(ctx, id, input); err != nil {
+		return "", fmt.Errorf("LinkService.CreateLink: %w", err)
+	}
+	return id, nil
+}
+
+func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
+	return s.store.UpdateLink(ctx, id, input)
+}
+
+func (s *LinkService) DeleteLink(ctx context.Context, id string) error {
+	return s.store.DeleteLink(ctx, id)
 }
