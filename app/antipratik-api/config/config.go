@@ -41,12 +41,13 @@ type StorageConfig struct {
 }
 
 // R2Config holds Cloudflare R2 credentials and settings.
+// Files are always served via the backend's own /files/ and /thumbnails/ endpoints
+// regardless of storage backend — R2 object URLs are never exposed to clients.
 type R2Config struct {
 	Endpoint        string `yaml:"endpoint"`
 	Bucket          string `yaml:"bucket"`
 	AccessKeyID     string `yaml:"access_key_id"`
 	SecretAccessKey string `yaml:"secret_access_key"`
-	PublicBaseURL   string `yaml:"public_base_url"` // optional; base URL for constructing public file URLs
 }
 
 // Load reads and parses the YAML config file at the given path.

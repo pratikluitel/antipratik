@@ -16,4 +16,3 @@ storage:
     bucket: "antipratik"
     access_key_id: ""
     secret_access_key: ""
-    public_base_url: ""   # optional; if set, file URLs point here instead of /files/
