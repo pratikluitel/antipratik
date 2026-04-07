@@ -29,7 +29,11 @@ func (h *AuthHandlerImpl) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := h.auth.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "invalid credentials")
+		if logic.IsValidationError(err) {
+			writeError(w, http.StatusBadRequest, err.Error())
+		} else {
+			writeError(w, http.StatusUnauthorized, "invalid credentials")
+		}
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"token": token})

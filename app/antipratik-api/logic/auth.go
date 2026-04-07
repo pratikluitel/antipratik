@@ -23,6 +23,13 @@ func NewAuthService(users store.UserStore, jwtSecret string) *AuthService {
 }
 
 func (s *AuthService) Login(ctx context.Context, username, password string) (string, error) {
+	if err := requireNonEmpty("username", username); err != nil {
+		return "", err
+	}
+	if err := requireNonEmpty("password", password); err != nil {
+		return "", err
+	}
+
 	user, err := s.users.GetUserByUsername(ctx, username)
 	if err != nil {
 		return "", fmt.Errorf("auth service login: %w", err)

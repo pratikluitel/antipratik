@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/logic"
@@ -23,8 +22,7 @@ func NewLinkHandler(l logic.LinkLogic) *LinkHandlerImpl {
 func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetLinks(r.Context())
 	if err != nil {
-		log.Printf("GetLinks error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "GetLinks", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, links)
@@ -34,8 +32,7 @@ func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
 func (h *LinkHandlerImpl) GetFeaturedLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetFeaturedLinks(r.Context())
 	if err != nil {
-		log.Printf("GetFeaturedLinks error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "GetFeaturedLinks", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, links)
@@ -49,8 +46,7 @@ func (h *LinkHandlerImpl) CreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateLink(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateLink error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateLink", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -64,8 +60,7 @@ func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdateLink(r.Context(), id, input); err != nil {
-		log.Printf("UpdateLink error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateLink", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -74,8 +69,7 @@ func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 func (h *LinkHandlerImpl) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeleteLink(r.Context(), id); err != nil {
-		log.Printf("DeleteLink error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "DeleteLink", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

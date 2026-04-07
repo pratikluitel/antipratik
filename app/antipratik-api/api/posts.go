@@ -30,8 +30,7 @@ func (h *PostHandlerImpl) GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.logic.GetPosts(r.Context(), filter)
 	if err != nil {
-		log.Printf("GetPosts error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "GetPosts", err)
 		return
 	}
 
@@ -44,8 +43,7 @@ func (h *PostHandlerImpl) GetPost(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.GetPost(r.Context(), slug)
 	if err != nil {
-		log.Printf("GetPost error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "GetPost", err)
 		return
 	}
 	if post == nil {
@@ -66,8 +64,7 @@ func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateEssay(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateEssay error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateEssay", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -81,8 +78,7 @@ func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateShort(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateShort error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateShort", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -96,8 +92,7 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateMusic(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateMusic error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateMusic", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -111,8 +106,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreatePhoto(r.Context(), input)
 	if err != nil {
-		log.Printf("CreatePhoto error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreatePhoto", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -126,8 +120,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateVideo(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateVideo error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateVideo", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -141,8 +134,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 	}
 	id, err := h.logic.CreateLinkPost(r.Context(), input)
 	if err != nil {
-		log.Printf("CreateLinkPost error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "CreateLinkPost", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -156,8 +148,7 @@ func (h *PostHandlerImpl) UpdateEssay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdateEssay(r.Context(), id, input); err != nil {
-		log.Printf("UpdateEssay error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateEssay", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -171,8 +162,7 @@ func (h *PostHandlerImpl) UpdateShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdateShort(r.Context(), id, input); err != nil {
-		log.Printf("UpdateShort error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateShort", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -186,8 +176,7 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdateMusic(r.Context(), id, input); err != nil {
-		log.Printf("UpdateMusic error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateMusic", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -201,8 +190,7 @@ func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdatePhoto(r.Context(), id, input); err != nil {
-		log.Printf("UpdatePhoto error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdatePhoto", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -216,8 +204,7 @@ func (h *PostHandlerImpl) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.logic.UpdateVideo(r.Context(), id, input); err != nil {
-		log.Printf("UpdateVideo error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateVideo", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -231,8 +218,7 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if err := h.logic.UpdateLinkPost(r.Context(), id, input); err != nil {
-		log.Printf("UpdateLinkPost error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "UpdateLinkPost", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"id": id})
@@ -241,8 +227,7 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeletePost(r.Context(), id); err != nil {
-		log.Printf("DeletePost error: %v", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		handleLogicError(w, "DeletePost", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
