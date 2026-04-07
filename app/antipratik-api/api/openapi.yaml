@@ -43,6 +43,44 @@ components:
         caption:
           type: string
           nullable: true
+        thumbnailSmallUrl:
+          type: string
+          nullable: true
+        thumbnailMediumUrl:
+          type: string
+          nullable: true
+        thumbnailLargeUrl:
+          type: string
+          nullable: true
+
+    UploadPhotoResponse:
+      type: object
+      properties:
+        fileId:
+          type: string
+          description: "Uploaded file ID in the format <postId>.<ext>"
+        originalUrl:
+          type: string
+          description: "URL to retrieve the original image via GET /files/{fileId}"
+        thumbnailSmallUrl:
+          type: string
+          description: "URL to the small thumbnail (300px wide) via GET /thumbnails/{thumbnailId}"
+        thumbnailMediumUrl:
+          type: string
+          description: "URL to the medium thumbnail (600px wide)"
+        thumbnailLargeUrl:
+          type: string
+          description: "URL to the large thumbnail (1200px wide)"
+
+    UploadMusicResponse:
+      type: object
+      properties:
+        fileId:
+          type: string
+          description: "Uploaded file ID in the format <postId>.<ext>"
+        audioUrl:
+          type: string
+          description: "URL to retrieve the audio file via GET /files/{fileId}"
 
     EssayPost:
       type: object
@@ -887,6 +925,191 @@ paths:
           description: Deleted
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # Upload and file-serving endpoints live outside /api — override server at path level.
+  /uploads/photos:
+    servers:
+      - url: /
+    post:
+      summary: Upload a photo file and generate thumbnails
+      description: |
+        Accepts a multipart/form-data request with a `postId` string field and a
+        `file` binary field. Stores the original and generates three thumbnail
+        variants (small 300px, medium 600px, large 1200px). Returns URL references
+        only — no binary content in the response.
+        File IDs follow the pattern `<postId>.<ext>`.
+        Thumbnail IDs follow the pattern `<postId>-<size>.<ext>`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [postId, file]
+              properties:
+                postId:
+                  type: string
+                  description: ID of the associated post
+                file:
+                  type: string
+                  format: binary
+                  description: "Image file — allowed types: jpg, jpeg, png, webp"
+      responses:
+        "201":
+          description: Upload successful; returns metadata with URL references
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadPhotoResponse"
+        "400":
+          description: Validation error (missing field, unsupported file type, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /uploads/music:
+    servers:
+      - url: /
+    post:
+      summary: Upload a music/audio file
+      description: |
+        Accepts a multipart/form-data request with a `postId` string field and a
+        `file` binary field. Stores the audio file and returns a URL reference.
+        File IDs follow the pattern `<postId>.<ext>`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [postId, file]
+              properties:
+                postId:
+                  type: string
+                  description: ID of the associated post
+                file:
+                  type: string
+                  format: binary
+                  description: "Audio file — allowed types: mp3, wav, ogg, m4a"
+      responses:
+        "201":
+          description: Upload successful; returns metadata with URL reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadMusicResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /files/{fileId}:
+    servers:
+      - url: /
+    get:
+      summary: Retrieve an uploaded file (photo or audio)
+      description: |
+        Streams the original binary content of an uploaded file.
+        The `fileId` must match the pattern returned by upload endpoints (`<postId>.<ext>`).
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "File ID in the format <postId>.<ext>"
+      responses:
+        "200":
+          description: File binary content
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+            audio/ogg:
+              schema:
+                type: string
+                format: binary
+            audio/mp4:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /thumbnails/{thumbnailId}:
+    servers:
+      - url: /
+    get:
+      summary: Retrieve a photo thumbnail
+      description: |
+        Streams the binary content of a generated thumbnail image.
+        Thumbnail IDs follow the pattern `<postId>-<size>.<ext>` where size is
+        one of `small` (300px), `medium` (600px), or `large` (1200px).
+      parameters:
+        - name: thumbnailId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Thumbnail ID in the format <postId>-<size>.<ext>"
+      responses:
+        "200":
+          description: Thumbnail image binary content
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Thumbnail not found
           content:
             application/json:
               schema:

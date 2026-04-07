@@ -47,12 +47,19 @@ func main() {
 	linkLogic := logic.NewLinkService(linkStore)
 	authService := logic.NewAuthService(userStore, jwtSecret)
 
+	fileStore, err := store.NewFileStore(cfg.Storage)
+	if err != nil {
+		log.Fatalf("init file store: %v", err)
+	}
+
 	postH := api.NewPostHandler(postLogic)
 	linkH := api.NewLinkHandler(linkLogic)
 	authH := api.NewAuthHandler(authService)
+	uploadSvc := logic.NewUploadService(fileStore, "")
+	uploadH := api.NewUploadHandler(uploadSvc, fileStore)
 
 	mux := http.NewServeMux()
-	api.RegisterRoutes(mux, postH, linkH, authH, authService, "api/openapi.yaml", "api/swagger.html")
+	api.RegisterRoutes(mux, postH, linkH, authH, authService, uploadH, "api/openapi.yaml", "api/swagger.html")
 
 	handler := api.CORSMiddleware(mux)
 
