@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,6 +61,26 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 func newID() string  { return uuid.New().String() }
 func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
 
+// extractDomain parses rawURL and returns the hostname with www. stripped.
+// Returns a ValidationError if the URL is malformed or missing scheme/host.
+func extractDomain(rawURL string) (string, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return "", validationErr("url must be a valid absolute URL (e.g. https://example.com/path)")
+	}
+	host := strings.TrimPrefix(u.Hostname(), "www.")
+	return host, nil
+}
+
+// computeReadingTime returns ceil(wordCount / 200), minimum 1.
+func computeReadingTime(body string) int {
+	words := len(strings.Fields(body))
+	if words == 0 {
+		return 1
+	}
+	return (words + 199) / 200
+}
+
 func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.EssayPost{}, err
@@ -69,9 +91,7 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 	if err := requireNonEmpty("body", input.Body); err != nil {
 		return models.EssayPost{}, err
 	}
-	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
-		return models.EssayPost{}, err
-	}
+	input.ReadingTimeMinutes = computeReadingTime(input.Body)
 
 	id, createdAt := newID(), nowUTC()
 	if err := s.store.CreatePost(ctx, "essay", id, createdAt); err != nil {
@@ -110,14 +130,9 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 	return models.ShortPost{ID: id, Type: "short", CreatedAt: createdAt, Tags: tags, Body: input.Body}, nil
 }
 
-func (s *PostService) CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (models.MusicPost, error) {
+func (s *PostService) CreateMusic(ctx context.Context, id string, input models.CreateMusicPost) (models.MusicPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.MusicPost{}, err
-	}
-	if input.Album != nil && *input.Album != "" {
-		if err := requireNonEmpty("albumArt", input.AlbumArt); err != nil {
-			return models.MusicPost{}, err
-		}
 	}
 	if err := requireNonEmpty("audioURL", input.AudioURL); err != nil {
 		return models.MusicPost{}, err
@@ -126,10 +141,6 @@ func (s *PostService) CreateMusic(ctx context.Context, preID string, input model
 		return models.MusicPost{}, err
 	}
 
-	id := preID
-	if id == "" {
-		id = newID()
-	}
 	createdAt := nowUTC()
 	if err := s.store.CreatePost(ctx, "music", id, createdAt); err != nil {
 		return models.MusicPost{}, fmt.Errorf("PostService.CreateMusic: %w", err)
@@ -137,6 +148,7 @@ func (s *PostService) CreateMusic(ctx context.Context, preID string, input model
 	if err := s.store.CreateMusicData(ctx, id, input); err != nil {
 		return models.MusicPost{}, fmt.Errorf("PostService.CreateMusic data: %w", err)
 	}
+
 	tags := input.Tags
 	if tags == nil {
 		tags = []string{}
@@ -219,9 +231,11 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 	if err := requireNonEmpty("url", input.URL); err != nil {
 		return models.LinkPost{}, err
 	}
-	if err := requireNonEmpty("domain", input.Domain); err != nil {
+	domain, err := extractDomain(input.URL)
+	if err != nil {
 		return models.LinkPost{}, err
 	}
+	input.Domain = domain
 
 	id := preID
 	if id == "" {
@@ -245,101 +259,306 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 	}, nil
 }
 
-func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error {
+func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.UpdateEssayPost) (models.EssayPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.EssayPost{}, err
 	}
-	if err := requireNonEmpty("title", input.Title); err != nil {
-		return err
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.EssayPost{}, fmt.Errorf("PostService.UpdateEssay: %w", err)
 	}
-	if err := requireNonEmpty("slug", input.Slug); err != nil {
-		return err
+	cur, ok := post.(models.EssayPost)
+	if !ok {
+		return models.EssayPost{}, validationErr("post is not an essay")
 	}
-	if err := requireNonEmpty("body", input.Body); err != nil {
-		return err
+
+	merged := models.CreateEssayPost{Title: cur.Title, Slug: cur.Slug, Excerpt: cur.Excerpt, Body: cur.Body, Tags: cur.Tags}
+	if input.Title != nil {
+		merged.Title = *input.Title
 	}
-	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
-		return err
+	if input.Slug != nil {
+		merged.Slug = *input.Slug
 	}
-	return s.store.UpdateEssay(ctx, id, input)
+	if input.Excerpt != nil {
+		merged.Excerpt = *input.Excerpt
+	}
+	if input.Body != nil {
+		merged.Body = *input.Body
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := requireNonEmpty("title", merged.Title); err != nil {
+		return models.EssayPost{}, err
+	}
+	if err := requireNonEmpty("slug", merged.Slug); err != nil {
+		return models.EssayPost{}, err
+	}
+	if err := requireNonEmpty("body", merged.Body); err != nil {
+		return models.EssayPost{}, err
+	}
+	merged.ReadingTimeMinutes = computeReadingTime(merged.Body)
+
+	if err := s.store.UpdateEssay(ctx, id, merged); err != nil {
+		return models.EssayPost{}, fmt.Errorf("PostService.UpdateEssay: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.EssayPost{
+		ID: id, Type: "essay", CreatedAt: cur.CreatedAt, Tags: tags,
+		Title: merged.Title, Slug: merged.Slug, Excerpt: merged.Excerpt,
+		Body: merged.Body, ReadingTimeMinutes: merged.ReadingTimeMinutes,
+	}, nil
 }
 
-func (s *PostService) UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error {
+func (s *PostService) UpdateShort(ctx context.Context, id string, input models.UpdateShortPost) (models.ShortPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.ShortPost{}, err
 	}
-	if err := requireNonEmpty("body", input.Body); err != nil {
-		return err
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.ShortPost{}, fmt.Errorf("PostService.UpdateShort: %w", err)
 	}
-	return s.store.UpdateShort(ctx, id, input)
+	cur, ok := post.(models.ShortPost)
+	if !ok {
+		return models.ShortPost{}, validationErr("post is not a short post")
+	}
+
+	merged := models.CreateShortPost{Body: cur.Body, Tags: cur.Tags}
+	if input.Body != nil {
+		merged.Body = *input.Body
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := requireNonEmpty("body", merged.Body); err != nil {
+		return models.ShortPost{}, err
+	}
+
+	if err := s.store.UpdateShort(ctx, id, merged); err != nil {
+		return models.ShortPost{}, fmt.Errorf("PostService.UpdateShort: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.ShortPost{ID: id, Type: "short", CreatedAt: cur.CreatedAt, Tags: tags, Body: merged.Body}, nil
 }
 
-func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error {
+func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.UpdateMusicPost) (models.MusicPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.MusicPost{}, err
 	}
-	if err := requireNonEmpty("title", input.Title); err != nil {
-		return err
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.MusicPost{}, fmt.Errorf("PostService.UpdateMusic: %w", err)
 	}
-	if input.Album != nil && *input.Album != "" {
-		if err := requireNonEmpty("albumArt", input.AlbumArt); err != nil {
-			return err
-		}
+	cur, ok := post.(models.MusicPost)
+	if !ok {
+		return models.MusicPost{}, validationErr("post is not a music post")
 	}
-	if err := requireNonEmpty("audioURL", input.AudioURL); err != nil {
-		return err
+
+	merged := models.CreateMusicPost{
+		Title: cur.Title, AudioURL: cur.AudioURL, AlbumArt: cur.AlbumArt,
+		Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
 	}
-	if err := requirePositive("duration", input.Duration); err != nil {
-		return err
+	if input.Title != nil {
+		merged.Title = *input.Title
 	}
-	return s.store.UpdateMusic(ctx, id, input)
+	if input.AudioURL != nil {
+		merged.AudioURL = *input.AudioURL
+	}
+	if input.AlbumArt != nil {
+		merged.AlbumArt = *input.AlbumArt
+	}
+	if input.Duration != nil {
+		merged.Duration = *input.Duration
+	}
+	if input.Album != nil {
+		merged.Album = input.Album
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := requireNonEmpty("title", merged.Title); err != nil {
+		return models.MusicPost{}, err
+	}
+	if err := requireNonEmpty("audioURL", merged.AudioURL); err != nil {
+		return models.MusicPost{}, err
+	}
+	if err := requirePositive("duration", merged.Duration); err != nil {
+		return models.MusicPost{}, err
+	}
+
+	if err := s.store.UpdateMusic(ctx, id, merged); err != nil {
+		return models.MusicPost{}, fmt.Errorf("PostService.UpdateMusic: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.MusicPost{
+		ID: id, Type: "music", CreatedAt: cur.CreatedAt, Tags: tags,
+		Title: merged.Title, AlbumArt: merged.AlbumArt, AudioURL: merged.AudioURL,
+		Duration: merged.Duration, Album: merged.Album,
+	}, nil
 }
 
-func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error {
+func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.UpdatePhotoPost) (models.PhotoPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.PhotoPost{}, err
 	}
-	if len(input.Images) == 0 {
-		return validationErr("images cannot be empty")
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.PhotoPost{}, fmt.Errorf("PostService.UpdatePhoto: %w", err)
 	}
-	for i, img := range input.Images {
-		if err := requireNonEmpty(fmt.Sprintf("images[%d].url", i), img.URL); err != nil {
-			return err
-		}
+	cur, ok := post.(models.PhotoPost)
+	if !ok {
+		return models.PhotoPost{}, validationErr("post is not a photo post")
 	}
-	return s.store.UpdatePhoto(ctx, id, input)
+
+	merged := models.CreatePhotoPost{Images: cur.Images, Location: cur.Location, Tags: cur.Tags}
+	if input.Location != nil {
+		merged.Location = input.Location
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := s.store.UpdatePhoto(ctx, id, merged); err != nil {
+		return models.PhotoPost{}, fmt.Errorf("PostService.UpdatePhoto: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.PhotoPost{
+		ID: id, Type: "photo", CreatedAt: cur.CreatedAt, Tags: tags,
+		Images: merged.Images, Location: merged.Location,
+	}, nil
 }
 
-func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error {
+func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.UpdateVideoPost) (models.VideoPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.VideoPost{}, err
 	}
-	if err := requireNonEmpty("title", input.Title); err != nil {
-		return err
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.VideoPost{}, fmt.Errorf("PostService.UpdateVideo: %w", err)
 	}
-	if err := requireNonEmpty("videoURL", input.VideoURL); err != nil {
-		return err
+	cur, ok := post.(models.VideoPost)
+	if !ok {
+		return models.VideoPost{}, validationErr("post is not a video post")
 	}
-	if err := requirePositive("duration", input.Duration); err != nil {
-		return err
+
+	merged := models.CreateVideoPost{
+		Title: cur.Title, ThumbnailURL: cur.ThumbnailURL, VideoURL: cur.VideoURL,
+		Duration: cur.Duration, Playlist: cur.Playlist, Tags: cur.Tags,
 	}
-	return s.store.UpdateVideo(ctx, id, input)
+	if input.Title != nil {
+		merged.Title = *input.Title
+	}
+	if input.VideoURL != nil {
+		merged.VideoURL = *input.VideoURL
+	}
+	if input.Duration != nil {
+		merged.Duration = *input.Duration
+	}
+	if input.Playlist != nil {
+		merged.Playlist = input.Playlist
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := requireNonEmpty("title", merged.Title); err != nil {
+		return models.VideoPost{}, err
+	}
+	if err := requireNonEmpty("videoURL", merged.VideoURL); err != nil {
+		return models.VideoPost{}, err
+	}
+	if err := requirePositive("duration", merged.Duration); err != nil {
+		return models.VideoPost{}, err
+	}
+
+	if err := s.store.UpdateVideo(ctx, id, merged); err != nil {
+		return models.VideoPost{}, fmt.Errorf("PostService.UpdateVideo: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.VideoPost{
+		ID: id, Type: "video", CreatedAt: cur.CreatedAt, Tags: tags,
+		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, VideoURL: merged.VideoURL,
+		Duration: merged.Duration, Playlist: merged.Playlist,
+	}, nil
 }
 
-func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error {
+func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input models.UpdateLinkPost) (models.LinkPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.LinkPost{}, err
 	}
-	if err := requireNonEmpty("title", input.Title); err != nil {
-		return err
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return models.LinkPost{}, fmt.Errorf("PostService.UpdateLinkPost: %w", err)
 	}
-	if err := requireNonEmpty("url", input.URL); err != nil {
-		return err
+	cur, ok := post.(models.LinkPost)
+	if !ok {
+		return models.LinkPost{}, validationErr("post is not a link post")
 	}
-	if err := requireNonEmpty("domain", input.Domain); err != nil {
-		return err
+
+	merged := models.CreateLinkPost{
+		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
+		Description: cur.Description, ThumbnailURL: cur.ThumbnailURL,
+		Category: cur.Category, Tags: cur.Tags,
 	}
-	return s.store.UpdateLinkPost(ctx, id, input)
+	if input.Title != nil {
+		merged.Title = *input.Title
+	}
+	if input.URL != nil {
+		merged.URL = *input.URL
+	}
+	if input.Description != nil {
+		merged.Description = input.Description
+	}
+	if input.Category != nil {
+		merged.Category = input.Category
+	}
+	if input.Tags != nil {
+		merged.Tags = input.Tags
+	}
+
+	if err := requireNonEmpty("title", merged.Title); err != nil {
+		return models.LinkPost{}, err
+	}
+	if err := requireNonEmpty("url", merged.URL); err != nil {
+		return models.LinkPost{}, err
+	}
+	domain, err := extractDomain(merged.URL)
+	if err != nil {
+		return models.LinkPost{}, err
+	}
+	merged.Domain = domain
+
+	if err := s.store.UpdateLinkPost(ctx, id, merged); err != nil {
+		return models.LinkPost{}, fmt.Errorf("PostService.UpdateLinkPost: %w", err)
+	}
+	tags := merged.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.LinkPost{
+		ID: id, Type: "link", CreatedAt: cur.CreatedAt, Tags: tags,
+		Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
+		Description: merged.Description, ThumbnailURL: merged.ThumbnailURL,
+		Category: merged.Category,
+	}, nil
 }
 
 func (s *PostService) DeletePost(ctx context.Context, id string) error {

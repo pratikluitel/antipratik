@@ -27,12 +27,12 @@ type PostLogic interface {
 	CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error)
 	CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error)
 	CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error)
-	UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error
-	UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error
-	UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error
-	UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error
-	UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error
-	UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error
+	UpdateEssay(ctx context.Context, id string, input models.UpdateEssayPost) (models.EssayPost, error)
+	UpdateShort(ctx context.Context, id string, input models.UpdateShortPost) (models.ShortPost, error)
+	UpdateMusic(ctx context.Context, id string, input models.UpdateMusicPost) (models.MusicPost, error)
+	UpdatePhoto(ctx context.Context, id string, input models.UpdatePhotoPost) (models.PhotoPost, error)
+	UpdateVideo(ctx context.Context, id string, input models.UpdateVideoPost) (models.VideoPost, error)
+	UpdateLinkPost(ctx context.Context, id string, input models.UpdateLinkPost) (models.LinkPost, error)
 	DeletePost(ctx context.Context, id string) error
 }
 
@@ -46,7 +46,7 @@ type LinkLogic interface {
 
 	// Write operations
 	CreateLink(ctx context.Context, input models.CreateExternalLink) (string, error)
-	UpdateLink(ctx context.Context, id string, input models.CreateExternalLink) error
+	UpdateLink(ctx context.Context, id string, input models.UpdateExternalLink) (models.ExternalLink, error)
 	DeleteLink(ctx context.Context, id string) error
 }
 

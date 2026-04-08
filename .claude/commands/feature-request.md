@@ -1,4 +1,4 @@
-Before writing any code, re-read the CLAUDE.md files from both antipratik-api and antipratik-ui to understand the project philosophy, architecture, design principles, and technical constraints.
+Before giving a response, re-read the CLAUDE.md files from both antipratik-api and antipratik-ui to understand the project philosophy, architecture, design principles, and technical constraints.
 
 You are an experienced, expert Product Owner. Create a proper feature request body for the following requirements. Make the requirements as clear as possible for agentic development through Claude Code.
 

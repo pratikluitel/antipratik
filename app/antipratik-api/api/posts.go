@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -90,30 +89,32 @@ func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
 
 func (h *PostHandlerImpl) UpdateEssay(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var input models.CreateEssayPost
+	var input models.UpdateEssayPost
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if err := h.logic.UpdateEssay(r.Context(), id, input); err != nil {
+	post, err := h.logic.UpdateEssay(r.Context(), id, input)
+	if err != nil {
 		handleLogicError(w, "UpdateEssay", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": id})
+	writeJSON(w, http.StatusOK, post)
 }
 
 func (h *PostHandlerImpl) UpdateShort(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var input models.CreateShortPost
+	var input models.UpdateShortPost
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if err := h.logic.UpdateShort(r.Context(), id, input); err != nil {
+	post, err := h.logic.UpdateShort(r.Context(), id, input)
+	if err != nil {
 		handleLogicError(w, "UpdateShort", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": id})
+	writeJSON(w, http.StatusOK, post)
 }
 
 // ── Multipart write handlers (music, photo, video, link) ─────────────────────
@@ -150,14 +151,19 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		albumArtInput = &fi
 	}
 
-	uploaded, err := h.uploads.UploadMusicFiles(r.Context(), postID,
-		logic.FileInput{File: audioFile, Header: audioHeader}, albumArtInput)
+	audioInput := &logic.FileInput{File: audioFile, Header: audioHeader}
+	uploaded, err := h.uploads.UploadMusicFiles(r.Context(), postID, audioInput, albumArtInput)
 	if err != nil {
 		handleLogicError(w, "CreateMusic upload", err)
 		return
 	}
 
-	duration, _ := strconv.Atoi(r.FormValue("duration"))
+	duration, err := strconv.Atoi(r.FormValue("duration"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "duration must be an integer")
+		return
+	}
+
 	input := models.CreateMusicPost{
 		Title:    r.FormValue("title"),
 		AudioURL: uploaded.AudioURL,
@@ -184,44 +190,28 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	audioFile, audioHeader, err := r.FormFile("audioFile")
+	input := models.UpdateMusicPost{Tags: formTags(r)}
+	if title := r.FormValue("title"); title != "" {
+		input.Title = &title
+	}
+	if durStr := r.FormValue("duration"); durStr != "" {
+		if d, err := strconv.Atoi(durStr); err == nil {
+			input.Duration = &d
+		} else {
+			writeError(w, http.StatusBadRequest, "duration must be an integer")
+			return
+		}
+	}
+	if albumStr := r.FormValue("album"); albumStr != "" {
+		input.Album = &albumStr
+	}
+
+	post, err := h.logic.UpdateMusic(r.Context(), postID, input)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "audioFile is required")
-		return
-	}
-	defer audioFile.Close()
-
-	var albumArtInput *logic.FileInput
-	if artFile, artHeader, err := r.FormFile("albumArtFile"); err == nil {
-		defer artFile.Close()
-		fi := logic.FileInput{File: artFile, Header: artHeader}
-		albumArtInput = &fi
-	}
-
-	uploaded, err := h.uploads.UploadMusicFiles(r.Context(), postID,
-		logic.FileInput{File: audioFile, Header: audioHeader}, albumArtInput)
-	if err != nil {
-		handleLogicError(w, "UpdateMusic upload", err)
-		return
-	}
-
-	duration, _ := strconv.Atoi(r.FormValue("duration"))
-	input := models.CreateMusicPost{
-		Title:    r.FormValue("title"),
-		AudioURL: uploaded.AudioURL,
-		AlbumArt: uploaded.AlbumArtURL,
-		Duration: duration,
-		Tags:     r.Form["tags"],
-	}
-	if album := r.FormValue("album"); album != "" {
-		input.Album = &album
-	}
-
-	if err := h.logic.UpdateMusic(r.Context(), postID, input); err != nil {
 		handleLogicError(w, "UpdateMusic", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": postID})
+	writeJSON(w, http.StatusOK, post)
 }
 
 func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
@@ -297,61 +287,17 @@ func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileHeaders := r.MultipartForm.File["images"]
-	if len(fileHeaders) == 0 {
-		writeError(w, http.StatusBadRequest, "at least one image file is required")
-		return
-	}
-
-	fileInputs := make([]logic.FileInput, 0, len(fileHeaders))
-	for _, fh := range fileHeaders {
-		f, err := fh.Open()
-		if err != nil {
-			writeError(w, http.StatusBadRequest, "could not read uploaded image")
-			return
-		}
-		defer f.Close()
-		fileInputs = append(fileInputs, logic.FileInput{File: f, Header: fh})
-	}
-
-	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, fileInputs)
-	if err != nil {
-		handleLogicError(w, "UpdatePhoto upload", err)
-		return
-	}
-
-	alts := r.Form["alt"]
-	captions := r.Form["caption"]
-	images := make([]models.PhotoImage, len(uploadResults))
-	for i, u := range uploadResults {
-		alt := ""
-		if i < len(alts) {
-			alt = alts[i]
-		}
-		small, med, large := u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
-		images[i] = models.PhotoImage{
-			URL:               u.OriginalURL,
-			Alt:               alt,
-			ThumbnailSmallURL: &small,
-			ThumbnailMedURL:   &med,
-			ThumbnailLargeURL: &large,
-		}
-		if i < len(captions) && captions[i] != "" {
-			c := captions[i]
-			images[i].Caption = &c
-		}
-	}
-
-	input := models.CreatePhotoPost{Images: images, Tags: r.Form["tags"]}
+	input := models.UpdatePhotoPost{Tags: formTags(r)}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
 
-	if err := h.logic.UpdatePhoto(r.Context(), postID, input); err != nil {
+	post, err := h.logic.UpdatePhoto(r.Context(), postID, input)
+	if err != nil {
 		handleLogicError(w, "UpdatePhoto", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": postID})
+	writeJSON(w, http.StatusOK, post)
 }
 
 func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
@@ -401,35 +347,30 @@ func (h *PostHandlerImpl) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	thumbnailURL := ""
-	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
-		defer thumbFile.Close()
-		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
-			logic.FileInput{File: thumbFile, Header: thumbHeader})
-		if err != nil {
-			handleLogicError(w, "UpdateVideo thumbnail upload", err)
-			return
-		}
-		thumbnailURL = url
-	}
+	input := models.UpdateVideoPost{Tags: formTags(r)}
 
-	duration, _ := strconv.Atoi(r.FormValue("duration"))
-	input := models.CreateVideoPost{
-		Title:        r.FormValue("title"),
-		VideoURL:     r.FormValue("videoURL"),
-		ThumbnailURL: thumbnailURL,
-		Duration:     duration,
-		Tags:         r.Form["tags"],
+	if title := r.FormValue("title"); title != "" {
+		input.Title = &title
+	}
+	if videoURL := r.FormValue("videoURL"); videoURL != "" {
+		input.VideoURL = &videoURL
+	}
+	if durStr := r.FormValue("duration"); durStr != "" {
+		if d, err := strconv.Atoi(durStr); err == nil {
+			input.Duration = &d
+		}
+		writeError(w, http.StatusBadRequest, "duration must be an integer")
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl
 	}
 
-	if err := h.logic.UpdateVideo(r.Context(), postID, input); err != nil {
+	post, err := h.logic.UpdateVideo(r.Context(), postID, input)
+	if err != nil {
 		handleLogicError(w, "UpdateVideo", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": postID})
+	writeJSON(w, http.StatusOK, post)
 }
 
 func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request) {
@@ -455,7 +396,6 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 	input := models.CreateLinkPost{
 		Title:        r.FormValue("title"),
 		URL:          r.FormValue("url"),
-		Domain:       r.FormValue("domain"),
 		ThumbnailURL: thumbnailURL,
 		Tags:         r.Form["tags"],
 	}
@@ -481,24 +421,12 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var thumbnailURL *string
-	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
-		defer thumbFile.Close()
-		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
-			logic.FileInput{File: thumbFile, Header: thumbHeader})
-		if err != nil {
-			handleLogicError(w, "UpdateLinkPost thumbnail upload", err)
-			return
-		}
-		thumbnailURL = &url
+	input := models.UpdateLinkPost{Tags: formTags(r)}
+	if title := r.FormValue("title"); title != "" {
+		input.Title = &title
 	}
-
-	input := models.CreateLinkPost{
-		Title:        r.FormValue("title"),
-		URL:          r.FormValue("url"),
-		Domain:       r.FormValue("domain"),
-		ThumbnailURL: thumbnailURL,
-		Tags:         r.Form["tags"],
+	if url := r.FormValue("url"); url != "" {
+		input.URL = &url
 	}
 	if desc := r.FormValue("description"); desc != "" {
 		input.Description = &desc
@@ -507,11 +435,12 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 		input.Category = &cat
 	}
 
-	if err := h.logic.UpdateLinkPost(r.Context(), postID, input); err != nil {
+	post, err := h.logic.UpdateLinkPost(r.Context(), postID, input)
+	if err != nil {
 		handleLogicError(w, "UpdateLinkPost", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": postID})
+	writeJSON(w, http.StatusOK, post)
 }
 
 func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
@@ -521,18 +450,4 @@ func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
-}
-
-// ── Shared response helpers ───────────────────────────────────────────────────
-
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Printf("writeJSON encode error: %v", err)
-	}
-}
-
-func writeError(w http.ResponseWriter, status int, msg string) {
-	writeJSON(w, status, map[string]string{"error": msg})
 }

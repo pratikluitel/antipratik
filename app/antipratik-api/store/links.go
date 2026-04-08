@@ -32,6 +32,19 @@ func (s *SQLiteLinkStore) GetFeaturedLinks(ctx context.Context) ([]models.Extern
 	return s.queryLinks(ctx, q)
 }
 
+// GetLinkByID returns an external link by ID, or an error if not found.
+func (s *SQLiteLinkStore) GetLinkByID(ctx context.Context, id string) (models.ExternalLink, error) {
+	links, err := s.queryLinks(ctx,
+		`SELECT id, title, url, domain, description, featured, category FROM links WHERE id = ?`, id)
+	if err != nil {
+		return models.ExternalLink{}, err
+	}
+	if len(links) == 0 {
+		return models.ExternalLink{}, fmt.Errorf("link %q not found", id)
+	}
+	return links[0], nil
+}
+
 func (s *SQLiteLinkStore) CreateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
 	featured := 0
 	if input.Featured {

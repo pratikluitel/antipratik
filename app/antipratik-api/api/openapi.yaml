@@ -7,6 +7,17 @@ info:
 servers:
   - url: /api
 
+tags:
+  - name: Auth
+  - name: All Posts
+  - name: Essays
+  - name: Short Posts
+  - name: Music
+  - name: Photos
+  - name: Videos
+  - name: Link Posts
+  - name: Links
+
 components:
   securitySchemes:
     bearerAuth:
@@ -204,6 +215,7 @@ components:
           nullable: true
         category:
           type: string
+          enum: [music, writing, video, social]
           nullable: true
 
     Post:
@@ -234,10 +246,11 @@ components:
           type: boolean
         category:
           type: string
+          enum: [music, writing, video, social]
 
     CreateEssayPost:
       type: object
-      required: [title, slug, excerpt, body, readingTimeMinutes]
+      required: [title, slug, excerpt, body]
       properties:
         title:
           type: string
@@ -247,12 +260,57 @@ components:
           type: string
         body:
           type: string
-        readingTimeMinutes:
-          type: integer
         tags:
           type: array
           items:
             type: string
+
+    UpdateEssayPost:
+      type: object
+      description: All fields are optional. Omitted fields retain their current values. tags null = keep existing; tags [] = clear all; tags [...] = replace.
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        body:
+          type: string
+        tags:
+          type: array
+          nullable: true
+          items:
+            type: string
+
+    UpdateShortPost:
+      type: object
+      description: All fields are optional. tags null = keep existing; tags [] = clear all.
+      properties:
+        body:
+          type: string
+        tags:
+          type: array
+          nullable: true
+          items:
+            type: string
+
+    UpdateExternalLink:
+      type: object
+      description: All fields are optional. Omitted fields retain their current values.
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+          description: Must be a valid absolute URL. The domain is derived server-side.
+        description:
+          type: string
+        featured:
+          type: boolean
+        category:
+          type: string
+          enum: [music, writing, video, social]
 
     CreateShortPost:
       type: object
@@ -323,14 +381,13 @@ components:
 
     CreateLinkPost:
       type: object
-      required: [title, url, domain]
+      required: [title, url]
       properties:
         title:
           type: string
         url:
           type: string
-        domain:
-          type: string
+          description: Must be a valid absolute URL (e.g. https://example.com/path). The domain is derived server-side.
         description:
           type: string
           nullable: true
@@ -340,6 +397,7 @@ components:
         category:
           type: string
           nullable: true
+          enum: [music, writing, video, social]
         tags:
           type: array
           items:
@@ -347,24 +405,26 @@ components:
 
     CreateExternalLink:
       type: object
-      required: [title, url, domain, description, category]
+      required: [title, url, description, category]
       properties:
         title:
           type: string
         url:
           type: string
-        domain:
-          type: string
+          description: Must be a valid absolute URL. The domain is derived server-side.
         description:
           type: string
         featured:
           type: boolean
+          default: false
         category:
           type: string
+          enum: [music, writing, video, social]
 
 paths:
   /auth/login:
     post:
+      tags: [Auth]
       summary: Login and get JWT token
       requestBody:
         required: true
@@ -394,6 +454,7 @@ paths:
 
   /posts:
     get:
+      tags: [All Posts]
       summary: List posts
       parameters:
         - name: type
@@ -425,6 +486,7 @@ paths:
 
   /posts/{slug}:
     get:
+      tags: [Essays]
       summary: Get essay by slug
       parameters:
         - name: slug
@@ -448,6 +510,7 @@ paths:
 
   /posts/essay:
     post:
+      tags: [Essays]
       summary: Create essay post
       security:
         - bearerAuth: []
@@ -463,7 +526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/EssayPost"
         "401":
           description: Unauthorized
           content:
@@ -473,7 +536,8 @@ paths:
 
   /posts/essay/{id}:
     put:
-      summary: Update essay post
+      tags: [Essays]
+      summary: Update essay post (partial)
       security:
         - bearerAuth: []
       parameters:
@@ -487,14 +551,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateEssayPost"
+              $ref: "#/components/schemas/UpdateEssayPost"
       responses:
         "200":
-          description: Updated
+          description: Updated essay post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/EssayPost"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -504,6 +574,7 @@ paths:
 
   /posts/short:
     post:
+      tags: [Short Posts]
       summary: Create short post
       security:
         - bearerAuth: []
@@ -519,7 +590,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/ShortPost"
         "401":
           description: Unauthorized
           content:
@@ -529,7 +600,8 @@ paths:
 
   /posts/short/{id}:
     put:
-      summary: Update short post
+      tags: [Short Posts]
+      summary: Update short post (partial)
       security:
         - bearerAuth: []
       parameters:
@@ -543,14 +615,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateShortPost"
+              $ref: "#/components/schemas/UpdateShortPost"
       responses:
         "200":
-          description: Updated
+          description: Updated short post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/ShortPost"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -560,6 +638,7 @@ paths:
 
   /posts/music:
     post:
+      tags: [Music]
       summary: Create music post (with file upload)
       description: |
         Accepts `multipart/form-data`. Stores the audio file (and optional album art)
@@ -600,7 +679,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/MusicPost"
         "400":
           description: Validation error
           content:
@@ -616,7 +695,9 @@ paths:
 
   /posts/music/{id}:
     put:
-      summary: Update music post (with file upload)
+      tags: [Music]
+      summary: Update music post (partial)
+      description: All fields are optional. Omit a field to keep its current value. tags absent = keep; tags present (even empty) = replace entirely.
       security:
         - bearerAuth: []
       parameters:
@@ -631,14 +712,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [audioFile, title, duration]
               properties:
-                audioFile:
-                  type: string
-                  format: binary
-                albumArtFile:
-                  type: string
-                  format: binary
                 title:
                   type: string
                 duration:
@@ -649,13 +723,14 @@ paths:
                   type: array
                   items:
                     type: string
+                  description: Omit to keep existing tags; send empty to clear all
       responses:
         "200":
-          description: Updated
+          description: Updated music post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/MusicPost"
         "400":
           description: Validation error
           content:
@@ -671,6 +746,7 @@ paths:
 
   /posts/photo:
     post:
+      tags: [Photos]
       summary: Create photo post (with file upload)
       description: |
         Accepts `multipart/form-data`. Upload one or more image files as `images[]`.
@@ -714,7 +790,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/PhotoPost"
         "400":
           description: Validation error
           content:
@@ -730,7 +806,9 @@ paths:
 
   /posts/photo/{id}:
     put:
-      summary: Update photo post (with file upload)
+      tags: [Photos]
+      summary: Update photo post (partial)
+      description: All fields optional. images absent = keep existing; images provided = replace entirely. tags absent = keep; tags present (even empty) = replace.
       security:
         - bearerAuth: []
       parameters:
@@ -745,34 +823,21 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [images]
               properties:
-                images:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                alt:
-                  type: array
-                  items:
-                    type: string
-                caption:
-                  type: array
-                  items:
-                    type: string
                 location:
                   type: string
                 tags:
                   type: array
                   items:
                     type: string
+                  description: Omit to keep existing tags; send empty to clear all
       responses:
         "200":
-          description: Updated
+          description: Updated photo post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/PhotoPost"
         "400":
           description: Validation error
           content:
@@ -788,6 +853,7 @@ paths:
 
   /posts/video:
     post:
+      tags: [Videos]
       summary: Create video post (with optional thumbnail upload)
       security:
         - bearerAuth: []
@@ -837,7 +903,9 @@ paths:
 
   /posts/video/{id}:
     put:
-      summary: Update video post (with optional thumbnail upload)
+      tags: [Videos]
+      summary: Update video post (partial)
+      description: All fields optional. Omit to keep current value. tags absent = keep; tags present (even empty) = replace.
       security:
         - bearerAuth: []
       parameters:
@@ -852,11 +920,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, videoURL, duration]
               properties:
-                thumbnailFile:
-                  type: string
-                  format: binary
                 title:
                   type: string
                 videoURL:
@@ -869,13 +933,14 @@ paths:
                   type: array
                   items:
                     type: string
+                  description: Omit to keep existing tags; send empty to clear all
       responses:
         "200":
-          description: Updated
+          description: Updated video post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/VideoPost"
         "400":
           description: Validation error
           content:
@@ -891,6 +956,7 @@ paths:
 
   /posts/link:
     post:
+      tags: [Link Posts]
       summary: Create link post (with optional thumbnail upload)
       security:
         - bearerAuth: []
@@ -900,7 +966,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, url, domain]
+              required: [title, url]
               properties:
                 thumbnailFile:
                   type: string
@@ -910,12 +976,12 @@ paths:
                   type: string
                 url:
                   type: string
-                domain:
-                  type: string
+                  description: Must be a valid absolute URL. The domain is derived server-side.
                 description:
                   type: string
                 category:
                   type: string
+                  enum: [music, writing, video, social]
                 tags:
                   type: array
                   items:
@@ -942,7 +1008,9 @@ paths:
 
   /posts/link/{id}:
     put:
-      summary: Update link post (with optional thumbnail upload)
+      tags: [Link Posts]
+      summary: Update link post (partial)
+      description: All fields optional. Omit to keep current value. tags absent = keep; tags present (even empty) = replace.
       security:
         - bearerAuth: []
       parameters:
@@ -957,32 +1025,29 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, url, domain]
               properties:
-                thumbnailFile:
-                  type: string
-                  format: binary
                 title:
                   type: string
                 url:
                   type: string
-                domain:
-                  type: string
+                  description: Must be a valid absolute URL. The domain is derived server-side.
                 description:
                   type: string
                 category:
                   type: string
+                  enum: [music, writing, video, social]
                 tags:
                   type: array
                   items:
                     type: string
+                  description: Omit to keep existing tags; send empty to clear all
       responses:
         "200":
-          description: Updated
+          description: Updated link post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/LinkPost"
         "400":
           description: Validation error
           content:
@@ -998,6 +1063,7 @@ paths:
 
   /posts/{id}:
     delete:
+      tags: [All Posts]
       summary: Delete any post by ID
       security:
         - bearerAuth: []
@@ -1019,6 +1085,7 @@ paths:
 
   /links:
     get:
+      tags: [Links]
       summary: List all external links
       responses:
         "200":
@@ -1030,6 +1097,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ExternalLink"
     post:
+      tags: [Links]
       summary: Create external link
       security:
         - bearerAuth: []
@@ -1055,6 +1123,7 @@ paths:
 
   /links/featured:
     get:
+      tags: [Links]
       summary: List featured external links (up to 4)
       responses:
         "200":
@@ -1068,7 +1137,8 @@ paths:
 
   /links/{id}:
     put:
-      summary: Update external link
+      tags: [Links]
+      summary: Update external link (partial)
       security:
         - bearerAuth: []
       parameters:
@@ -1082,14 +1152,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateExternalLink"
+              $ref: "#/components/schemas/UpdateExternalLink"
       responses:
         "200":
-          description: Updated
+          description: Updated external link
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IDResponse"
+                $ref: "#/components/schemas/ExternalLink"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -1097,6 +1173,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
     delete:
+      tags: [Links]
       summary: Delete external link
       security:
         - bearerAuth: []

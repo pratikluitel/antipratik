@@ -2,20 +2,11 @@ package api
 
 import (
 	"errors"
-	"io"
 	"log"
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/store"
 )
-
-func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadCloser, ct string) {
-	defer body.Close()
-	w.Header().Set("Content-Type", ct)
-	if _, err := io.Copy(w, body); err != nil && r.Context().Err() == nil {
-		log.Printf("streamFile copy error: %v", err)
-	}
-}
 
 // FileServingHandler serves uploaded files and thumbnails from storage.
 type FileServingHandler struct {
