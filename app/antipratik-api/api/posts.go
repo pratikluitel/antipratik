@@ -455,7 +455,6 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 	input := models.CreateLinkPost{
 		Title:        r.FormValue("title"),
 		URL:          r.FormValue("url"),
-		Domain:       r.FormValue("domain"),
 		ThumbnailURL: thumbnailURL,
 		Tags:         r.Form["tags"],
 	}
@@ -496,7 +495,6 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 	input := models.CreateLinkPost{
 		Title:        r.FormValue("title"),
 		URL:          r.FormValue("url"),
-		Domain:       r.FormValue("domain"),
 		ThumbnailURL: thumbnailURL,
 		Tags:         r.Form["tags"],
 	}

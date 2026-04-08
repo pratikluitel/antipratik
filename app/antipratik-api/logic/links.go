@@ -44,9 +44,6 @@ func validateExternalLink(input models.CreateExternalLink) error {
 	if err := requireNonEmpty("url", input.URL); err != nil {
 		return err
 	}
-	if err := requireNonEmpty("domain", input.Domain); err != nil {
-		return err
-	}
 	if err := requireNonEmpty("description", input.Description); err != nil {
 		return err
 	}
@@ -60,6 +57,11 @@ func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExterna
 	if err := validateExternalLink(input); err != nil {
 		return "", err
 	}
+	domain, err := extractDomain(input.URL)
+	if err != nil {
+		return "", err
+	}
+	input.Domain = domain
 	id := uuid.New().String()
 	if err := s.store.CreateLink(ctx, id, input); err != nil {
 		return "", fmt.Errorf("LinkService.CreateLink: %w", err)
@@ -74,6 +76,11 @@ func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.Cr
 	if err := validateExternalLink(input); err != nil {
 		return err
 	}
+	domain, err := extractDomain(input.URL)
+	if err != nil {
+		return err
+	}
+	input.Domain = domain
 	return s.store.UpdateLink(ctx, id, input)
 }
 

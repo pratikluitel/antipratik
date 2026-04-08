@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,6 +61,26 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 func newID() string  { return uuid.New().String() }
 func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
 
+// extractDomain parses rawURL and returns the hostname with www. stripped.
+// Returns a ValidationError if the URL is malformed or missing scheme/host.
+func extractDomain(rawURL string) (string, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return "", validationErr("url must be a valid absolute URL (e.g. https://example.com/path)")
+	}
+	host := strings.TrimPrefix(u.Hostname(), "www.")
+	return host, nil
+}
+
+// computeReadingTime returns ceil(wordCount / 200), minimum 1.
+func computeReadingTime(body string) int {
+	words := len(strings.Fields(body))
+	if words == 0 {
+		return 1
+	}
+	return (words + 199) / 200
+}
+
 func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.EssayPost{}, err
@@ -69,9 +91,7 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 	if err := requireNonEmpty("body", input.Body); err != nil {
 		return models.EssayPost{}, err
 	}
-	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
-		return models.EssayPost{}, err
-	}
+	input.ReadingTimeMinutes = computeReadingTime(input.Body)
 
 	id, createdAt := newID(), nowUTC()
 	if err := s.store.CreatePost(ctx, "essay", id, createdAt); err != nil {
@@ -219,9 +239,11 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 	if err := requireNonEmpty("url", input.URL); err != nil {
 		return models.LinkPost{}, err
 	}
-	if err := requireNonEmpty("domain", input.Domain); err != nil {
+	domain, err := extractDomain(input.URL)
+	if err != nil {
 		return models.LinkPost{}, err
 	}
+	input.Domain = domain
 
 	id := preID
 	if id == "" {
@@ -258,9 +280,7 @@ func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.C
 	if err := requireNonEmpty("body", input.Body); err != nil {
 		return err
 	}
-	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
-		return err
-	}
+	input.ReadingTimeMinutes = computeReadingTime(input.Body)
 	return s.store.UpdateEssay(ctx, id, input)
 }
 
@@ -336,9 +356,11 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 	if err := requireNonEmpty("url", input.URL); err != nil {
 		return err
 	}
-	if err := requireNonEmpty("domain", input.Domain); err != nil {
+	domain, err := extractDomain(input.URL)
+	if err != nil {
 		return err
 	}
+	input.Domain = domain
 	return s.store.UpdateLinkPost(ctx, id, input)
 }
 

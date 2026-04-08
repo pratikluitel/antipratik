@@ -133,7 +133,7 @@ type CreateEssayPost struct {
 	Slug               string   `json:"slug"`
 	Excerpt            string   `json:"excerpt"`
 	Body               string   `json:"body"`
-	ReadingTimeMinutes int      `json:"readingTimeMinutes"`
+	ReadingTimeMinutes int      `json:"-"`
 	Tags               []string `json:"tags"`
 }
 
@@ -169,7 +169,7 @@ type CreateVideoPost struct {
 type CreateLinkPost struct {
 	Title        string   `json:"title"`
 	URL          string   `json:"url"`
-	Domain       string   `json:"domain"`
+	Domain       string   `json:"-"`
 	Description  *string  `json:"description,omitempty"`
 	ThumbnailURL *string  `json:"thumbnailURL,omitempty"`
 	Category     *string  `json:"category,omitempty"`
@@ -179,7 +179,7 @@ type CreateLinkPost struct {
 type CreateExternalLink struct {
 	Title       string `json:"title"`
 	URL         string `json:"url"`
-	Domain      string `json:"domain"`
+	Domain      string `json:"-"`
 	Description string `json:"description"`
 	Featured    bool   `json:"featured"`
 	Category    string `json:"category"`
