@@ -18,14 +18,14 @@ const IS_API_DISABLED = !API_URL;
 
 function prefixUrl(url: string | undefined | null): string {
   if (!url) return '';
-  if (url.startsWith('http') || url.startsWith('//')) return url;
-  return `${API_URL}${url}`;
+  if (url.startsWith('http') || url.startsWith('https') || url.startsWith('//')) return url;
+  return `${API_URL}/${url}`;
 }
 
 function prefixOptionalUrl(url: string | undefined | null): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith('http') || url.startsWith('//')) return url;
-  return `${API_URL}${url}`;
+  if (url.startsWith('http') || url.startsWith('https') || url.startsWith('//')) return url;
+  return `${API_URL}/${url}`;
 }
 
 function prefixPost(post: Post): Post {
