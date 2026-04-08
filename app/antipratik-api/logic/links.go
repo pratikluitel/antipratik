@@ -69,19 +69,51 @@ func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExterna
 	return id, nil
 }
 
-func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.CreateExternalLink) error {
+func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.UpdateExternalLink) (models.ExternalLink, error) {
 	if err := requireNonEmpty("id", id); err != nil {
-		return err
+		return models.ExternalLink{}, err
 	}
-	if err := validateExternalLink(input); err != nil {
-		return err
-	}
-	domain, err := extractDomain(input.URL)
+	cur, err := s.store.GetLinkByID(ctx, id)
 	if err != nil {
-		return err
+		return models.ExternalLink{}, fmt.Errorf("LinkService.UpdateLink: %w", err)
 	}
-	input.Domain = domain
-	return s.store.UpdateLink(ctx, id, input)
+
+	merged := models.CreateExternalLink{
+		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
+		Description: cur.Description, Featured: cur.Featured, Category: cur.Category,
+	}
+	if input.Title != nil {
+		merged.Title = *input.Title
+	}
+	if input.URL != nil {
+		merged.URL = *input.URL
+	}
+	if input.Description != nil {
+		merged.Description = *input.Description
+	}
+	if input.Featured != nil {
+		merged.Featured = *input.Featured
+	}
+	if input.Category != nil {
+		merged.Category = *input.Category
+	}
+
+	if err := validateExternalLink(merged); err != nil {
+		return models.ExternalLink{}, err
+	}
+	domain, err := extractDomain(merged.URL)
+	if err != nil {
+		return models.ExternalLink{}, err
+	}
+	merged.Domain = domain
+
+	if err := s.store.UpdateLink(ctx, id, merged); err != nil {
+		return models.ExternalLink{}, fmt.Errorf("LinkService.UpdateLink: %w", err)
+	}
+	return models.ExternalLink{
+		ID: id, Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
+		Description: merged.Description, Featured: merged.Featured, Category: merged.Category,
+	}, nil
 }
 
 func (s *LinkService) DeleteLink(ctx context.Context, id string) error {

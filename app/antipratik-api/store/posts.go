@@ -295,6 +295,32 @@ func (s *SQLitePostStore) GetPosts(ctx context.Context, types, tags []string) ([
 	return s.assembleAll(ctx, baseRows, byType, tagsMap)
 }
 
+// GetPostByID returns any post type by ID, or an error if not found.
+func (s *SQLitePostStore) GetPostByID(ctx context.Context, id string) (models.Post, error) {
+	row := s.db.QueryRowContext(ctx, `SELECT id, type, created_at FROM posts WHERE id = ?`, id)
+	var r baseRow
+	if err := row.Scan(&r.ID, &r.Type, &r.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("post %q not found", id)
+		}
+		return nil, fmt.Errorf("GetPostByID: %w", err)
+	}
+	baseRows := []baseRow{r}
+	byType := groupByType(baseRows)
+	tagsMap, err := s.fetchTagsMap(ctx, []string{r.ID})
+	if err != nil {
+		return nil, err
+	}
+	posts, err := s.assembleAll(ctx, baseRows, byType, tagsMap)
+	if err != nil {
+		return nil, err
+	}
+	if len(posts) == 0 {
+		return nil, fmt.Errorf("post %q not found", id)
+	}
+	return posts[0], nil
+}
+
 // GetPostBySlug returns the essay with the given slug, or nil if not found.
 func (s *SQLitePostStore) GetPostBySlug(ctx context.Context, slug string) (*models.EssayPost, error) {
 	const q = `

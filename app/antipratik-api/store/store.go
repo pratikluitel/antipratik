@@ -17,6 +17,9 @@ type PostStore interface {
 	// GetPostBySlug returns the essay with the given slug, or nil if not found.
 	GetPostBySlug(ctx context.Context, slug string) (*models.EssayPost, error)
 
+	// GetPostByID returns any post type by its ID, or an error if not found.
+	GetPostByID(ctx context.Context, id string) (models.Post, error)
+
 	// Write operations
 	CreatePost(ctx context.Context, postType string, id string, createdAt string) error
 	CreateEssayData(ctx context.Context, id string, input models.CreateEssayPost) error
@@ -41,6 +44,9 @@ type LinkStore interface {
 
 	// GetFeaturedLinks returns up to 4 featured external links.
 	GetFeaturedLinks(ctx context.Context) ([]models.ExternalLink, error)
+
+	// GetLinkByID returns an external link by ID, or an error if not found.
+	GetLinkByID(ctx context.Context, id string) (models.ExternalLink, error)
 
 	// Write operations
 	CreateLink(ctx context.Context, id string, input models.CreateExternalLink) error

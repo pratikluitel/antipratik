@@ -54,16 +54,17 @@ func (h *LinkHandlerImpl) CreateLink(w http.ResponseWriter, r *http.Request) {
 
 func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var input models.CreateExternalLink
+	var input models.UpdateExternalLink
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	if err := h.logic.UpdateLink(r.Context(), id, input); err != nil {
+	link, err := h.logic.UpdateLink(r.Context(), id, input)
+	if err != nil {
 		handleLogicError(w, "UpdateLink", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"id": id})
+	writeJSON(w, http.StatusOK, link)
 }
 
 func (h *LinkHandlerImpl) DeleteLink(w http.ResponseWriter, r *http.Request) {

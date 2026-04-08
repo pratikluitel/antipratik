@@ -185,3 +185,65 @@ type CreateExternalLink struct {
 	Category    string `json:"category"`
 }
 
+// ── Partial Update input types ────────────────────────────────────────────────
+
+// UpdateEssayPost is the partial-update input for essay posts (JSON body).
+type UpdateEssayPost struct {
+	Title   *string  `json:"title"`
+	Slug    *string  `json:"slug"`
+	Excerpt *string  `json:"excerpt"`
+	Body    *string  `json:"body"`
+	Tags    []string `json:"tags"`
+}
+
+// UpdateShortPost is the partial-update input for short posts (JSON body).
+type UpdateShortPost struct {
+	Body *string  `json:"body"`
+	Tags []string `json:"tags"`
+}
+
+// UpdateMusicPost is the partial-update input for music posts (multipart/form-data).
+type UpdateMusicPost struct {
+	Title    *string
+	AudioURL *string
+	AlbumArt *string
+	Duration *int
+	Album    *string
+	Tags     []string
+}
+
+// UpdatePhotoPost is the partial-update input for photo posts (multipart/form-data).
+type UpdatePhotoPost struct {
+	Images   []PhotoImage
+	Location *string
+	Tags     []string
+}
+
+// UpdateVideoPost is the partial-update input for video posts (multipart/form-data).
+type UpdateVideoPost struct {
+	Title        *string
+	ThumbnailURL *string
+	VideoURL     *string
+	Duration     *int
+	Playlist     *string
+	Tags         []string
+}
+
+// UpdateLinkPost is the partial-update input for link posts (multipart/form-data).
+type UpdateLinkPost struct {
+	Title        *string
+	URL          *string
+	ThumbnailURL *string
+	Description  *string
+	Category     *string
+	Tags         []string
+}
+
+// UpdateExternalLink is the partial-update input for external links (JSON body).
+type UpdateExternalLink struct {
+	Title       *string `json:"title"`
+	URL         *string `json:"url"`
+	Description *string `json:"description"`
+	Featured    *bool   `json:"featured"`
+	Category    *string `json:"category"`
+}
