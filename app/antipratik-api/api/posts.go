@@ -66,12 +66,12 @@ func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	id, err := h.logic.CreateEssay(r.Context(), input)
+	post, err := h.logic.CreateEssay(r.Context(), input)
 	if err != nil {
 		handleLogicError(w, "CreateEssay", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
@@ -80,12 +80,12 @@ func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	id, err := h.logic.CreateShort(r.Context(), input)
+	post, err := h.logic.CreateShort(r.Context(), input)
 	if err != nil {
 		handleLogicError(w, "CreateShort", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) UpdateEssay(w http.ResponseWriter, r *http.Request) {
@@ -169,12 +169,12 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		input.Album = &album
 	}
 
-	id, err := h.logic.CreateMusic(r.Context(), postID, input)
+	post, err := h.logic.CreateMusic(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, "CreateMusic", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
@@ -282,12 +282,12 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		input.Location = &loc
 	}
 
-	id, err := h.logic.CreatePhoto(r.Context(), postID, input)
+	post, err := h.logic.CreatePhoto(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, "CreatePhoto", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
@@ -386,12 +386,12 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		input.Playlist = &pl
 	}
 
-	id, err := h.logic.CreateVideo(r.Context(), postID, input)
+	post, err := h.logic.CreateVideo(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, "CreateVideo", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) UpdateVideo(w http.ResponseWriter, r *http.Request) {
@@ -466,12 +466,12 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		input.Category = &cat
 	}
 
-	id, err := h.logic.CreateLinkPost(r.Context(), postID, input)
+	post, err := h.logic.CreateLinkPost(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, "CreateLinkPost", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	writeJSON(w, http.StatusCreated, post)
 }
 
 func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request) {

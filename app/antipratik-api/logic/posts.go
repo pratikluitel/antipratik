@@ -59,81 +59,102 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 func newID() string  { return uuid.New().String() }
 func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
 
-func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (string, error) {
+func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
-		return "", err
+		return models.EssayPost{}, err
 	}
 	if err := requireNonEmpty("slug", input.Slug); err != nil {
-		return "", err
+		return models.EssayPost{}, err
 	}
 	if err := requireNonEmpty("body", input.Body); err != nil {
-		return "", err
+		return models.EssayPost{}, err
 	}
 	if err := requirePositive("readingTimeMinutes", input.ReadingTimeMinutes); err != nil {
-		return "", err
+		return models.EssayPost{}, err
 	}
 
-	id := newID()
-	if err := s.store.CreatePost(ctx, "essay", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreateEssay: %w", err)
+	id, createdAt := newID(), nowUTC()
+	if err := s.store.CreatePost(ctx, "essay", id, createdAt); err != nil {
+		return models.EssayPost{}, fmt.Errorf("PostService.CreateEssay: %w", err)
 	}
 	if err := s.store.CreateEssayData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreateEssay data: %w", err)
+		return models.EssayPost{}, fmt.Errorf("PostService.CreateEssay data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.EssayPost{
+		ID: id, Type: "essay", CreatedAt: createdAt, Tags: tags,
+		Title: input.Title, Slug: input.Slug, Excerpt: input.Excerpt,
+		Body: input.Body, ReadingTimeMinutes: input.ReadingTimeMinutes,
+	}, nil
 }
 
-func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortPost) (string, error) {
+func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortPost) (models.ShortPost, error) {
 	if err := requireNonEmpty("body", input.Body); err != nil {
-		return "", err
+		return models.ShortPost{}, err
 	}
 
-	id := newID()
-	if err := s.store.CreatePost(ctx, "short", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreateShort: %w", err)
+	id, createdAt := newID(), nowUTC()
+	if err := s.store.CreatePost(ctx, "short", id, createdAt); err != nil {
+		return models.ShortPost{}, fmt.Errorf("PostService.CreateShort: %w", err)
 	}
 	if err := s.store.CreateShortData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreateShort data: %w", err)
+		return models.ShortPost{}, fmt.Errorf("PostService.CreateShort data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.ShortPost{ID: id, Type: "short", CreatedAt: createdAt, Tags: tags, Body: input.Body}, nil
 }
 
-func (s *PostService) CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (string, error) {
+func (s *PostService) CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (models.MusicPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
-		return "", err
+		return models.MusicPost{}, err
 	}
 	if input.Album != nil && *input.Album != "" {
 		if err := requireNonEmpty("albumArt", input.AlbumArt); err != nil {
-			return "", err
+			return models.MusicPost{}, err
 		}
 	}
 	if err := requireNonEmpty("audioURL", input.AudioURL); err != nil {
-		return "", err
+		return models.MusicPost{}, err
 	}
 	if err := requirePositive("duration", input.Duration); err != nil {
-		return "", err
+		return models.MusicPost{}, err
 	}
 
 	id := preID
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "music", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreateMusic: %w", err)
+	createdAt := nowUTC()
+	if err := s.store.CreatePost(ctx, "music", id, createdAt); err != nil {
+		return models.MusicPost{}, fmt.Errorf("PostService.CreateMusic: %w", err)
 	}
 	if err := s.store.CreateMusicData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreateMusic data: %w", err)
+		return models.MusicPost{}, fmt.Errorf("PostService.CreateMusic data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.MusicPost{
+		ID: id, Type: "music", CreatedAt: createdAt, Tags: tags,
+		Title: input.Title, AlbumArt: input.AlbumArt, AudioURL: input.AudioURL,
+		Duration: input.Duration, Album: input.Album,
+	}, nil
 }
 
-func (s *PostService) CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (string, error) {
+func (s *PostService) CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error) {
 	if len(input.Images) == 0 {
-		return "", validationErr("images cannot be empty")
+		return models.PhotoPost{}, validationErr("images cannot be empty")
 	}
 	for i, img := range input.Images {
 		if err := requireNonEmpty(fmt.Sprintf("images[%d].url", i), img.URL); err != nil {
-			return "", err
+			return models.PhotoPost{}, err
 		}
 	}
 
@@ -141,61 +162,87 @@ func (s *PostService) CreatePhoto(ctx context.Context, preID string, input model
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "photo", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreatePhoto: %w", err)
+	createdAt := nowUTC()
+	if err := s.store.CreatePost(ctx, "photo", id, createdAt); err != nil {
+		return models.PhotoPost{}, fmt.Errorf("PostService.CreatePhoto: %w", err)
 	}
 	if err := s.store.CreatePhotoData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreatePhoto data: %w", err)
+		return models.PhotoPost{}, fmt.Errorf("PostService.CreatePhoto data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.PhotoPost{
+		ID: id, Type: "photo", CreatedAt: createdAt, Tags: tags,
+		Images: input.Images, Location: input.Location,
+	}, nil
 }
 
-func (s *PostService) CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (string, error) {
+func (s *PostService) CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
-		return "", err
+		return models.VideoPost{}, err
 	}
 	if err := requireNonEmpty("videoURL", input.VideoURL); err != nil {
-		return "", err
+		return models.VideoPost{}, err
 	}
 	if err := requirePositive("duration", input.Duration); err != nil {
-		return "", err
+		return models.VideoPost{}, err
 	}
 
 	id := preID
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "video", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreateVideo: %w", err)
+	createdAt := nowUTC()
+	if err := s.store.CreatePost(ctx, "video", id, createdAt); err != nil {
+		return models.VideoPost{}, fmt.Errorf("PostService.CreateVideo: %w", err)
 	}
 	if err := s.store.CreateVideoData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreateVideo data: %w", err)
+		return models.VideoPost{}, fmt.Errorf("PostService.CreateVideo data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.VideoPost{
+		ID: id, Type: "video", CreatedAt: createdAt, Tags: tags,
+		Title: input.Title, ThumbnailURL: input.ThumbnailURL,
+		VideoURL: input.VideoURL, Duration: input.Duration, Playlist: input.Playlist,
+	}, nil
 }
 
-func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (string, error) {
+func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
-		return "", err
+		return models.LinkPost{}, err
 	}
 	if err := requireNonEmpty("url", input.URL); err != nil {
-		return "", err
+		return models.LinkPost{}, err
 	}
 	if err := requireNonEmpty("domain", input.Domain); err != nil {
-		return "", err
+		return models.LinkPost{}, err
 	}
 
 	id := preID
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "link", id, nowUTC()); err != nil {
-		return "", fmt.Errorf("PostService.CreateLinkPost: %w", err)
+	createdAt := nowUTC()
+	if err := s.store.CreatePost(ctx, "link", id, createdAt); err != nil {
+		return models.LinkPost{}, fmt.Errorf("PostService.CreateLinkPost: %w", err)
 	}
 	if err := s.store.CreateLinkPostData(ctx, id, input); err != nil {
-		return "", fmt.Errorf("PostService.CreateLinkPost data: %w", err)
+		return models.LinkPost{}, fmt.Errorf("PostService.CreateLinkPost data: %w", err)
 	}
-	return id, nil
+	tags := input.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	return models.LinkPost{
+		ID: id, Type: "link", CreatedAt: createdAt, Tags: tags,
+		Title: input.Title, URL: input.URL, Domain: input.Domain,
+		Description: input.Description, ThumbnailURL: input.ThumbnailURL, Category: input.Category,
+	}, nil
 }
 
 func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error {
