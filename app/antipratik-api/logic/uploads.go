@@ -12,113 +12,175 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/webp"
 )
 
-// UploadLogic defines the upload use-cases.
+// FileInput bundles a multipart file and its header for upload operations.
+type FileInput struct {
+	File   multipart.File
+	Header *multipart.FileHeader
+}
+
+// PhotoImageResult holds the URL fields for a single uploaded photo image.
+type PhotoImageResult struct {
+	OriginalURL       string
+	ThumbnailSmallURL string
+	ThumbnailMedURL   string
+	ThumbnailLargeURL string
+}
+
+// MusicFilesResult holds the URL fields from a music post file upload.
+type MusicFilesResult struct {
+	AudioURL    string
+	AlbumArtURL string // empty string if no album art was uploaded
+}
+
+// UploadLogic handles file storage and thumbnail generation for uploaded assets.
 type UploadLogic interface {
-	UploadPhoto(ctx context.Context, postID string, file multipart.File, header *multipart.FileHeader) (models.UploadPhotoResponse, error)
-	UploadMusic(ctx context.Context, postID string, file multipart.File, header *multipart.FileHeader) (models.UploadMusicResponse, error)
+	// UploadPhotoFiles stores multiple photo images (with 3 thumbnail variants each) for the
+	// given post. File IDs follow <postID>-<index>.<ext>; thumbnail IDs follow
+	// <postID>-<index>-<size>.<ext> where size is small/medium/large.
+	UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error)
+
+	// UploadMusicFiles stores an audio file and optional album art for the given post.
+	// audioFile is required; albumArtFile may be nil when no album art is provided.
+	UploadMusicFiles(ctx context.Context, postID string, audioFile FileInput, albumArtFile *FileInput) (MusicFilesResult, error)
+
+	// UploadThumbnail stores a single thumbnail image and returns its serving URL.
+	// suffix is appended to the postID in the stored file name (e.g. "thumb").
+	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (string, error)
 }
 
 // UploadService implements UploadLogic.
 type UploadService struct {
-	files   store.FileStore
-	baseURL string // e.g. "https://api.example.com" — prepended to /files/ and /thumbnails/ paths
+	files store.FileStore
 }
 
 // NewUploadService constructs an UploadService.
-// baseURL is the server base URL used to construct public file URLs.
-func NewUploadService(files store.FileStore, baseURL string) *UploadService {
-	return &UploadService{files: files, baseURL: strings.TrimRight(baseURL, "/")}
+func NewUploadService(files store.FileStore) *UploadService {
+	return &UploadService{files: files}
 }
 
 var allowedPhotoExts = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
 var allowedMusicExts = map[string]bool{".mp3": true, ".wav": true, ".ogg": true, ".m4a": true}
 
-// UploadPhoto validates the photo, generates 3 thumbnails, stores all files, and returns URLs.
-func (s *UploadService) UploadPhoto(ctx context.Context, postID string, file multipart.File, header *multipart.FileHeader) (models.UploadPhotoResponse, error) {
+// UploadPhotoFiles implements UploadLogic.
+func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
-		return models.UploadPhotoResponse{}, err
+		return nil, err
 	}
-	ext := strings.ToLower(filepath.Ext(header.Filename))
-	if !allowedPhotoExts[ext] {
-		return models.UploadPhotoResponse{}, validationErr(fmt.Sprintf("photo file must be one of: jpg, jpeg, png, webp — got %q", ext))
-	}
-
-	// Decode image.
-	src, err := decodeImage(file, ext)
-	if err != nil {
-		return models.UploadPhotoResponse{}, validationErr(fmt.Sprintf("could not decode image: %v", err))
+	if len(files) == 0 {
+		return nil, validationErr("at least one image file is required")
 	}
 
-	fileID := postID + ext
-	originalKey := "photos/" + fileID
-	ct := contentTypeForExt(ext)
+	results := make([]PhotoImageResult, 0, len(files))
+	for i, fi := range files {
+		ext := strings.ToLower(filepath.Ext(fi.Header.Filename))
+		if !allowedPhotoExts[ext] {
+			return nil, validationErr(fmt.Sprintf("images[%d]: file must be one of jpg, jpeg, png, webp — got %q", i, ext))
+		}
 
-	// Re-encode original (from decoded image so we read from src, not the already-read file).
-	origBuf, err := encodeImage(src, ext)
-	if err != nil {
-		return models.UploadPhotoResponse{}, fmt.Errorf("UploadPhoto encode original: %w", err)
-	}
-	if err := s.files.Put(ctx, originalKey, bytes.NewReader(origBuf), ct); err != nil {
-		return models.UploadPhotoResponse{}, fmt.Errorf("UploadPhoto store original: %w", err)
-	}
-
-	// Generate and store thumbnails.
-	sizes := []struct {
-		name     string
-		maxWidth int
-	}{
-		{"small", 300},
-		{"medium", 600},
-		{"large", 1200},
-	}
-	thumbnailIDs := make([]string, len(sizes))
-	for i, sz := range sizes {
-		thumb := resizeImage(src, sz.maxWidth)
-		buf, err := encodeImage(thumb, ext)
+		src, err := decodeImage(fi.File, ext)
 		if err != nil {
-			return models.UploadPhotoResponse{}, fmt.Errorf("UploadPhoto encode thumbnail %s: %w", sz.name, err)
+			return nil, validationErr(fmt.Sprintf("images[%d]: could not decode image: %v", i, err))
 		}
-		thumbID := postID + "-" + sz.name + ext
-		if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
-			return models.UploadPhotoResponse{}, fmt.Errorf("UploadPhoto store thumbnail %s: %w", sz.name, err)
-		}
-		thumbnailIDs[i] = thumbID
-	}
 
-	return models.UploadPhotoResponse{
-		FileID:             fileID,
-		OriginalURL:        s.baseURL + "/files/" + fileID,
-		ThumbnailSmallURL:  s.baseURL + "/thumbnails/" + thumbnailIDs[0],
-		ThumbnailMediumURL: s.baseURL + "/thumbnails/" + thumbnailIDs[1],
-		ThumbnailLargeURL:  s.baseURL + "/thumbnails/" + thumbnailIDs[2],
-	}, nil
+		ct := contentTypeForExt(ext)
+		fileID := fmt.Sprintf("%s-%d%s", postID, i, ext)
+		origKey := "photos/" + fileID
+
+		origBuf, err := encodeImage(src, ext)
+		if err != nil {
+			return nil, fmt.Errorf("UploadPhotoFiles encode original[%d]: %w", i, err)
+		}
+		if err := s.files.Put(ctx, origKey, bytes.NewReader(origBuf), ct); err != nil {
+			return nil, fmt.Errorf("UploadPhotoFiles store original[%d]: %w", i, err)
+		}
+
+		sizes := []struct {
+			name     string
+			maxWidth int
+		}{
+			{"small", 300},
+			{"medium", 600},
+			{"large", 1200},
+		}
+		thumbURLs := make([]string, len(sizes))
+		for j, sz := range sizes {
+			thumb := resizeImage(src, sz.maxWidth)
+			buf, err := encodeImage(thumb, ext)
+			if err != nil {
+				return nil, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
+			}
+			thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, ext)
+			if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
+				return nil, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
+			}
+			thumbURLs[j] = "/thumbnails/" + thumbID
+		}
+
+		results = append(results, PhotoImageResult{
+			OriginalURL:       "/files/" + fileID,
+			ThumbnailSmallURL: thumbURLs[0],
+			ThumbnailMedURL:   thumbURLs[1],
+			ThumbnailLargeURL: thumbURLs[2],
+		})
+	}
+	return results, nil
 }
 
-// UploadMusic validates the audio file, stores it, and returns the audio URL.
-func (s *UploadService) UploadMusic(ctx context.Context, postID string, file multipart.File, header *multipart.FileHeader) (models.UploadMusicResponse, error) {
+// UploadMusicFiles implements UploadLogic.
+func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, audioFile FileInput, albumArtFile *FileInput) (MusicFilesResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
-		return models.UploadMusicResponse{}, err
-	}
-	ext := strings.ToLower(filepath.Ext(header.Filename))
-	if !allowedMusicExts[ext] {
-		return models.UploadMusicResponse{}, validationErr(fmt.Sprintf("music file must be one of: mp3, wav, ogg, m4a — got %q", ext))
+		return MusicFilesResult{}, err
 	}
 
-	fileID := postID + ext
-	if err := s.files.Put(ctx, "music/"+fileID, file, contentTypeForExt(ext)); err != nil {
-		return models.UploadMusicResponse{}, fmt.Errorf("UploadMusic store: %w", err)
+	// Upload audio.
+	audioExt := strings.ToLower(filepath.Ext(audioFile.Header.Filename))
+	if !allowedMusicExts[audioExt] {
+		return MusicFilesResult{}, validationErr(fmt.Sprintf("audioFile must be one of mp3, wav, ogg, m4a — got %q", audioExt))
+	}
+	audioFileID := postID + audioExt
+	if err := s.files.Put(ctx, "music/"+audioFileID, audioFile.File, contentTypeForExt(audioExt)); err != nil {
+		return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store audio: %w", err)
 	}
 
-	return models.UploadMusicResponse{
-		FileID:   fileID,
-		AudioURL: s.baseURL + "/files/" + fileID,
-	}, nil
+	result := MusicFilesResult{
+		AudioURL: "/files/" + audioFileID,
+	}
+
+	// Upload album art (optional).
+	if albumArtFile != nil {
+		artExt := strings.ToLower(filepath.Ext(albumArtFile.Header.Filename))
+		if !allowedPhotoExts[artExt] {
+			return MusicFilesResult{}, validationErr(fmt.Sprintf("albumArtFile must be one of jpg, jpeg, png, webp — got %q", artExt))
+		}
+		artFileID := postID + "-albumart" + artExt
+		if err := s.files.Put(ctx, "photos/"+artFileID, albumArtFile.File, contentTypeForExt(artExt)); err != nil {
+			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store album art: %w", err)
+		}
+		result.AlbumArtURL = "/files/" + artFileID
+	}
+
+	return result, nil
+}
+
+// UploadThumbnail implements UploadLogic.
+func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (string, error) {
+	if err := requireNonEmpty("postId", postID); err != nil {
+		return "", err
+	}
+	ext := strings.ToLower(filepath.Ext(file.Header.Filename))
+	if !allowedPhotoExts[ext] {
+		return "", validationErr(fmt.Sprintf("thumbnailFile must be one of jpg, jpeg, png, webp — got %q", ext))
+	}
+	fileID := postID + "-" + suffix + ext
+	if err := s.files.Put(ctx, "photos/"+fileID, file.File, contentTypeForExt(ext)); err != nil {
+		return "", fmt.Errorf("UploadThumbnail store: %w", err)
+	}
+	return "/files/" + fileID, nil
 }
 
 // ── Image helpers ─────────────────────────────────────────────────────────────
@@ -140,7 +202,7 @@ func encodeImage(img image.Image, ext string) ([]byte, error) {
 	case ".png":
 		err = png.Encode(&buf, img)
 	default:
-		// jpg, jpeg, webp → store as JPEG for thumbnails
+		// jpg, jpeg, webp → encode as JPEG
 		err = jpeg.Encode(&buf, img, &jpeg.Options{Quality: 85})
 	}
 	if err != nil {
@@ -150,7 +212,6 @@ func encodeImage(img image.Image, ext string) ([]byte, error) {
 }
 
 // resizeImage scales src so its width is at most maxWidth, preserving aspect ratio.
-// If src is already narrower than maxWidth it is returned unchanged.
 func resizeImage(src image.Image, maxWidth int) image.Image {
 	bounds := src.Bounds()
 	w := bounds.Dx()

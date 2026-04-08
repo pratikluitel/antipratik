@@ -98,7 +98,7 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 	return id, nil
 }
 
-func (s *PostService) CreateMusic(ctx context.Context, input models.CreateMusicPost) (string, error) {
+func (s *PostService) CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (string, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return "", err
 	}
@@ -114,7 +114,10 @@ func (s *PostService) CreateMusic(ctx context.Context, input models.CreateMusicP
 		return "", err
 	}
 
-	id := newID()
+	id := preID
+	if id == "" {
+		id = newID()
+	}
 	if err := s.store.CreatePost(ctx, "music", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateMusic: %w", err)
 	}
@@ -124,7 +127,7 @@ func (s *PostService) CreateMusic(ctx context.Context, input models.CreateMusicP
 	return id, nil
 }
 
-func (s *PostService) CreatePhoto(ctx context.Context, input models.CreatePhotoPost) (string, error) {
+func (s *PostService) CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (string, error) {
 	if len(input.Images) == 0 {
 		return "", validationErr("images cannot be empty")
 	}
@@ -134,7 +137,10 @@ func (s *PostService) CreatePhoto(ctx context.Context, input models.CreatePhotoP
 		}
 	}
 
-	id := newID()
+	id := preID
+	if id == "" {
+		id = newID()
+	}
 	if err := s.store.CreatePost(ctx, "photo", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreatePhoto: %w", err)
 	}
@@ -144,7 +150,7 @@ func (s *PostService) CreatePhoto(ctx context.Context, input models.CreatePhotoP
 	return id, nil
 }
 
-func (s *PostService) CreateVideo(ctx context.Context, input models.CreateVideoPost) (string, error) {
+func (s *PostService) CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (string, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return "", err
 	}
@@ -155,7 +161,10 @@ func (s *PostService) CreateVideo(ctx context.Context, input models.CreateVideoP
 		return "", err
 	}
 
-	id := newID()
+	id := preID
+	if id == "" {
+		id = newID()
+	}
 	if err := s.store.CreatePost(ctx, "video", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateVideo: %w", err)
 	}
@@ -165,7 +174,7 @@ func (s *PostService) CreateVideo(ctx context.Context, input models.CreateVideoP
 	return id, nil
 }
 
-func (s *PostService) CreateLinkPost(ctx context.Context, input models.CreateLinkPost) (string, error) {
+func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (string, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return "", err
 	}
@@ -176,7 +185,10 @@ func (s *PostService) CreateLinkPost(ctx context.Context, input models.CreateLin
 		return "", err
 	}
 
-	id := newID()
+	id := preID
+	if id == "" {
+		id = newID()
+	}
 	if err := s.store.CreatePost(ctx, "link", id, nowUTC()); err != nil {
 		return "", fmt.Errorf("PostService.CreateLinkPost: %w", err)
 	}

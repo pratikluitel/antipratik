@@ -168,7 +168,7 @@ These rules are inviolable. Check them before writing any code.
 - Handle HTTP status codes and headers
 
 **Key Components:**
-- `PostHandler`, `LinkHandler`, `AuthHandler` interfaces
+- `PostHandler`, `LinkHandler`, `AuthHandler`, `UploadHandler` interfaces
 - `CORSMiddleware` for cross-origin requests
 - `JWTAuthMiddleware` for authentication
 - Route registration in `routes.go`
@@ -185,8 +185,8 @@ These rules are inviolable. Check them before writing any code.
 - Handle business logic errors
 
 **Key Components:**
-- `PostLogic`, `LinkLogic`, `AuthLogic` interfaces
-- `PostService`, `LinkService`, `AuthService` implementations
+- `PostLogic`, `LinkLogic`, `AuthLogic`, `UploadLogic` interfaces
+- `PostService`, `LinkService`, `AuthService`, `UploadService` implementations
 - Input validation and sanitization
 
 **Never Does:** HTTP concerns, direct database access.
@@ -202,6 +202,7 @@ These rules are inviolable. Check them before writing any code.
 
 **Key Components:**
 - `PostStore`, `LinkStore`, `UserStore` interfaces
+- `FileStore` interface with `LocalFileStore` and `R2FileStore` implementations
 - SQLite implementations with prepared statements
 - Migration execution on startup
 
@@ -223,6 +224,8 @@ These rules are inviolable. Check them before writing any code.
 8. **Never Mix Layers** — API layer calls logic, logic calls store. No shortcuts.
 9. **Never Use Panic** — Return errors instead of panicking in production code.
 10. **Never Trust Client-Side Validation** — Server must validate everything again.
+11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
+12. **Never add a separate upload endpoint** — File uploads belong inside the existing `POST/PUT /api/posts/<type>` handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes.
 
 ---
 
@@ -279,8 +282,26 @@ These rules are inviolable. Check them before writing any code.
 | POST | `/api/auth/login` | No | Login with username/password, returns JWT |
 | GET | `/api/openapi.yaml` | No | OpenAPI 3.0 specification |
 | GET | `/api/index.html` | No | Swagger UI for API documentation |
+| GET | `/files/{fileId}` | No | Stream original uploaded file binary |
+| GET | `/thumbnails/{thumbnailId}` | No | Stream photo thumbnail binary |
 
 All endpoints return `application/json`. Errors: `{"error":"message"}`.
+
+### File Upload Contract
+File uploads are embedded in the existing post create/update endpoints as `multipart/form-data` (not separate upload endpoints).
+
+| Post type | Endpoint | File fields |
+|-----------|----------|-------------|
+| Music | `POST/PUT /api/posts/music` | `audioFile` (required), `albumArtFile` (optional) |
+| Photo | `POST/PUT /api/posts/photo` | `images[]` (one or more, required) |
+| Video | `POST/PUT /api/posts/video` | `thumbnailFile` (optional) |
+| Link | `POST/PUT /api/posts/link` | `thumbnailFile` (optional) |
+
+- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Allowed audio types: `mp3`, `wav`, `ogg`, `m4a`.
+- Photo uploads auto-generate 3 thumbnail variants: small (300px), medium (600px), large (1200px) wide.
+- Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
+- All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
+- File URLs always route through the backend's own `/files/` and `/thumbnails/` endpoints — the storage backend (local or R2) is never exposed.
 
 ### Post Types Supported
 - **essay:** Long-form writing with title, slug, excerpt, body, reading time
@@ -311,6 +332,8 @@ SQLite database with foreign key constraints and cascading deletes.
 | `users` | User accounts for authentication |
 | `settings` | Key-value configuration storage |
 
+`photo_images` has nullable columns `thumbnail_small_url`, `thumbnail_medium_url`, `thumbnail_large_url` (added in migration `004`). Existing rows have `NULL` in these columns; rows created via the upload endpoint have them populated.
+
 ### Key Relationships
 - All post types reference `posts.id` with CASCADE DELETE
 - Tags stored separately to allow efficient filtering
@@ -337,6 +360,10 @@ SQLite database with foreign key constraints and cascading deletes.
 - **CORS:** Must be configured for production domains
 - **HTTPS:** Required for secure cookie/token handling
 - **Backups:** SQLite database should be regularly backed up
+- **File Storage:** Configure `storage.backend` in `config.yaml`:
+  - `local` — files written to `storage.local_dir` (default `./data/uploads/`)
+  - `r2` — files stored in Cloudflare R2; requires `storage.r2.endpoint`, `bucket`, `access_key_id`, `secret_access_key`
+  - R2 credentials should be supplied via environment or secrets management, not committed to `config.yaml`
 
 ---
 

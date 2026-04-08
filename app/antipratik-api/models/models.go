@@ -185,20 +185,3 @@ type CreateExternalLink struct {
 	Category    string `json:"category"`
 }
 
-// ── Upload response types ─────────────────────────────────────────────────────
-
-// UploadPhotoResponse is returned after a successful photo upload.
-// It contains URL references only — no binary content.
-type UploadPhotoResponse struct {
-	FileID             string `json:"fileId"`
-	OriginalURL        string `json:"originalUrl"`
-	ThumbnailSmallURL  string `json:"thumbnailSmallUrl"`
-	ThumbnailMediumURL string `json:"thumbnailMediumUrl"`
-	ThumbnailLargeURL  string `json:"thumbnailLargeUrl"`
-}
-
-// UploadMusicResponse is returned after a successful music upload.
-type UploadMusicResponse struct {
-	FileID   string `json:"fileId"`
-	AudioURL string `json:"audioUrl"`
-}

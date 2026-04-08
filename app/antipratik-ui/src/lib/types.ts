@@ -43,13 +43,18 @@ export interface MusicPost extends BasePost {
   album?: string;
 }
 
+export interface PhotoImage {
+  url: string;                // original — served via GET /files/{fileId}
+  alt: string;
+  caption?: string;
+  thumbnailSmallUrl?: string;  // 300px wide — served via GET /thumbnails/{id}-small.ext
+  thumbnailMediumUrl?: string; // 600px wide
+  thumbnailLargeUrl?: string;  // 1200px wide
+}
+
 export interface PhotoPost extends BasePost {
   type: 'photo';
-  images: Array<{
-    url: string;
-    alt: string;
-    caption?: string;
-  }>;
+  images: PhotoImage[];
   location?: string;
 }
 
