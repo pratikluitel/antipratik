@@ -15,6 +15,7 @@
   color: var(--color-text-sub-dark);
   line-height: var(--lh-ui);
   margin: 0;
+  white-space: pre-wrap;
 }
 
 [data-theme="light"] .body {

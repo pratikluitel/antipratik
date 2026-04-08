@@ -59,7 +59,7 @@ export default function ArticleClient({ post }: Props) {
     year: 'numeric',
   });
 
-  const htmlBody = marked.parse(post.body) as string;
+  const htmlBody = marked.parse(post.body, { breaks: true }) as string;
 
   return (
     <>

@@ -1,0 +1,101 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--admin-input-radius);
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-dark);
+  background: var(--color-surface-dark);
+}
+
+.tab {
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted-dark);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--motion-fast);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--color-text-primary-dark);
+}
+
+.tabActive {
+  color: var(--color-text-primary-dark);
+  border-bottom-color: var(--color-text-primary-dark);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 400px;
+  padding: var(--space-2);
+  background: var(--color-deepest);
+  color: var(--color-text-primary-dark);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  line-height: var(--lh-body);
+  border: none;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.textarea:disabled {
+  opacity: 0.5;
+}
+
+.preview {
+  min-height: 400px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-deepest);
+  color: var(--color-text-body-dark);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+}
+
+.preview h1, .preview h2, .preview h3, .preview h4 {
+  font-family: var(--font-serif);
+  color: var(--color-text-primary-dark);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.preview p {
+  margin: 0 0 var(--space-2);
+}
+
+.preview code {
+  background: var(--color-surface-dark);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: var(--text-meta);
+}
+
+.preview pre {
+  background: var(--color-surface-dark);
+  padding: var(--space-2);
+  border-radius: var(--admin-input-radius);
+  overflow-x: auto;
+}
+
+.preview blockquote {
+  border-left: 3px solid var(--color-border-dark);
+  margin: 0;
+  padding-left: var(--space-2);
+  color: var(--color-text-muted-dark);
+}
+
+.empty {
+  color: var(--color-text-muted-dark);
+  font-style: italic;
+}

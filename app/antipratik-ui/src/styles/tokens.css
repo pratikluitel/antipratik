@@ -477,6 +477,11 @@
   --text-body:                       var(--color-text-body-dark);
   --text-muted:                      var(--color-text-muted-dark);
   --text-subtle:                     var(--color-text-subtle-dark);
+  --color-text-primary:              var(--color-text-primary-dark);
+  --color-text-sub:                  var(--color-text-sub-dark);
+  --color-text-body:                 var(--color-text-body-dark);
+  --color-text-muted:                var(--color-text-muted-dark);
+  --color-text-subtle:               var(--color-text-subtle-dark);
   --nav-bg:                          var(--nav-bg-dark);
   --filter-bar-bg:                   var(--filter-bar-bg-dark);
   --card-bg:                         var(--card-bg-dark);
@@ -503,6 +508,11 @@
   --text-body:                       var(--color-text-body-light);
   --text-muted:                      var(--color-text-muted-light);
   --text-subtle:                     var(--color-text-subtle-light);
+  --color-text-primary:              var(--color-text-primary-light);
+  --color-text-sub:                  var(--color-text-primary-light);
+  --color-text-body:                 var(--color-text-body-light);
+  --color-text-muted:                var(--color-text-muted-light);
+  --color-text-subtle:               var(--color-text-subtle-light);
   --nav-bg:                          var(--nav-bg-light);
   --filter-bar-bg:                   var(--filter-bar-bg-light);
   --card-bg:                         var(--card-bg-light);
@@ -511,4 +521,18 @@
   --card-hover-border:               var(--card-hover-border-light);
   --nl-bg:                           var(--color-stone);            /* #1C2B3A — warmer dark, less jarring on parchment */
   --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 4.9:1 on new block bg */
+}
+
+/* ─── ADMIN PANEL ───────────────────────────────────────────────────────────── */
+
+:root {
+  --admin-sidebar-width:   220px;
+  --admin-content-max:     860px;
+  --admin-tab-height:      44px;
+  --admin-top-bar-height:  52px;
+  --admin-input-radius:    6px;
+  --admin-input-padding-x: var(--space-2);
+  --admin-input-padding-y: 10px;
+  --admin-danger:              #C0392B;   /* destructive UI: delete buttons, errors, required — distinct from --accent-music */
+  --admin-form-section-radius: 8px;       /* form section card container — wider than --admin-input-radius (6px) */
 }

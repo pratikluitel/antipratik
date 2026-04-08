@@ -18,15 +18,20 @@ func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadCloser, ct s
 	}
 }
 
-// formTags returns nil when the "tags" key is absent from the form (keep existing),
-// or the slice of values (possibly empty = clear all) when the key is present.
-// Values may be comma-separated (e.g. "tag1,tag2") and are split and trimmed.
+// formTags returns nil when neither "tags" nor "tags[]" key is present in the form
+// (keep existing), or the slice of values (possibly empty = clear all) when either
+// key is present. Browsers/FormData append array fields as "tags[]"; plain JSON forms
+// use "tags". Values may be comma-separated (e.g. "tag1,tag2") and are split and trimmed.
 func formTags(r *http.Request) []string {
-	if _, ok := r.Form["tags"]; !ok {
+	key := "tags"
+	if _, ok := r.Form["tags[]"]; ok {
+		key = "tags[]"
+	} else if _, ok := r.Form["tags"]; !ok {
 		return nil
 	}
+
 	var tags []string
-	for _, v := range r.Form["tags"] {
+	for _, v := range r.Form[key] {
 		for _, part := range strings.Split(v, ",") {
 			part = strings.TrimSpace(part)
 			if part != "" {

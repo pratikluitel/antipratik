@@ -7,7 +7,7 @@
  * Never call fetch() directly in a component or page.
  */
 
-import type { Post, MusicPost, PhotoPost, VideoPost, LinkPost, EssayPost, ExternalLink, FilterState } from './types';
+import type { Post, MusicPost, PhotoPost, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const IS_API_DISABLED = !API_URL;
@@ -144,4 +144,250 @@ export async function getFeaturedLinks(): Promise<ExternalLink[]> {
     throw new Error(`API error: ${response.status} ${response.statusText} — getFeaturedLinks`);
   }
   return response.json() as Promise<ExternalLink[]>;
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/auth/login
+ * Returns a JWT on success; throws on invalid credentials.
+ */
+export async function login(username: string, password: string): Promise<{ token: string }> {
+  const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `Login failed (${response.status})`);
+  }
+  return response.json() as Promise<{ token: string }>;
+}
+
+// ─── ADMIN WRITE HELPERS ──────────────────────────────────────────────────────
+
+function authHeaders(token: string): HeadersInit {
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function throwOnError(response: Response, label: string): Promise<void> {
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `API error: ${response.status} — ${label}`);
+  }
+}
+
+// ─── ESSAY ────────────────────────────────────────────────────────────────────
+
+export interface CreateEssayInput {
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: string;
+  tags?: string[];
+}
+
+export async function createEssay(data: CreateEssayInput, token: string): Promise<EssayPost> {
+  const response = await fetch(`${API_URL}/api/posts/essay`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'createEssay');
+  return response.json() as Promise<EssayPost>;
+}
+
+export interface UpdateEssayInput {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  body?: string;
+  tags?: string[];
+}
+
+export async function updateEssay(id: string, data: UpdateEssayInput, token: string): Promise<EssayPost> {
+  const response = await fetch(`${API_URL}/api/posts/essay/${id}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'updateEssay');
+  return response.json() as Promise<EssayPost>;
+}
+
+// ─── SHORT POST ───────────────────────────────────────────────────────────────
+
+export interface CreateShortPostInput {
+  body: string;
+  tags?: string[];
+}
+
+export async function createShortPost(data: CreateShortPostInput, token: string): Promise<ShortPost> {
+  const response = await fetch(`${API_URL}/api/posts/short`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'createShortPost');
+  return response.json() as Promise<ShortPost>;
+}
+
+export interface UpdateShortPostInput {
+  body?: string;
+  tags?: string[];
+}
+
+export async function updateShortPost(id: string, data: UpdateShortPostInput, token: string): Promise<ShortPost> {
+  const response = await fetch(`${API_URL}/api/posts/short/${id}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'updateShortPost');
+  return response.json() as Promise<ShortPost>;
+}
+
+// ─── MUSIC ────────────────────────────────────────────────────────────────────
+
+export async function createMusicPost(formData: FormData, token: string): Promise<MusicPost> {
+  const response = await fetch(`${API_URL}/api/posts/music`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'createMusicPost');
+  return response.json() as Promise<MusicPost>;
+}
+
+export async function updateMusicPost(id: string, formData: FormData, token: string): Promise<MusicPost> {
+  const response = await fetch(`${API_URL}/api/posts/music/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'updateMusicPost');
+  return response.json() as Promise<MusicPost>;
+}
+
+// ─── PHOTO ────────────────────────────────────────────────────────────────────
+
+export async function createPhotoPost(formData: FormData, token: string): Promise<PhotoPost> {
+  const response = await fetch(`${API_URL}/api/posts/photo`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'createPhotoPost');
+  return response.json() as Promise<PhotoPost>;
+}
+
+export async function updatePhotoPost(id: string, formData: FormData, token: string): Promise<PhotoPost> {
+  const response = await fetch(`${API_URL}/api/posts/photo/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'updatePhotoPost');
+  return response.json() as Promise<PhotoPost>;
+}
+
+// ─── VIDEO ────────────────────────────────────────────────────────────────────
+
+export async function createVideoPost(formData: FormData, token: string): Promise<VideoPost> {
+  const response = await fetch(`${API_URL}/api/posts/video`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'createVideoPost');
+  return response.json() as Promise<VideoPost>;
+}
+
+export async function updateVideoPost(id: string, formData: FormData, token: string): Promise<VideoPost> {
+  const response = await fetch(`${API_URL}/api/posts/video/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'updateVideoPost');
+  return response.json() as Promise<VideoPost>;
+}
+
+// ─── LINK POST ────────────────────────────────────────────────────────────────
+
+export async function createLinkPost(formData: FormData, token: string): Promise<LinkPost> {
+  const response = await fetch(`${API_URL}/api/posts/link`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'createLinkPost');
+  return response.json() as Promise<LinkPost>;
+}
+
+export async function updateLinkPost(id: string, formData: FormData, token: string): Promise<LinkPost> {
+  const response = await fetch(`${API_URL}/api/posts/link/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'updateLinkPost');
+  return response.json() as Promise<LinkPost>;
+}
+
+// ─── EXTERNAL LINK ────────────────────────────────────────────────────────────
+
+export interface CreateExternalLinkInput {
+  title: string;
+  url: string;
+  description: string;
+  category: 'music' | 'writing' | 'video' | 'social';
+  featured?: boolean;
+}
+
+export async function createExternalLink(data: CreateExternalLinkInput, token: string): Promise<ExternalLink> {
+  const response = await fetch(`${API_URL}/api/links`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'createExternalLink');
+  return response.json() as Promise<ExternalLink>;
+}
+
+export interface UpdateExternalLinkInput {
+  title?: string;
+  url?: string;
+  description?: string;
+  category?: 'music' | 'writing' | 'video' | 'social';
+  featured?: boolean;
+}
+
+export async function updateExternalLink(id: string, data: UpdateExternalLinkInput, token: string): Promise<ExternalLink> {
+  const response = await fetch(`${API_URL}/api/links/${id}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'updateExternalLink');
+  return response.json() as Promise<ExternalLink>;
+}
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+
+export async function deletePost(id: string, token: string): Promise<void> {
+  const response = await fetch(`${API_URL}/api/posts/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'deletePost');
+}
+
+export async function deleteExternalLink(id: string, token: string): Promise<void> {
+  const response = await fetch(`${API_URL}/api/links/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'deleteExternalLink');
 }
