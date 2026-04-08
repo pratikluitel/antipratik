@@ -1,0 +1,50 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topBar {
+  height: var(--admin-top-bar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background: var(--color-surface-dark);
+  border-bottom: 1px solid var(--color-border-dark);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted);
+  letter-spacing: var(--ls-ui);
+}
+
+.logoutBtn {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--admin-input-radius);
+  padding: 4px var(--space-2);
+  cursor: pointer;
+  transition: color var(--motion-fast), border-color var(--motion-fast);
+}
+
+.logoutBtn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-4);
+  max-width: var(--admin-content-max);
+  width: 100%;
+  margin: 0 auto;
+}

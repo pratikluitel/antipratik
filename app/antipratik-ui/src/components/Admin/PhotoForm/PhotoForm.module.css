@@ -1,0 +1,22 @@
+.photoList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.photoEntry {
+  padding: var(--space-2);
+  background: var(--color-surface-dark);
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--admin-input-radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.fileName {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+  margin: 0;
+}

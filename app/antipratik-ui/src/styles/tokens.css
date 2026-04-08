@@ -512,3 +512,15 @@
   --nl-bg:                           var(--color-stone);            /* #1C2B3A — warmer dark, less jarring on parchment */
   --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 4.9:1 on new block bg */
 }
+
+/* ─── ADMIN PANEL ───────────────────────────────────────────────────────────── */
+
+:root {
+  --admin-sidebar-width:   220px;
+  --admin-content-max:     860px;
+  --admin-tab-height:      44px;
+  --admin-top-bar-height:  52px;
+  --admin-input-radius:    6px;
+  --admin-input-padding-x: var(--space-2);
+  --admin-input-padding-y: 10px;
+}

@@ -1,0 +1,161 @@
+.tabBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-dark);
+  padding-bottom: 0;
+}
+
+.tab {
+  height: var(--admin-tab-height);
+  padding: 0 var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--motion-fast);
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tabActive {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-text-primary);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.newBtn {
+  align-self: flex-start;
+  padding: 8px var(--space-3);
+  background: var(--color-text-primary);
+  color: var(--color-deepest);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--motion-fast);
+}
+
+.newBtn:hover {
+  opacity: 0.85;
+}
+
+.formSection {
+  background: var(--color-surface-dark);
+  border: 1px solid var(--color-border-dark);
+  border-radius: 8px;
+  padding: var(--space-3);
+}
+
+.formTitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loading,
+.empty {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted);
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2);
+  background: var(--color-surface-dark);
+  border: 1px solid var(--color-border-dark);
+  border-radius: 6px;
+  transition: background var(--motion-fast);
+}
+
+.row:hover {
+  background: var(--color-elevated-dark);
+}
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+}
+
+.rowActions {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.editBtn {
+  padding: 4px var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid var(--color-border-dark);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color var(--motion-fast), border-color var(--motion-fast);
+}
+
+.editBtn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
+.deleteBtn {
+  padding: 4px var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--accent-music);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--accent-music) 40%, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--motion-fast);
+}
+
+.deleteBtn:hover {
+  background: color-mix(in srgb, var(--accent-music) 12%, transparent);
+}
