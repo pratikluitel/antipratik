@@ -7,6 +7,17 @@ info:
 servers:
   - url: /api
 
+tags:
+  - name: Auth
+  - name: All Posts
+  - name: Essays
+  - name: Short Posts
+  - name: Music
+  - name: Photos
+  - name: Videos
+  - name: Link Posts
+  - name: Links
+
 components:
   securitySchemes:
     bearerAuth:
@@ -405,6 +416,7 @@ components:
           type: string
         featured:
           type: boolean
+          default: false
         category:
           type: string
           enum: [music, writing, video, social]
@@ -412,6 +424,7 @@ components:
 paths:
   /auth/login:
     post:
+      tags: [Auth]
       summary: Login and get JWT token
       requestBody:
         required: true
@@ -441,6 +454,7 @@ paths:
 
   /posts:
     get:
+      tags: [All Posts]
       summary: List posts
       parameters:
         - name: type
@@ -472,6 +486,7 @@ paths:
 
   /posts/{slug}:
     get:
+      tags: [Essays]
       summary: Get essay by slug
       parameters:
         - name: slug
@@ -495,6 +510,7 @@ paths:
 
   /posts/essay:
     post:
+      tags: [Essays]
       summary: Create essay post
       security:
         - bearerAuth: []
@@ -520,6 +536,7 @@ paths:
 
   /posts/essay/{id}:
     put:
+      tags: [Essays]
       summary: Update essay post (partial)
       security:
         - bearerAuth: []
@@ -557,6 +574,7 @@ paths:
 
   /posts/short:
     post:
+      tags: [Short Posts]
       summary: Create short post
       security:
         - bearerAuth: []
@@ -582,6 +600,7 @@ paths:
 
   /posts/short/{id}:
     put:
+      tags: [Short Posts]
       summary: Update short post (partial)
       security:
         - bearerAuth: []
@@ -619,6 +638,7 @@ paths:
 
   /posts/music:
     post:
+      tags: [Music]
       summary: Create music post (with file upload)
       description: |
         Accepts `multipart/form-data`. Stores the audio file (and optional album art)
@@ -675,6 +695,7 @@ paths:
 
   /posts/music/{id}:
     put:
+      tags: [Music]
       summary: Update music post (partial)
       description: All fields are optional. Omit a field to keep its current value. tags absent = keep; tags present (even empty) = replace entirely.
       security:
@@ -725,6 +746,7 @@ paths:
 
   /posts/photo:
     post:
+      tags: [Photos]
       summary: Create photo post (with file upload)
       description: |
         Accepts `multipart/form-data`. Upload one or more image files as `images[]`.
@@ -784,6 +806,7 @@ paths:
 
   /posts/photo/{id}:
     put:
+      tags: [Photos]
       summary: Update photo post (partial)
       description: All fields optional. images absent = keep existing; images provided = replace entirely. tags absent = keep; tags present (even empty) = replace.
       security:
@@ -830,6 +853,7 @@ paths:
 
   /posts/video:
     post:
+      tags: [Videos]
       summary: Create video post (with optional thumbnail upload)
       security:
         - bearerAuth: []
@@ -879,6 +903,7 @@ paths:
 
   /posts/video/{id}:
     put:
+      tags: [Videos]
       summary: Update video post (partial)
       description: All fields optional. Omit to keep current value. tags absent = keep; tags present (even empty) = replace.
       security:
@@ -931,6 +956,7 @@ paths:
 
   /posts/link:
     post:
+      tags: [Link Posts]
       summary: Create link post (with optional thumbnail upload)
       security:
         - bearerAuth: []
@@ -982,6 +1008,7 @@ paths:
 
   /posts/link/{id}:
     put:
+      tags: [Link Posts]
       summary: Update link post (partial)
       description: All fields optional. Omit to keep current value. tags absent = keep; tags present (even empty) = replace.
       security:
@@ -1036,6 +1063,7 @@ paths:
 
   /posts/{id}:
     delete:
+      tags: [All Posts]
       summary: Delete any post by ID
       security:
         - bearerAuth: []
@@ -1057,6 +1085,7 @@ paths:
 
   /links:
     get:
+      tags: [Links]
       summary: List all external links
       responses:
         "200":
@@ -1068,6 +1097,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/ExternalLink"
     post:
+      tags: [Links]
       summary: Create external link
       security:
         - bearerAuth: []
@@ -1093,6 +1123,7 @@ paths:
 
   /links/featured:
     get:
+      tags: [Links]
       summary: List featured external links (up to 4)
       responses:
         "200":
@@ -1106,6 +1137,7 @@ paths:
 
   /links/{id}:
     put:
+      tags: [Links]
       summary: Update external link (partial)
       security:
         - bearerAuth: []
@@ -1141,6 +1173,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
     delete:
+      tags: [Links]
       summary: Delete external link
       security:
         - bearerAuth: []
