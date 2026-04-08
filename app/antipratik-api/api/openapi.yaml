@@ -237,7 +237,7 @@ components:
 
     CreateEssayPost:
       type: object
-      required: [title, slug, excerpt, body, readingTimeMinutes]
+      required: [title, slug, excerpt, body]
       properties:
         title:
           type: string
@@ -247,8 +247,6 @@ components:
           type: string
         body:
           type: string
-        readingTimeMinutes:
-          type: integer
         tags:
           type: array
           items:
@@ -323,14 +321,13 @@ components:
 
     CreateLinkPost:
       type: object
-      required: [title, url, domain]
+      required: [title, url]
       properties:
         title:
           type: string
         url:
           type: string
-        domain:
-          type: string
+          description: Must be a valid absolute URL (e.g. https://example.com/path). The domain is derived server-side.
         description:
           type: string
           nullable: true
@@ -347,14 +344,13 @@ components:
 
     CreateExternalLink:
       type: object
-      required: [title, url, domain, description, category]
+      required: [title, url, description, category]
       properties:
         title:
           type: string
         url:
           type: string
-        domain:
-          type: string
+          description: Must be a valid absolute URL. The domain is derived server-side.
         description:
           type: string
         featured:
@@ -900,7 +896,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, url, domain]
+              required: [title, url]
               properties:
                 thumbnailFile:
                   type: string
@@ -910,8 +906,7 @@ paths:
                   type: string
                 url:
                   type: string
-                domain:
-                  type: string
+                  description: Must be a valid absolute URL. The domain is derived server-side.
                 description:
                   type: string
                 category:
@@ -957,7 +952,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [title, url, domain]
+              required: [title, url]
               properties:
                 thumbnailFile:
                   type: string
@@ -966,8 +961,7 @@ paths:
                   type: string
                 url:
                   type: string
-                domain:
-                  type: string
+                  description: Must be a valid absolute URL. The domain is derived server-side.
                 description:
                   type: string
                 category:
