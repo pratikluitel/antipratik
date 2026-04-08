@@ -52,3 +52,6 @@ app/antipratik-api/data/
 
 # TEMPORARY: ignore all public files until I decide how to handle them
 app/antipratik-ui/public/*
+
+# temporaty files
+tmp/
