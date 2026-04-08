@@ -220,7 +220,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileHeaders := r.MultipartForm.File["images"]
+	fileHeaders := r.MultipartForm.File["images[]"]
 	if len(fileHeaders) == 0 {
 		writeError(w, http.StatusBadRequest, "at least one image file is required")
 		return
@@ -245,8 +245,8 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	alts := r.Form["alt"]
-	captions := r.Form["caption"]
+	alts := r.Form["alt[]"]
+	captions := r.Form["caption[]"]
 	images := make([]models.PhotoImage, len(uploadResults))
 	for i, u := range uploadResults {
 		alt := ""
@@ -267,7 +267,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	input := models.CreatePhotoPost{Images: images, Tags: r.Form["tags"]}
+	input := models.CreatePhotoPost{Images: images, Tags: r.Form["tags[]"]}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
@@ -358,8 +358,10 @@ func (h *PostHandlerImpl) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 	if durStr := r.FormValue("duration"); durStr != "" {
 		if d, err := strconv.Atoi(durStr); err == nil {
 			input.Duration = &d
+		} else {
+			writeError(w, http.StatusBadRequest, "duration must be an integer")
+			return
 		}
-		writeError(w, http.StatusBadRequest, "duration must be an integer")
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl

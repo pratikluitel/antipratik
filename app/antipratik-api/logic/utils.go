@@ -9,6 +9,7 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/jdeng/goheif"
 	"github.com/rwcarlsen/goexif/exif"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/webp"
@@ -27,6 +28,8 @@ func decodeImage(r multipart.File, ext string) (image.Image, error) {
 	switch ext {
 	case ".webp":
 		img, err = webp.Decode(bytes.NewReader(data))
+	case ".heic", ".heif":
+		img, err = goheif.Decode(bytes.NewReader(data))
 	default:
 		img, _, err = image.Decode(bytes.NewReader(data))
 	}
@@ -218,6 +221,10 @@ func contentTypeForExt(ext string) string {
 		return "image/png"
 	case ".webp":
 		return "image/webp"
+	case ".heic":
+		return "image/heic"
+	case ".heif":
+		return "image/heif"
 	case ".mp3":
 		return "audio/mpeg"
 	case ".wav":

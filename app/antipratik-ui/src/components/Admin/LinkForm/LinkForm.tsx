@@ -93,7 +93,7 @@ export default function LinkForm({ token, initial, onSuccess, onCancel }: LinkFo
         {initial ? (
           <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>
         ) : (
-          <input id="link-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
+          <input id="link-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
         )}
       </div>
 

@@ -16,7 +16,7 @@
   padding: 8px var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   background: none;
   border: none;
   cursor: pointer;
@@ -26,12 +26,12 @@
 }
 
 .tab:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
 }
 
 .tabActive {
-  color: var(--color-text-primary);
-  border-bottom-color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
+  border-bottom-color: var(--color-text-primary-dark);
 }
 
 .textarea {
@@ -39,7 +39,7 @@
   min-height: 400px;
   padding: var(--space-2);
   background: var(--color-deepest);
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   line-height: var(--lh-body);
@@ -57,7 +57,7 @@
   min-height: 400px;
   padding: var(--space-2) var(--space-3);
   background: var(--color-deepest);
-  color: var(--color-text-body);
+  color: var(--color-text-body-dark);
   font-family: var(--font-sans);
   font-size: var(--text-body);
   line-height: var(--lh-body);
@@ -65,7 +65,7 @@
 
 .preview h1, .preview h2, .preview h3, .preview h4 {
   font-family: var(--font-serif);
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   margin-top: var(--space-3);
   margin-bottom: var(--space-1);
 }
@@ -92,10 +92,10 @@
   border-left: 3px solid var(--color-border-dark);
   margin: 0;
   padding-left: var(--space-2);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
 }
 
 .empty {
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   font-style: italic;
 }

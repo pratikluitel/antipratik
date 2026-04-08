@@ -83,7 +83,7 @@ export default function MusicForm({ token, initial, onSuccess, onCancel }: Music
         {initial ? (
           <p className={f.immutableNote}>Current: {initial.albumArt || 'none'}</p>
         ) : (
-          <input id="music-art" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => setAlbumArtFile(e.target.files?.[0] ?? null)} disabled={loading} />
+          <input id="music-art" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setAlbumArtFile(e.target.files?.[0] ?? null)} disabled={loading} />
         )}
       </div>
 

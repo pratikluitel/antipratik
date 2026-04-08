@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useRef, useEffect } from 'react';
 import type { PhotoPost } from '@/lib/types';
 import { createPhotoPost, updatePhotoPost } from '@/lib/api';
 import TagInput from '../TagInput';
 import f from '../adminForm.module.css';
 import styles from './PhotoForm.module.css';
+import Image from 'next/image';
 
 interface PhotoFormProps {
   token: string;
@@ -18,6 +19,7 @@ interface PhotoEntry {
   file: File;
   alt: string;
   caption: string;
+  previewUrl: string;
 }
 
 export default function PhotoForm({ token, initial, onSuccess, onCancel }: PhotoFormProps) {
@@ -27,11 +29,27 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      photos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    };
+  }, [photos]);
 
   function handleFilesChange(files: FileList | null) {
     if (!files) return;
-    const entries: PhotoEntry[] = Array.from(files).map((file) => ({ file, alt: '', caption: '' }));
+    const entries: PhotoEntry[] = Array.from(files).map((file) => ({
+      file,
+      alt: '',
+      caption: '',
+      previewUrl: URL.createObjectURL(file),
+    }));
     setPhotos((prev) => [...prev, ...entries]);
+    
+    // Reset file input so same file can be selected again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   function updateEntry(index: number, field: 'alt' | 'caption', value: string) {
@@ -39,7 +57,11 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   }
 
   function removeEntry(index: number) {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotos((prev) => {
+      const removed = prev[index];
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -79,23 +101,69 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
       {error && <p className={f.error} role="alert">{error}</p>}
       {success && <p className={f.success}>Saved successfully.</p>}
 
-      {initial ? (
-        <div className={f.field}>
-          <span className={f.label}>Images <span className={f.immutableNote}>(cannot be changed after creation)</span></span>
-          <p className={f.immutableNote}>{initial.images.length} image(s) in this post.</p>
-        </div>
-      ) : (
-        <div className={f.field}>
-          <label className={`${f.label} ${f.required}`} htmlFor="photo-files">Images</label>
-          <input id="photo-files" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp" multiple onChange={(e) => handleFilesChange(e.target.files)} disabled={loading} />
-        </div>
-      )}
+      <div className={f.field}>
+        <label className={f.label}>Images</label>
+        {initial?.images && initial.images.length > 0 && (
+          <div className={styles.existingImages}>
+            <p className={f.immutableNote}>Existing photos ({initial.images.length}):</p>
+            <div className={styles.thumbnailGrid}>
+              {initial.images.map((img, i) => (
+                <div key={i} className={styles.thumbnailItem}>
+                  {img.thumbnailSmallUrl && (
+                    <Image 
+                      src={img.thumbnailSmallUrl} 
+                      alt={img.alt} 
+                      width={80} 
+                      height={80} 
+                      className={styles.smallThumb} 
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {!initial && (
+          <>
+            <input 
+              ref={fileInputRef}
+              id="photo-files" 
+              className={styles.hiddenInput} 
+              type="file" 
+              accept=".jpg,.jpeg,.png,.webp,.heic,.heif" 
+              multiple 
+              onChange={(e) => handleFilesChange(e.target.files)} 
+              disabled={loading} 
+            />
+            <button 
+              type="button" 
+              className={f.secondaryBtn} 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+            >
+              {photos.length > 0 ? 'Add more photos' : 'Select photos'}
+            </button>
+          </>
+        )}
+      </div>
 
-      {!initial && photos.length > 0 && (
+      {photos.length > 0 && (
         <div className={styles.photoList}>
           {photos.map((p, i) => (
             <div key={i} className={styles.photoEntry}>
-              <p className={styles.fileName}>{p.file.name}</p>
+              <div className={styles.previewContainer}>
+                <div className={styles.previewWrapper}>
+                  <Image 
+                    src={p.previewUrl} 
+                    alt="Preview" 
+                    fill 
+                    sizes="120px"
+                    className={styles.previewImage}
+                  />
+                </div>
+                <p className={styles.fileName}>{p.file.name}</p>
+              </div>
               <div className={f.field}>
                 <label className={`${f.label} ${f.required}`}>Alt text</label>
                 <input className={f.input} value={p.alt} onChange={(e) => updateEntry(i, 'alt', e.target.value)} disabled={loading} />

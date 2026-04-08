@@ -87,7 +87,7 @@ export default function VideoForm({ token, initial, onSuccess, onCancel }: Video
         {initial ? (
           <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>
         ) : (
-          <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
+          <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
         )}
       </div>
 

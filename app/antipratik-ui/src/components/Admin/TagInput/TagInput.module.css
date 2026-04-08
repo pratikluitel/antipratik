@@ -12,7 +12,7 @@
 }
 
 .container:focus-within {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-text-muted-dark);
 }
 
 .tag {
@@ -25,13 +25,13 @@
   border-radius: 4px;
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: var(--color-text-body);
+  color: var(--color-text-body-dark);
 }
 
 .remove {
   background: none;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -40,7 +40,7 @@
 }
 
 .remove:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
 }
 
 .input {
@@ -49,12 +49,12 @@
   background: none;
   border: none;
   outline: none;
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   padding: 2px 0;
 }
 
 .input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
 }

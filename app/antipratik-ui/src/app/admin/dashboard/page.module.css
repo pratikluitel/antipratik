@@ -12,7 +12,7 @@
   padding: 0 var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   background: none;
   border: none;
   cursor: pointer;
@@ -22,12 +22,12 @@
 }
 
 .tab:hover {
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
 }
 
 .tabActive {
-  color: var(--color-text-primary);
-  border-bottom-color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
+  border-bottom-color: var(--color-text-primary-dark);
 }
 
 .panel {
@@ -39,7 +39,7 @@
 .newBtn {
   align-self: flex-start;
   padding: 8px var(--space-3);
-  background: var(--color-text-primary);
+  background: var(--color-text-primary-dark);
   color: var(--color-deepest);
   border: none;
   border-radius: 6px;
@@ -64,7 +64,7 @@
 .formTitle {
   font-family: var(--font-serif);
   font-size: var(--text-h3);
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   margin: 0 0 var(--space-3);
 }
 
@@ -78,7 +78,7 @@
 .empty {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   padding: var(--space-4) 0;
   text-align: center;
 }
@@ -109,7 +109,7 @@
 .rowTitle {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -118,7 +118,7 @@
 .rowMeta {
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
 }
 
 .rowActions {
@@ -131,7 +131,7 @@
   padding: 4px var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   background: none;
   border: 1px solid var(--color-border-dark);
   border-radius: 4px;
@@ -140,8 +140,8 @@
 }
 
 .editBtn:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-muted);
+  color: var(--color-text-primary-dark);
+  border-color: var(--color-text-muted-dark);
 }
 
 .deleteBtn {

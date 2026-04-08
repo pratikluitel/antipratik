@@ -15,7 +15,7 @@
 .label {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
 }
 
 .required::after {
@@ -31,7 +31,7 @@
   background: var(--color-surface-dark);
   border: 1px solid var(--color-border-dark);
   border-radius: var(--admin-input-radius);
-  color: var(--color-text-primary);
+  color: var(--color-text-primary-dark);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   outline: none;
@@ -42,7 +42,7 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-  border-color: var(--color-text-muted);
+  border-color: var(--color-text-muted-dark);
 }
 
 .input:disabled,
@@ -64,13 +64,13 @@
 
 .hint {
   font-size: var(--text-meta);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   margin: 0;
 }
 
 .charCount {
   font-size: var(--text-meta);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   text-align: right;
 }
 
@@ -81,7 +81,7 @@
 .fileInput {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
-  color: var(--color-text-body);
+  color: var(--color-text-body-dark);
 }
 
 .checkboxRow {
@@ -93,7 +93,7 @@
 .checkbox {
   width: 16px;
   height: 16px;
-  accent-color: var(--color-text-primary);
+  accent-color: var(--color-text-primary-dark);
   cursor: pointer;
 }
 
@@ -105,7 +105,7 @@
 
 .submitBtn {
   padding: var(--admin-input-padding-y) var(--space-4);
-  background: var(--color-text-primary);
+  background: var(--color-text-primary-dark);
   color: var(--color-deepest);
   border: none;
   border-radius: var(--admin-input-radius);
@@ -128,7 +128,7 @@
 .cancelBtn {
   padding: var(--admin-input-padding-y) var(--space-4);
   background: none;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   border: 1px solid var(--color-border-dark);
   border-radius: var(--admin-input-radius);
   font-family: var(--font-sans);
@@ -138,8 +138,8 @@
 }
 
 .cancelBtn:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-muted);
+  color: var(--color-text-primary-dark);
+  border-color: var(--color-text-muted-dark);
 }
 
 .error {
@@ -164,7 +164,7 @@
 
 .immutableNote {
   font-size: var(--text-meta);
-  color: var(--color-text-muted);
+  color: var(--color-text-muted-dark);
   font-style: italic;
 }
 

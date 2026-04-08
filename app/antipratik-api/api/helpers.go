@@ -22,11 +22,15 @@ func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadCloser, ct s
 // or the slice of values (possibly empty = clear all) when the key is present.
 // Values may be comma-separated (e.g. "tag1,tag2") and are split and trimmed.
 func formTags(r *http.Request) []string {
-	if _, ok := r.Form["tags"]; !ok {
+	key := "tags"
+	if _, ok := r.Form[key]; !ok {
 		return nil
+	} else if _, ok := r.Form["tags[]"]; ok {
+		key = "tags[]"
 	}
+
 	var tags []string
-	for _, v := range r.Form["tags"] {
+	for _, v := range r.Form[key] {
 		for _, part := range strings.Split(v, ",") {
 			part = strings.TrimSpace(part)
 			if part != "" {
