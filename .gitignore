@@ -46,5 +46,8 @@ next-env.d.ts
 # database files
 *.db
 
+# uploaded files (local storage backend)
+app/antipratik-api/data/
+
 # TEMPORARY: ignore all public files until I decide how to handle them
 app/antipratik-ui/public/*
