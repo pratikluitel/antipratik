@@ -235,11 +235,15 @@ src/lib/
 - **FilterState** includes `sortOrder: 'newest' | 'oldest'`
 - **Additional types added post-scaffold:** `LayoutMode`, `LAYOUT_MODE`, `FeedItem`, `FilterAction` — see `src/lib/types.ts`
 
-**Go backend endpoints (future):**
+**Go backend endpoints:**
 - `GET /api/posts` → `getPosts()`
 - `GET /api/posts/:slug` → `getPost(slug)`
 - `GET /api/links` → `getLinks()`
 - `GET /api/links/featured` → `getFeaturedLinks()`
+
+**URL prefixing (important):** The backend stores relative URLs for all file fields (`/files/…`, `/thumbnails/…`). `api.ts` must prefix every file-backed URL with `API_URL` before returning data to components. This is done via the `prefixPost()` helper in `api.ts` — called inside `getPosts()`. Affected fields: `MusicPost.albumArt`, `MusicPost.audioUrl`, `PhotoImage.url`, `PhotoImage.thumbnailSmallUrl/thumbnailMediumUrl/thumbnailLargeUrl`, `VideoPost.thumbnailUrl`, `LinkPost.thumbnailUrl`.
+
+**PhotoImage type** now includes optional thumbnail fields: `thumbnailSmallUrl?`, `thumbnailMediumUrl?`, `thumbnailLargeUrl?` — present when the image was uploaded through the backend. Use `thumbnailSmallUrl` for card previews and `thumbnailLargeUrl` for lightbox when available, falling back to `url`.
 
 ---
 

@@ -34,6 +34,11 @@ func main() {
 		log.Fatalf("seed: %v", err)
 	}
 
+	fileStore, err := store.NewFileStore(cfg.Storage)
+	if err != nil {
+		log.Fatalf("init file store: %v", err)
+	}
+
 	postStore := store.NewPostStore(db)
 	linkStore := store.NewLinkStore(db)
 	userStore := store.NewUserStore(db)
@@ -43,16 +48,18 @@ func main() {
 		log.Fatalf("jwt secret: %v", err)
 	}
 
+	uploadSvc := logic.NewUploadService(fileStore)
 	postLogic := logic.NewPostService(postStore)
 	linkLogic := logic.NewLinkService(linkStore)
 	authService := logic.NewAuthService(userStore, jwtSecret)
 
-	postH := api.NewPostHandler(postLogic)
+	postH := api.NewPostHandler(postLogic, uploadSvc)
 	linkH := api.NewLinkHandler(linkLogic)
 	authH := api.NewAuthHandler(authService)
+	fileH := api.NewFileServingHandler(fileStore)
 
 	mux := http.NewServeMux()
-	api.RegisterRoutes(mux, postH, linkH, authH, authService, "api/openapi.yaml", "api/swagger.html")
+	api.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, "api/openapi.yaml", "api/swagger.html")
 
 	handler := api.CORSMiddleware(mux)
 

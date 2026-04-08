@@ -87,8 +87,9 @@ func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input 
 		return err
 	}
 	for i, img := range input.Images {
-		_, err = tx.ExecContext(ctx, `INSERT INTO photo_images (post_id, url, alt, caption, sort_order) VALUES (?, ?, ?, ?, ?)`,
-			id, img.URL, img.Alt, img.Caption, i)
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO photo_images (post_id, url, alt, caption, sort_order, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			id, img.URL, img.Alt, img.Caption, i, img.ThumbnailSmallURL, img.ThumbnailMedURL, img.ThumbnailLargeURL)
 		if err != nil {
 			return err
 		}
@@ -203,8 +204,9 @@ func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input mode
 		return err
 	}
 	for i, img := range input.Images {
-		if _, err = tx.ExecContext(ctx, `INSERT INTO photo_images (post_id, url, alt, caption, sort_order) VALUES (?, ?, ?, ?, ?)`,
-			id, img.URL, img.Alt, img.Caption, i); err != nil {
+		if _, err = tx.ExecContext(ctx,
+			`INSERT INTO photo_images (post_id, url, alt, caption, sort_order, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			id, img.URL, img.Alt, img.Caption, i, img.ThumbnailSmallURL, img.ThumbnailMedURL, img.ThumbnailLargeURL); err != nil {
 			return err
 		}
 	}
@@ -532,7 +534,7 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, url, alt, caption FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
+	q := "SELECT post_id, url, alt, caption, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchPhotoImages: %w", err)
@@ -543,7 +545,7 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 	for rows.Next() {
 		var postID string
 		var img models.PhotoImage
-		if err := rows.Scan(&postID, &img.URL, &img.Alt, &img.Caption); err != nil {
+		if err := rows.Scan(&postID, &img.URL, &img.Alt, &img.Caption, &img.ThumbnailSmallURL, &img.ThumbnailMedURL, &img.ThumbnailLargeURL); err != nil {
 			return nil, fmt.Errorf("fetchPhotoImages scan: %w", err)
 		}
 		m[postID] = append(m[postID], img)

@@ -11,9 +11,10 @@ import (
 
 // Config holds all runtime configuration for the server.
 type Config struct {
-	Server ServerConfig `yaml:"server"`
-	DB     DBConfig     `yaml:"db"`
-	Static StaticConfig `yaml:"static"`
+	Server  ServerConfig  `yaml:"server"`
+	DB      DBConfig      `yaml:"db"`
+	Static  StaticConfig  `yaml:"static"`
+	Storage StorageConfig `yaml:"storage"`
 }
 
 // ServerConfig holds HTTP server settings.
@@ -30,6 +31,23 @@ type DBConfig struct {
 // StaticConfig holds settings for serving the frontend static build.
 type StaticConfig struct {
 	Dir string `yaml:"dir"`
+}
+
+// StorageConfig holds settings for the pluggable file storage backend.
+type StorageConfig struct {
+	Backend  string   `yaml:"backend"`   // "local" or "r2"
+	LocalDir string   `yaml:"local_dir"` // used when backend=local
+	R2       R2Config `yaml:"r2"`
+}
+
+// R2Config holds Cloudflare R2 credentials and settings.
+// Files are always served via the backend's own /files/ and /thumbnails/ endpoints
+// regardless of storage backend — R2 object URLs are never exposed to clients.
+type R2Config struct {
+	Endpoint        string `yaml:"endpoint"`
+	Bucket          string `yaml:"bucket"`
+	AccessKeyID     string `yaml:"access_key_id"`
+	SecretAccessKey string `yaml:"secret_access_key"`
 }
 
 // Load reads and parses the YAML config file at the given path.

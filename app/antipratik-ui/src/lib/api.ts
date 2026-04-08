@@ -7,10 +7,58 @@
  * Never call fetch() directly in a component or page.
  */
 
-import type { Post, EssayPost, ExternalLink, FilterState } from './types';
+import type { Post, MusicPost, PhotoPost, VideoPost, LinkPost, EssayPost, ExternalLink, FilterState } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const IS_API_DISABLED = !API_URL;
+
+// ─── URL PREFIXING ────────────────────────────────────────────────────────────
+// The backend stores relative URLs (e.g. /files/abc.jpg, /thumbnails/abc-small.jpg).
+// Prefix them with the API base URL so the browser can resolve them correctly.
+
+function prefixUrl(url: string | undefined | null): string {
+  if (!url) return '';
+  if (url.startsWith('http') || url.startsWith('https') || url.startsWith('//')) return url;
+  return url.startsWith('/') ? `${API_URL}${url}` : `${API_URL}/${url}`;
+}
+
+function prefixOptionalUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('http') || url.startsWith('https') || url.startsWith('//')) return url;
+  return url.startsWith('/') ? `${API_URL}${url}` : `${API_URL}/${url}`;
+}
+
+function prefixPost(post: Post): Post {
+  switch (post.type) {
+    case 'music': {
+      const p = post as MusicPost;
+      return { ...p, albumArt: prefixUrl(p.albumArt), audioUrl: prefixUrl(p.audioUrl) };
+    }
+    case 'photo': {
+      const p = post as PhotoPost;
+      return {
+        ...p,
+        images: p.images.map((img) => ({
+          ...img,
+          url: prefixUrl(img.url),
+          thumbnailSmallUrl: prefixOptionalUrl(img.thumbnailSmallUrl),
+          thumbnailMediumUrl: prefixOptionalUrl(img.thumbnailMediumUrl),
+          thumbnailLargeUrl: prefixOptionalUrl(img.thumbnailLargeUrl),
+        })),
+      };
+    }
+    case 'video': {
+      const p = post as VideoPost;
+      return { ...p, thumbnailUrl: prefixUrl(p.thumbnailUrl) };
+    }
+    case 'link': {
+      const p = post as LinkPost;
+      return { ...p, thumbnailUrl: prefixOptionalUrl(p.thumbnailUrl) };
+    }
+    default:
+      return post;
+  }
+}
 
 // During isolated UI builds without a backend, we still compile the app.
 // Pages will render with empty collections, and actual data loading requires
@@ -41,7 +89,8 @@ export async function getPosts(filter?: FilterState): Promise<Post[]> {
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getPosts`);
   }
-  return response.json() as Promise<Post[]>;
+  const posts: Post[] = await response.json();
+  return posts.map(prefixPost);
 }
 
 /**

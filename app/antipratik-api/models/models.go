@@ -53,9 +53,12 @@ func (m MusicPost) postType() string { return "music" }
 
 // PhotoImage is a single image within a PhotoPost.
 type PhotoImage struct {
-	URL     string  `json:"url"`
-	Alt     string  `json:"alt"`
-	Caption *string `json:"caption,omitempty"`
+	URL               string  `json:"url"`
+	Alt               string  `json:"alt"`
+	Caption           *string `json:"caption,omitempty"`
+	ThumbnailSmallURL *string `json:"thumbnailSmallUrl,omitempty"`
+	ThumbnailMedURL   *string `json:"thumbnailMediumUrl,omitempty"`
+	ThumbnailLargeURL *string `json:"thumbnailLargeUrl,omitempty"`
 }
 
 // PhotoPost contains one or more images and an optional location.
@@ -181,3 +184,4 @@ type CreateExternalLink struct {
 	Featured    bool   `json:"featured"`
 	Category    string `json:"category"`
 }
+

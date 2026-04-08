@@ -8,7 +8,11 @@ import (
 )
 
 // RegisterRoutes registers all HTTP routes on mux.
-func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, authH *AuthHandlerImpl, authSvc logic.AuthLogic, openAPIPath, swaggerPath string) {
+func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, authH *AuthHandlerImpl, authSvc logic.AuthLogic, fileH *FileServingHandler, openAPIPath, swaggerPath string) {
+	// Public file serving routes
+	mux.HandleFunc("GET /files/{fileId}", fileH.ServeFile)
+	mux.HandleFunc("GET /thumbnails/{thumbnailId}", fileH.ServeThumbnail)
+
 	// Public read routes
 	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
 	mux.HandleFunc("GET /api/posts", postH.GetPosts)
@@ -38,7 +42,7 @@ func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, au
 		w.Write(data)
 	})
 
-	// Protected write routes — each handler individually wrapped with JWT middleware
+	// Protected write routes
 	protect := JWTAuthMiddleware(authSvc)
 	mux.Handle("POST /api/posts/essay", protect(http.HandlerFunc(postH.CreateEssay)))
 	mux.Handle("POST /api/posts/short", protect(http.HandlerFunc(postH.CreateShort)))

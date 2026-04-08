@@ -7,3 +7,12 @@ db:
 
 static:
   dir: "../antipratik-ui/out"
+
+storage:
+  backend: "local"        # "local" or "r2"
+  local_dir: "./data/uploads"
+  r2:
+    endpoint: ""
+    bucket: "antipratik"
+    access_key_id: ""
+    secret_access_key: ""

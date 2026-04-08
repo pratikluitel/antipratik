@@ -17,12 +17,16 @@ type PostLogic interface {
 	GetPost(ctx context.Context, slug string) (*models.EssayPost, error)
 
 	// Write operations
-	CreateEssay(ctx context.Context, input models.CreateEssayPost) (string, error)
-	CreateShort(ctx context.Context, input models.CreateShortPost) (string, error)
-	CreateMusic(ctx context.Context, input models.CreateMusicPost) (string, error)
-	CreatePhoto(ctx context.Context, input models.CreatePhotoPost) (string, error)
-	CreateVideo(ctx context.Context, input models.CreateVideoPost) (string, error)
-	CreateLinkPost(ctx context.Context, input models.CreateLinkPost) (string, error)
+	// Essay and Short use auto-generated IDs.
+	// Music, Photo, Video, and LinkPost accept a preID: if non-empty it is used as the post ID
+	// (so the API layer can generate the ID before uploading files and keep them in sync);
+	// if empty, a new UUID is generated.
+	CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error)
+	CreateShort(ctx context.Context, input models.CreateShortPost) (models.ShortPost, error)
+	CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (models.MusicPost, error)
+	CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error)
+	CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error)
+	CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error)
 	UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error
 	UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error
 	UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error

@@ -43,6 +43,16 @@ components:
         caption:
           type: string
           nullable: true
+        thumbnailSmallUrl:
+          type: string
+          nullable: true
+        thumbnailMediumUrl:
+          type: string
+          nullable: true
+        thumbnailLargeUrl:
+          type: string
+          nullable: true
+
 
     EssayPost:
       type: object
@@ -550,15 +560,40 @@ paths:
 
   /posts/music:
     post:
-      summary: Create music post
+      summary: Create music post (with file upload)
+      description: |
+        Accepts `multipart/form-data`. Stores the audio file (and optional album art)
+        and creates the post in one request. File IDs follow `<postId>.<ext>`.
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateMusicPost"
+              type: object
+              required: [audioFile, title, duration]
+              properties:
+                audioFile:
+                  type: string
+                  format: binary
+                  description: "Audio file — allowed: mp3, wav, ogg, m4a"
+                albumArtFile:
+                  type: string
+                  format: binary
+                  description: "Album art image (optional) — allowed: jpg, jpeg, png, webp"
+                title:
+                  type: string
+                duration:
+                  type: integer
+                  description: Duration in seconds
+                album:
+                  type: string
+                  description: Album name (optional)
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "201":
           description: Created
@@ -566,6 +601,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -575,7 +616,7 @@ paths:
 
   /posts/music/{id}:
     put:
-      summary: Update music post
+      summary: Update music post (with file upload)
       security:
         - bearerAuth: []
       parameters:
@@ -587,9 +628,27 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateMusicPost"
+              type: object
+              required: [audioFile, title, duration]
+              properties:
+                audioFile:
+                  type: string
+                  format: binary
+                albumArtFile:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                duration:
+                  type: integer
+                album:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "200":
           description: Updated
@@ -597,6 +656,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -606,15 +671,43 @@ paths:
 
   /posts/photo:
     post:
-      summary: Create photo post
+      summary: Create photo post (with file upload)
+      description: |
+        Accepts `multipart/form-data`. Upload one or more image files as `images[]`.
+        Thumbnails (300/600/1200px) are generated automatically. Provide parallel
+        `alt[]` and optional `caption[]` arrays matching image order.
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreatePhotoPost"
+              type: object
+              required: [images]
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: "Image files — allowed: jpg, jpeg, png, webp"
+                alt:
+                  type: array
+                  items:
+                    type: string
+                  description: Alt text for each image (parallel to images[])
+                caption:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional caption for each image (parallel to images[])
+                location:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "201":
           description: Created
@@ -622,6 +715,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -631,7 +730,7 @@ paths:
 
   /posts/photo/{id}:
     put:
-      summary: Update photo post
+      summary: Update photo post (with file upload)
       security:
         - bearerAuth: []
       parameters:
@@ -643,9 +742,30 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreatePhotoPost"
+              type: object
+              required: [images]
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                alt:
+                  type: array
+                  items:
+                    type: string
+                caption:
+                  type: array
+                  items:
+                    type: string
+                location:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "200":
           description: Updated
@@ -653,6 +773,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -662,15 +788,33 @@ paths:
 
   /posts/video:
     post:
-      summary: Create video post
+      summary: Create video post (with optional thumbnail upload)
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateVideoPost"
+              type: object
+              required: [title, videoURL, duration]
+              properties:
+                thumbnailFile:
+                  type: string
+                  format: binary
+                  description: "Thumbnail image (optional) — allowed: jpg, jpeg, png, webp"
+                title:
+                  type: string
+                videoURL:
+                  type: string
+                duration:
+                  type: integer
+                playlist:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "201":
           description: Created
@@ -678,6 +822,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -687,7 +837,7 @@ paths:
 
   /posts/video/{id}:
     put:
-      summary: Update video post
+      summary: Update video post (with optional thumbnail upload)
       security:
         - bearerAuth: []
       parameters:
@@ -699,9 +849,26 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateVideoPost"
+              type: object
+              required: [title, videoURL, duration]
+              properties:
+                thumbnailFile:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                videoURL:
+                  type: string
+                duration:
+                  type: integer
+                playlist:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "200":
           description: Updated
@@ -709,6 +876,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -718,15 +891,35 @@ paths:
 
   /posts/link:
     post:
-      summary: Create link post
+      summary: Create link post (with optional thumbnail upload)
       security:
         - bearerAuth: []
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateLinkPost"
+              type: object
+              required: [title, url, domain]
+              properties:
+                thumbnailFile:
+                  type: string
+                  format: binary
+                  description: "Thumbnail image (optional) — allowed: jpg, jpeg, png, webp"
+                title:
+                  type: string
+                url:
+                  type: string
+                domain:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "201":
           description: Created
@@ -734,6 +927,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -743,7 +942,7 @@ paths:
 
   /posts/link/{id}:
     put:
-      summary: Update link post
+      summary: Update link post (with optional thumbnail upload)
       security:
         - bearerAuth: []
       parameters:
@@ -755,9 +954,28 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateLinkPost"
+              type: object
+              required: [title, url, domain]
+              properties:
+                thumbnailFile:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                url:
+                  type: string
+                domain:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
       responses:
         "200":
           description: Updated
@@ -765,6 +983,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IDResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized
           content:
@@ -887,6 +1111,96 @@ paths:
           description: Deleted
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # File-serving endpoints live outside /api — override server at path level.
+  /files/{fileId}:
+    servers:
+      - url: /
+    get:
+      summary: Retrieve an uploaded file (photo or audio)
+      description: |
+        Streams the original binary content of an uploaded file.
+        The `fileId` must match the pattern returned by upload endpoints (`<postId>.<ext>`).
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "File ID in the format <postId>.<ext>"
+      responses:
+        "200":
+          description: File binary content
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+            audio/ogg:
+              schema:
+                type: string
+                format: binary
+            audio/mp4:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /thumbnails/{thumbnailId}:
+    servers:
+      - url: /
+    get:
+      summary: Retrieve a photo thumbnail
+      description: |
+        Streams the binary content of a generated thumbnail image.
+        Thumbnail IDs follow the pattern `<postId>-<size>.<ext>` where size is
+        one of `small` (300px), `medium` (600px), or `large` (1200px).
+      parameters:
+        - name: thumbnailId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Thumbnail ID in the format <postId>-<size>.<ext>"
+      responses:
+        "200":
+          description: Thumbnail image binary content
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Thumbnail not found
           content:
             application/json:
               schema:
