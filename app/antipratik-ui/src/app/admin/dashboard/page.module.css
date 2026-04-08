@@ -38,11 +38,11 @@
 
 .newBtn {
   align-self: flex-start;
-  padding: 8px var(--space-3);
+  padding: var(--space-1) var(--space-3);
   background: var(--color-text-primary-dark);
   color: var(--color-deepest);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--admin-input-radius);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   font-weight: 600;
@@ -91,7 +91,7 @@
   padding: var(--space-2) var(--space-2);
   background: var(--color-surface-dark);
   border: 1px solid var(--color-border-dark);
-  border-radius: 6px;
+  border-radius: var(--admin-input-radius);
   transition: background var(--motion-fast);
 }
 

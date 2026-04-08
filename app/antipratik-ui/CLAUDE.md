@@ -167,6 +167,18 @@ These tokens were added or modified during implementation (not in the original d
 | `--toggle-track-hover-bg-light` | `rgba(0, 0, 0, 0.10)` | Toggle track hover bg in light mode |
 | `--toggle-thumb-bg-dark` | `rgba(255, 255, 255, 0.15)` | Toggle thumb bg in dark mode |
 | `--toggle-thumb-bg-light` | `rgba(0, 0, 0, 0.12)` | Toggle thumb bg in light mode |
+| `--color-text-primary` | *(theme alias)* | Theme-switching alias for `--color-text-primary-dark/light` — set in `[data-theme]` blocks |
+| `--color-text-sub` | *(theme alias)* | Theme-switching alias for `--color-text-sub-dark` / `--color-text-primary-light` |
+| `--color-text-body` | *(theme alias)* | Theme-switching alias for `--color-text-body-dark/light` |
+| `--color-text-muted` | *(theme alias)* | Theme-switching alias for `--color-text-muted-dark/light` |
+| `--color-text-subtle` | *(theme alias)* | Theme-switching alias for `--color-text-subtle-dark/light` |
+| `--admin-sidebar-width` | `220px` | Admin panel sidebar width |
+| `--admin-content-max` | `860px` | Admin panel main content max-width |
+| `--admin-tab-height` | `44px` | Admin dashboard tab bar item height |
+| `--admin-top-bar-height` | `52px` | Admin top bar height |
+| `--admin-input-radius` | `6px` | Border-radius for admin form inputs, buttons, and rows |
+| `--admin-input-padding-x` | `var(--space-2)` | Horizontal padding for admin form inputs |
+| `--admin-input-padding-y` | `10px` | Vertical padding for admin form inputs (between `--space-1`=8px and `--space-2`=16px) |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 
