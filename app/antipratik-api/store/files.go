@@ -4,6 +4,7 @@ package store
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/pratikluitel/antipratik/config"
 )
 
@@ -118,6 +120,10 @@ func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadCloser, strin
 		Key:    aws.String(key),
 	})
 	if err != nil {
+		var nsk *types.NoSuchKey
+		if errors.As(err, &nsk) {
+			return nil, "", ErrFileNotFound
+		}
 		return nil, "", fmt.Errorf("r2FileStore.Get: %w", err)
 	}
 	ct := contentTypeFromKey(key)

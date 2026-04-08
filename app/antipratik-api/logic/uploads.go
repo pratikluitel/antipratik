@@ -68,6 +68,15 @@ func NewUploadService(files store.FileStore) *UploadService {
 var allowedPhotoExts = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
 var allowedMusicExts = map[string]bool{".mp3": true, ".wav": true, ".ogg": true, ".m4a": true}
 
+// storageExt returns the file extension used when storing the encoded image.
+// WebP inputs are encoded as JPEG, so they are stored with a .jpg extension.
+func storageExt(ext string) string {
+	if ext == ".webp" {
+		return ".jpg"
+	}
+	return ext
+}
+
 // UploadPhotoFiles implements UploadLogic.
 func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
@@ -89,8 +98,9 @@ func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, fil
 			return nil, validationErr(fmt.Sprintf("images[%d]: could not decode image: %v", i, err))
 		}
 
-		ct := contentTypeForExt(ext)
-		fileID := fmt.Sprintf("%s-%d%s", postID, i, ext)
+		sExt := storageExt(ext)
+		ct := contentTypeForExt(sExt)
+		fileID := fmt.Sprintf("%s-%d%s", postID, i, sExt)
 		origKey := "photos/" + fileID
 
 		origBuf, err := encodeImage(src, ext)
@@ -116,7 +126,7 @@ func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, fil
 			if err != nil {
 				return nil, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
 			}
-			thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, ext)
+			thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, sExt)
 			if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
 				return nil, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
 			}
@@ -159,8 +169,9 @@ func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, aud
 		if !allowedPhotoExts[artExt] {
 			return MusicFilesResult{}, validationErr(fmt.Sprintf("albumArtFile must be one of jpg, jpeg, png, webp — got %q", artExt))
 		}
-		artFileID := postID + "-albumart" + artExt
-		if err := s.files.Put(ctx, "photos/"+artFileID, albumArtFile.File, contentTypeForExt(artExt)); err != nil {
+		artSExt := storageExt(artExt)
+		artFileID := postID + "-albumart" + artSExt
+		if err := s.files.Put(ctx, "photos/"+artFileID, albumArtFile.File, contentTypeForExt(artSExt)); err != nil {
 			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store album art: %w", err)
 		}
 		result.AlbumArtURL = "/files/" + artFileID
@@ -178,8 +189,9 @@ func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suff
 	if !allowedPhotoExts[ext] {
 		return "", validationErr(fmt.Sprintf("thumbnailFile must be one of jpg, jpeg, png, webp — got %q", ext))
 	}
-	fileID := postID + "-" + suffix + ext
-	if err := s.files.Put(ctx, "photos/"+fileID, file.File, contentTypeForExt(ext)); err != nil {
+	sExt := storageExt(ext)
+	fileID := postID + "-" + suffix + sExt
+	if err := s.files.Put(ctx, "photos/"+fileID, file.File, contentTypeForExt(sExt)); err != nil {
 		return "", fmt.Errorf("UploadThumbnail store: %w", err)
 	}
 	return "/files/" + fileID, nil
