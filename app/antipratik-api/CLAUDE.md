@@ -285,10 +285,13 @@ These rules are inviolable. Check them before writing any code.
 | GET | `/files/{fileId}` | No | Stream original uploaded file binary |
 | GET | `/thumbnails/{thumbnailId}` | No | Stream photo thumbnail binary |
 
-All endpoints return `application/json`. Errors: `{"error":"message"}`.
+Most API endpoints return `application/json`. Exceptions:
+- `GET /files/{fileId}` streams original audio/image binary content with the proper MIME type.
+- `GET /thumbnails/{thumbnailId}` streams binary thumbnail images.
+Errors: `{"error":"message"}`.
 
 ### File Upload Contract
-File uploads are embedded in the existing post create/update endpoints as `multipart/form-data` (not separate upload endpoints).
+File uploads are embedded in the existing post create endpoints as `multipart/form-data` (not separate upload endpoints).
 
 | Post type | Endpoint | File fields |
 |-----------|----------|-------------|
@@ -298,6 +301,9 @@ File uploads are embedded in the existing post create/update endpoints as `multi
 | Link | `POST/PUT /api/posts/link` | `thumbnailFile` (optional) |
 
 - Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Allowed audio types: `mp3`, `wav`, `ogg`, `m4a`.
+- `POST /api/posts/music` supports optional `albumArtFile`.
+- `POST /api/posts/video` and `POST /api/posts/link` support optional `thumbnailFile`.
+- Link URLs must be absolute; the server derives `domain` automatically from the submitted `url`.
 - Photo uploads auto-generate 3 thumbnail variants: small (300px), medium (600px), large (1200px) wide.
 - Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
