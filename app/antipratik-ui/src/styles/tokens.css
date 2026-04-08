@@ -533,4 +533,6 @@
   --admin-input-radius:    6px;
   --admin-input-padding-x: var(--space-2);
   --admin-input-padding-y: 10px;
+  --admin-danger:              #C0392B;   /* destructive UI: delete buttons, errors, required — distinct from --accent-music */
+  --admin-form-section-radius: 8px;       /* form section card container — wider than --admin-input-radius (6px) */
 }

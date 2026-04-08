@@ -179,6 +179,8 @@ These tokens were added or modified during implementation (not in the original d
 | `--admin-input-radius` | `6px` | Border-radius for admin form inputs, buttons, and rows |
 | `--admin-input-padding-x` | `var(--space-2)` | Horizontal padding for admin form inputs |
 | `--admin-input-padding-y` | `10px` | Vertical padding for admin form inputs (between `--space-1`=8px and `--space-2`=16px) |
+| `--admin-danger` | `#C0392B` | Admin destructive/error colour (delete buttons, error states, required asterisk) — separate from `--accent-music` (Rule 6) |
+| `--admin-form-section-radius` | `8px` | Admin form section card border-radius — wider than `--admin-input-radius` (6px) |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 

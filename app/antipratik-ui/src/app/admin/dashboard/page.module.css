@@ -57,7 +57,7 @@
 .formSection {
   background: var(--color-surface-dark);
   border: 1px solid var(--color-border-dark);
-  border-radius: 8px;
+  border-radius: var(--admin-form-section-radius);
   padding: var(--space-3);
 }
 
@@ -148,14 +148,14 @@
   padding: 4px var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: var(--accent-music);
+  color: var(--admin-danger);
   background: none;
-  border: 1px solid color-mix(in srgb, var(--accent-music) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--admin-danger) 40%, transparent);
   border-radius: 4px;
   cursor: pointer;
   transition: background var(--motion-fast);
 }
 
 .deleteBtn:hover {
-  background: color-mix(in srgb, var(--accent-music) 12%, transparent);
+  background: color-mix(in srgb, var(--admin-danger) 12%, transparent);
 }

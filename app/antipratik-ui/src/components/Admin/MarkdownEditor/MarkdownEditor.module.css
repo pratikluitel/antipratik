@@ -13,7 +13,7 @@
 }
 
 .tab {
-  padding: 8px var(--space-2);
+  padding: var(--space-1) var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   color: var(--color-text-muted-dark);
