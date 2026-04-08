@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
 import styles from './MarkdownEditor.module.css';
 
 interface MarkdownEditorProps {
@@ -48,7 +50,7 @@ export default function MarkdownEditor({ value, onChange, disabled }: MarkdownEd
       ) : (
         <div className={styles.preview}>
           {value.trim() ? (
-            <ReactMarkdown>{value}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{value}</ReactMarkdown>
           ) : (
             <p className={styles.empty}>Nothing to preview yet.</p>
           )}

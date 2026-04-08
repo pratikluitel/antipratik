@@ -41,11 +41,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Don't render children until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return null;
-  }
-
+  // We always render children to keep the DOM tree stable for Next.js hydration.
+  // The RootLayout inline script handles the theme attribute immediately to prevent flash.
   return (
     <ThemeContext.Provider value={{ theme, toggle }}>
       {children}

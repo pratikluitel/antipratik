@@ -28,12 +28,14 @@ export default function VideoCard({ post }: Props) {
         className={styles.link}
       >
         <div className={styles.thumbnail}>
-          <Image
-            src={post.thumbnailUrl}
-            alt={post.title}
-            fill
-            sizes="(max-width: 860px) 100vw, 860px"
-          />
+          {post.thumbnailUrl && (
+            <Image
+              src={post.thumbnailUrl}
+              alt={post.title}
+              fill
+              sizes="(max-width: 860px) 100vw, 860px"
+            />
+          )}
           <div className={styles.scrim} />
           <div className={styles.playButton} aria-hidden="true">
             <span className={styles.playIcon} />

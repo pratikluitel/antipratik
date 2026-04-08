@@ -80,9 +80,7 @@ export default function AdminDashboardPage() {
     await deleteExternalLink(id, token);
     refreshData();
   }
-
-  if (!token) return null;
-
+  if (!token) return <div className={styles.loading}>Checking session...</div>;
   const tabPosts = activeTab !== 'externallink'
     ? posts.filter((p) => p.type === activeTab)
     : [];

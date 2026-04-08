@@ -477,6 +477,11 @@
   --text-body:                       var(--color-text-body-dark);
   --text-muted:                      var(--color-text-muted-dark);
   --text-subtle:                     var(--color-text-subtle-dark);
+  --color-text-primary:              var(--color-text-primary-dark);
+  --color-text-sub:                  var(--color-text-sub-dark);
+  --color-text-body:                 var(--color-text-body-dark);
+  --color-text-muted:                var(--color-text-muted-dark);
+  --color-text-subtle:               var(--color-text-subtle-dark);
   --nav-bg:                          var(--nav-bg-dark);
   --filter-bar-bg:                   var(--filter-bar-bg-dark);
   --card-bg:                         var(--card-bg-dark);
@@ -503,6 +508,11 @@
   --text-body:                       var(--color-text-body-light);
   --text-muted:                      var(--color-text-muted-light);
   --text-subtle:                     var(--color-text-subtle-light);
+  --color-text-primary:              var(--color-text-primary-light);
+  --color-text-sub:                  var(--color-text-primary-light);
+  --color-text-body:                 var(--color-text-body-light);
+  --color-text-muted:                var(--color-text-muted-light);
+  --color-text-subtle:               var(--color-text-subtle-light);
   --nav-bg:                          var(--nav-bg-light);
   --filter-bar-bg:                   var(--filter-bar-bg-light);
   --card-bg:                         var(--card-bg-light);

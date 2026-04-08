@@ -86,6 +86,10 @@ export default function Navbar() {
       : styles.navLink;
   }
 
+  if (pathname.startsWith('/admin')) {
+    return <div style={{ display: 'none' }} aria-hidden="true" />;
+  }
+
   return (
     <nav
       ref={navRef}

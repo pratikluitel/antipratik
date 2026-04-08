@@ -15,5 +15,5 @@ export default function AdminIndexPage() {
     }
   }, [router]);
 
-  return null;
+  return <div />;
 }
