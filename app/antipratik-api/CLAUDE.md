@@ -308,6 +308,7 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
 - Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
 - File URLs always route through the backend's own `/files/` and `/thumbnails/` endpoints — the storage backend (local or R2) is never exposed.
+- **Tag handling in PUT multipart requests:** If `tags[]` is absent, has no values, or contains only empty strings, all existing tags are cleared. Clients must re-send desired tags to preserve them. Non-multipart (JSON) update endpoints preserve existing tags when `tags` is omitted.
 
 ### Post Types Supported
 - **essay:** Long-form writing with title, slug, excerpt, body, reading time
