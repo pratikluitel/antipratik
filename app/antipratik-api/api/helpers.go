@@ -27,6 +27,11 @@ func formTags(r *http.Request) []string {
 	if _, ok := r.Form["tags[]"]; ok {
 		key = "tags[]"
 	} else if _, ok := r.Form["tags"]; !ok {
+		// For multipart requests, absence of tags[] means clear all tags.
+		// Non-multipart callers (JSON bodies) preserve existing tags when the key is absent.
+		if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
+			return []string{}
+		}
 		return nil
 	}
 
