@@ -6,16 +6,15 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
-func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadCloser, ct string) {
+func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadSeekCloser, ct string) {
 	defer body.Close()
 	w.Header().Set("Content-Type", ct)
-	if _, err := io.Copy(w, body); err != nil && r.Context().Err() == nil {
-		log.Printf("streamFile copy error: %v", err)
-	}
+	http.ServeContent(w, r, "", time.Time{}, body)
 }
 
 // formTags returns nil when neither "tags" nor "tags[]" key is present in the form
