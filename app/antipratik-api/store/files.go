@@ -23,8 +23,9 @@ type FileStore interface {
 	// Put stores the content from r under key with the given MIME content type.
 	Put(ctx context.Context, key string, r io.Reader, contentType string) error
 	// Get retrieves the content stored at key.
-	// Returns the body (caller must close), the content type, and any error.
-	Get(ctx context.Context, key string) (io.ReadCloser, string, error)
+	// Returns a seekable body (caller must close), the content type, and any error.
+	// The returned body implements io.ReadSeekCloser so callers can serve Range requests.
+	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
 	// Delete removes the file stored at key. It is not an error if the key does not exist.
 	Delete(ctx context.Context, key string) error
 }
@@ -69,7 +70,7 @@ func (s *localFileStore) Delete(_ context.Context, key string) error {
 	return nil
 }
 
-func (s *localFileStore) Get(_ context.Context, key string) (io.ReadCloser, string, error) {
+func (s *localFileStore) Get(_ context.Context, key string) (io.ReadSeekCloser, string, error) {
 	path := filepath.Join(s.baseDir, filepath.FromSlash(key))
 	f, err := os.Open(path)
 	if err != nil {
@@ -135,7 +136,7 @@ func (s *r2FileStore) Put(ctx context.Context, key string, r io.Reader, contentT
 	return nil
 }
 
-func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadCloser, string, error) {
+func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error) {
 	out, err := s.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(key),
@@ -147,14 +148,24 @@ func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadCloser, strin
 		}
 		return nil, "", fmt.Errorf("r2FileStore.Get: %w", err)
 	}
+	defer out.Body.Close()
 	ct := contentTypeFromKey(key)
 	if out.ContentType != nil && *out.ContentType != "" {
 		ct = *out.ContentType
 	}
-	return out.Body, ct, nil
+	buf, err := io.ReadAll(out.Body)
+	if err != nil {
+		return nil, "", fmt.Errorf("r2FileStore.Get read: %w", err)
+	}
+	return &bytesReadSeekCloser{bytes.NewReader(buf)}, ct, nil
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+// bytesReadSeekCloser wraps a *bytes.Reader to satisfy io.ReadSeekCloser.
+type bytesReadSeekCloser struct{ *bytes.Reader }
+
+func (bytesReadSeekCloser) Close() error { return nil }
 
 // contentTypeFromKey returns a MIME type based on the file extension in key.
 func contentTypeFromKey(key string) string {
