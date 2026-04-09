@@ -3,7 +3,9 @@ package logic
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -15,11 +17,12 @@ import (
 // PostService implements PostLogic.
 type PostService struct {
 	store store.PostStore
+	files store.FileStore
 }
 
-// NewPostService creates a new PostService backed by the given store.
-func NewPostService(s store.PostStore) *PostService {
-	return &PostService{store: s}
+// NewPostService creates a new PostService backed by the given store and file store.
+func NewPostService(s store.PostStore, files store.FileStore) *PostService {
+	return &PostService{store: s, files: files}
 }
 
 var validTypes = map[string]bool{
@@ -565,5 +568,66 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 	if err := requireNonEmpty("id", id); err != nil {
 		return err
 	}
+	post, err := s.store.GetPostByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	for _, key := range fileKeysForPost(post) {
+		if err := s.files.Delete(ctx, key); err != nil {
+			log.Printf("DeletePost: failed to delete file %q: %v", key, err)
+		}
+	}
 	return s.store.DeletePost(ctx, id)
+}
+
+func fileKeysForPost(post models.Post) []string {
+	var keys []string
+	switch p := post.(type) {
+	case models.MusicPost:
+		if p.AudioURL != "" {
+			keys = append(keys, urlToStorageKey(p.AudioURL))
+		}
+		if p.AlbumArt != "" {
+			keys = append(keys, urlToStorageKey(p.AlbumArt))
+		}
+	case models.PhotoPost:
+		for _, img := range p.Images {
+			keys = append(keys, urlToStorageKey(img.URL))
+			if img.ThumbnailSmallURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailSmallURL))
+			}
+			if img.ThumbnailMedURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailMedURL))
+			}
+			if img.ThumbnailLargeURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailLargeURL))
+			}
+		}
+	case models.VideoPost:
+		if p.ThumbnailURL != "" {
+			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
+		}
+	case models.LinkPost:
+		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
+			keys = append(keys, urlToStorageKey(*p.ThumbnailURL))
+		}
+	}
+	return keys
+}
+
+// urlToStorageKey converts a serving URL (/files/<id> or /thumbnails/<id>)
+// to a storage key (photos/<id>, music/<id>, or thumbnails/<id>).
+func urlToStorageKey(u string) string {
+	if after, ok := strings.CutPrefix(u, "/thumbnails/"); ok {
+		return "thumbnails/" + after
+	}
+	if after, ok := strings.CutPrefix(u, "/files/"); ok {
+		switch strings.ToLower(filepath.Ext(after)) {
+		case ".mp3", ".wav", ".ogg", ".m4a":
+			return "music/" + after
+		default:
+			return "photos/" + after
+		}
+	}
+	return u
 }

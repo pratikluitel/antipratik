@@ -25,6 +25,8 @@ type FileStore interface {
 	// Get retrieves the content stored at key.
 	// Returns the body (caller must close), the content type, and any error.
 	Get(ctx context.Context, key string) (io.ReadCloser, string, error)
+	// Delete removes the file stored at key. It is not an error if the key does not exist.
+	Delete(ctx context.Context, key string) error
 }
 
 // NewFileStore returns a FileStore implementation based on the supplied config.
@@ -55,6 +57,14 @@ func (s *localFileStore) Put(_ context.Context, key string, r io.Reader, _ strin
 	defer f.Close()
 	if _, err := io.Copy(f, r); err != nil {
 		return fmt.Errorf("localFileStore.Put copy: %w", err)
+	}
+	return nil
+}
+
+func (s *localFileStore) Delete(_ context.Context, key string) error {
+	path := filepath.Join(s.baseDir, filepath.FromSlash(key))
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("localFileStore.Delete: %w", err)
 	}
 	return nil
 }
@@ -93,6 +103,17 @@ func newR2FileStore(cfg config.R2Config) (*r2FileStore, error) {
 		Credentials:  aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(cfg.AccessKeyID, cfg.SecretAccessKey, "")),
 	})
 	return &r2FileStore{client: client, bucket: cfg.Bucket}, nil
+}
+
+func (s *r2FileStore) Delete(ctx context.Context, key string) error {
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return fmt.Errorf("r2FileStore.Delete: %w", err)
+	}
+	return nil
 }
 
 func (s *r2FileStore) Put(ctx context.Context, key string, r io.Reader, contentType string) error {
