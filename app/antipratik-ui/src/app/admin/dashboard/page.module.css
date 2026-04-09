@@ -134,7 +134,7 @@
   color: var(--color-text-muted-dark);
   background: none;
   border: 1px solid var(--color-border-dark);
-  border-radius: 4px;
+  border-radius: var(--admin-btn-radius);
   cursor: pointer;
   transition: color var(--motion-fast), border-color var(--motion-fast);
 }
@@ -151,7 +151,7 @@
   color: var(--admin-danger);
   background: none;
   border: 1px solid color-mix(in srgb, var(--admin-danger) 40%, transparent);
-  border-radius: 4px;
+  border-radius: var(--admin-btn-radius);
   cursor: pointer;
   transition: background var(--motion-fast);
 }

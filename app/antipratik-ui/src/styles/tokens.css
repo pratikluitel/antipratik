@@ -172,15 +172,11 @@
 --nav-transition:                    500ms ease-in-out;
 --nav-padding-x-desktop:             32px;
 --nav-padding-x-mobile:              20px;
---nav-bg-dark:                       #0F1118;
---nav-bg-light:                      #F7F5F0;
+--nav-bg-dark-blur:                  rgba(15, 17, 24, 0.85);   /* --color-bg-dark @ 85% */
+--nav-bg-light-blur:                 rgba(247, 245, 240, 0.85); /* --color-surface-light @ 85% */
 --nav-logo-size-default:             18px;
 --nav-logo-size-compact:             14px;
 --nav-link-size:                     13px;
---nav-link-size-compact:             12px;
---nav-link-gap:                      28px;
---nav-dot-color:                     #5E9E6A;
---nav-dot-size:                      3px;
 --nav-toggle-width:                  44px;
 --nav-toggle-height:                 24px;
 --nav-toggle-radius:                 12px;
@@ -195,7 +191,6 @@
 --toggle-track-hover-bg-light:       rgba(0, 0, 0, 0.10);
 --toggle-thumb-bg-dark:              rgba(255, 255, 255, 0.15);
 --toggle-thumb-bg-light:             rgba(0, 0, 0, 0.12);
---nav-menu-bg:                       #181D28;
 --nav-mobile-breakpoint:             767px;
 --nav-article-title-threshold:       200px;
 
@@ -212,79 +207,31 @@
 --pill-height:                       28px;
 --pill-height-mobile:                26px;
 --pill-border-radius:                14px;
---pill-font-size:                    12px;
---pill-font-size-mobile:             11px;
 --pill-transition:                   350ms ease-in-out;
 --pill-hover-bg-dark:                var(--color-elevated-dark);
 --pill-hover-bg-light:               #D8D4CA;
 --pill-all-selected-bg-dark:         var(--color-border-dark);
 --pill-all-selected-bg-light:        var(--color-stone);
---tags-active-color-dark:            #5E9E6A;
---tags-active-color-light:           #3D6B47;
---tags-active-badge-dark:            #5E9E6A;
---tags-active-badge-light:           #3D6B47;
---summary-bg-dark:                   #181D28;
---summary-bg-light:                  #EDEAE2;
---summary-border-dark:               #2E3748;
---summary-border-light:              #C8C0B4;
---summary-chip-bg-dark:              #1A2535;
---summary-chip-bg-light:             #D8D2C4;
---summary-chip-tag-color-dark:       #8BACC4;
---summary-chip-tag-color-light:      #5A7060;
 
 /* ═══════════════════════════════════════════════
    CARDS — shared base
 ═══════════════════════════════════════════════ */
 --card-radius:                       14px;
---card-padding:                      14px 16px 13px;
---card-border-dark:                  0.5px solid #2E3748;
---card-border-light:                 0.5px solid #C8C0B4;
---card-bg-dark:                      #181D28;
---card-bg-light:                     #F7F5F0;
---card-transition:                   400ms ease-in-out;
---card-hover-lift:                   translateY(-2px);
---card-hover-bg-dark:                #1E2535;
---card-hover-bg-light:               #FDFCF8;
---card-hover-border-dark:            #3A4A5E;
---card-hover-border-light:           #B0A898;
---card-tag-title-gap:                6px;
---card-title-excerpt-gap:            5px;
 --card-excerpt-meta-gap:             12px;
-
-/* Essay card */
---essay-img-height:                  160px;
---essay-no-img-border:               3px solid #4A7FBB;
---essay-no-img-padding-top:          16px;
-
-/* Short post card */
---short-text-size:                   14px;
---short-text-dark:                   #C8D8E8;
---short-text-light:                  #0F1118;
---short-padding:                     15px 17px;
---hashtag-color-dark:                #5E9E6A;
---hashtag-color-light:               #2A6838;
---hashtag-hover-dark:                #7DC48A;
---hashtag-hover-light:               #3D8050;
 
 /* Music card */
 --music-thumb-size:                  120px;
 --music-thumb-radius:                10px;
---music-card-padding:                13px 15px;
---waveform-expand-duration:          300ms ease-in-out;
---waveform-collapse-delay:           800ms;
---waveform-played-color:             #E03E35;
---waveform-unplayed-dark:            #2E3748;
---waveform-unplayed-light:           #C8C0B4;
 
 /* Photo card */
---photo-card-radius:                 6px;
 --photo-ratio:                       4 / 3;
---photo-grid-gap:                    4px;
 
 /* Video card */
 --video-ratio:                       16 / 9;
 --video-scrim:                       rgba(0,0,0,0.25);
 --video-scrim-hover:                 rgba(0,0,0,0.15);
+--video-overlay-bg:                  rgba(255, 255, 255, 0.92);
+--video-overlay-text:                rgba(255, 255, 255, 0.55);
 
 /* Link card */
 --link-card-padding:                 13px 15px;
@@ -293,40 +240,40 @@
 
 /* Lightbox */
 --lightbox-bg:                       rgba(10,12,18,0.96);
---lightbox-transition:               opacity 400ms ease-in-out;
+--lightbox-btn-bg:                   rgba(238, 242, 240, 0.12);  /* --color-snow @ 12% */
+--lightbox-btn-border:               rgba(238, 242, 240, 0.20);  /* --color-snow @ 20% */
+--lightbox-counter-color:            rgba(238, 242, 240, 0.50);  /* --color-snow @ 50% */
+--lightbox-caption-color:            rgba(238, 242, 240, 0.55);  /* --color-snow @ 55% */
+--lightbox-dot-bg:                   rgba(238, 242, 240, 0.30);  /* --color-snow @ 30% */
+--lightbox-nav-icon-size:            18px;
 
 /* ═══════════════════════════════════════════════
    MUSIC PLAYER
 ═══════════════════════════════════════════════ */
 --player-bar-height:                 64px;
 --player-bar-bg:                     #0A0E14;  /* always dark, both modes */
+--player-close-btn-bg:               rgba(238, 242, 240, 0.08);  /* --color-snow @ 8% */
 --player-bar-border-top:             0.5px solid #2E3748;
 --player-bar-padding-desktop:        0 20px;
 --player-bar-padding-mobile:         0 16px;
 --player-enter-duration:             400ms ease-in-out;
 --player-art-size-bar:               40px;
 --player-art-size-drawer:            56px;
---player-art-size-mobile:            36px;
 --player-btn-main-size-bar:          34px;
 --player-btn-main-size-drawer:       48px;
 --player-btn-main-bg:                #EEF2F0;
 --player-progress-height:            3px;
 --player-progress-bg:                #1E2535;
 --player-progress-fill:              #E03E35;
---player-time-color:                 #2E3748;
 
 /* Drawer */
 --drawer-bg:                         #0D1219;
 --drawer-border-top:                 0.5px solid #2E3748;
---drawer-max-height:                 280px;
---drawer-transition:                 max-height 500ms ease-in-out;
 --drawer-padding-desktop:            20px 24px 24px;
 --drawer-padding-mobile:             16px;
 --waveform-height:                   40px;
---waveform-height-mobile:            32px;
 --waveform-bar-width:                3px;
 --waveform-bar-gap:                  2px;
---waveform-bar-count:                35;
 
 /* ═══════════════════════════════════════════════
    ARTICLE READING VIEW
@@ -338,29 +285,6 @@
 --article-title-size-mobile:         22px;
 --article-title-tracking:            -0.01em;
 --back-btn-opacity-rest:             0.6;
---back-btn-margin-bottom:            32px;
---meta-bar-border-dark:              0.5px solid #1E2535;
---meta-bar-border-light:             0.5px solid #D8D2C4;
---hero-height:                       200px;
---hero-radius:                       10px;
---hero-margin-bottom:                28px;
---body-size-desktop:                 16px;
---body-size-mobile:                  15px;
---body-weight:                       300;
---body-line-height:                  1.8;
---body-color-dark:                   #8BACC4;
---body-color-light:                  #2A3A4A;
---body-paragraph-gap:                20px;
---art-h2-size:                       22px;
---art-h2-color-dark:                 #C8D8E8;
---art-h2-color-light:                #0F1118;
---art-h2-margin-top:                 32px;
---art-h2-margin-bottom:              12px;
---art-h3-size:                       18px;
---art-h3-color-dark:                 #B0C8DC;
---art-h3-color-light:                #1A2A3A;
---art-h3-margin-top:                 24px;
---art-h3-margin-bottom:              10px;
 --blockquote-border:                 3px solid #4A7FBB;
 --blockquote-padding:                4px 0 4px 20px;
 --blockquote-size:                   17px;
@@ -388,8 +312,6 @@
 --nl-padding-mobile:                 48px 24px;
 --nl-border-gradient:                linear-gradient(90deg, transparent 0%, #E03E35 20%, #4A7FBB 40%, #D4A832 60%, #5E9E6A 80%, transparent 100%);
 --nl-border-opacity:                 0.4;
---nl-copy-size:                      14px;
---nl-copy-color:                     #4A6A84;
 --nl-copy-max-width:                 420px;
 --nl-form-height:                    46px;   /* single source of truth — set on wrapper only */
 --nl-form-radius:                    10px;
@@ -413,7 +335,6 @@
 --nl-footer-form-height:             40px;
 --nl-footer-form-radius:             8px;
 --nl-footer-border-top:              0.5px solid #1E2535;
---nl-footer-copy-color:              #3A5068;
 
 /* ═══════════════════════════════════════════════
    EXTERNAL LINKS BLOCK
@@ -450,7 +371,6 @@
 --link-arrow-opacity-rest:           0.35;
 --link-arrow-opacity-hover:          0.90;
 --link-arrow-shift-hover:            translate(2px, -2px);
---links-homepage-max:                4;  /* max links shown in homepage snippet */
 
 /* ═══════════════════════════════════════════════
    ABOUT PAGE
@@ -482,12 +402,6 @@
   --color-text-body:                 var(--color-text-body-dark);
   --color-text-muted:                var(--color-text-muted-dark);
   --color-text-subtle:               var(--color-text-subtle-dark);
-  --nav-bg:                          var(--nav-bg-dark);
-  --filter-bar-bg:                   var(--filter-bar-bg-dark);
-  --card-bg:                         var(--card-bg-dark);
-  --card-border:                     var(--card-border-dark);
-  --card-hover-bg:                   var(--card-hover-bg-dark);
-  --card-hover-border:               var(--card-hover-border-dark);
   --nl-bg:                           var(--color-surface-dark);    /* #181D28 — raised surface, visible against page bg #0F1118 */
   --nl-input-bg:                     var(--color-bg-dark);          /* #0F1118 — inputs darker than block = inset feel */
   --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 5.9:1 on new block bg */
@@ -513,12 +427,6 @@
   --color-text-body:                 var(--color-text-body-light);
   --color-text-muted:                var(--color-text-muted-light);
   --color-text-subtle:               var(--color-text-subtle-light);
-  --nav-bg:                          var(--nav-bg-light);
-  --filter-bar-bg:                   var(--filter-bar-bg-light);
-  --card-bg:                         var(--card-bg-light);
-  --card-border:                     var(--card-border-light);
-  --card-hover-bg:                   var(--card-hover-bg-light);
-  --card-hover-border:               var(--card-hover-border-light);
   --nl-bg:                           var(--color-stone);            /* #1C2B3A — warmer dark, less jarring on parchment */
   --nl-legal-color:                  var(--color-text-muted-dark);  /* #7A9AB4 — WCAG AA 4.9:1 on new block bg */
 }
@@ -526,11 +434,11 @@
 /* ─── ADMIN PANEL ───────────────────────────────────────────────────────────── */
 
 :root {
-  --admin-sidebar-width:   220px;
   --admin-content-max:     860px;
   --admin-tab-height:      44px;
   --admin-top-bar-height:  52px;
   --admin-input-radius:    6px;
+  --admin-btn-radius:      4px;   /* smaller radius for inline action buttons (edit, delete, tag chips) */
   --admin-input-padding-x: var(--space-2);
   --admin-input-padding-y: 10px;
   --admin-danger:              #C0392B;   /* destructive UI: delete buttons, errors, required — distinct from --accent-music */

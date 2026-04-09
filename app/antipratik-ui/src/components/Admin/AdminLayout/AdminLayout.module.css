@@ -22,7 +22,6 @@
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   color: var(--color-text-muted-dark);
-  letter-spacing: var(--ls-ui);
 }
 
 .logoutBtn {

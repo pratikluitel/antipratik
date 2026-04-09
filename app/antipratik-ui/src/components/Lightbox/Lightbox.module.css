@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(10, 14, 20, 0.92);
+  background: var(--lightbox-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,10 +26,10 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(238, 242, 240, 0.12);
-  border: 0.5px solid rgba(238, 242, 240, 0.20);
-  color: #EEF2F0;
-  font-size: 16px;
+  background: var(--lightbox-btn-bg);
+  border: 0.5px solid var(--lightbox-btn-border);
+  color: var(--color-snow);
+  font-size: var(--text-body);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
   transform: translateX(-50%);
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: rgba(238, 242, 240, 0.50);
+  color: var(--lightbox-counter-color);
 }
 
 .imageContainer {
@@ -68,7 +68,7 @@
   margin-top: var(--space-2);
   font-family: var(--font-sans);
   font-size: var(--text-meta);
-  color: rgba(238, 242, 240, 0.55);
+  color: var(--lightbox-caption-color);
   text-align: center;
   max-width: 560px;
 }
@@ -81,10 +81,10 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(238, 242, 240, 0.12);
-  border: 0.5px solid rgba(238, 242, 240, 0.20);
-  color: #EEF2F0;
-  font-size: 18px;
+  background: var(--lightbox-btn-bg);
+  border: 0.5px solid var(--lightbox-btn-border);
+  color: var(--color-snow);
+  font-size: var(--lightbox-nav-icon-size);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -116,7 +116,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(238, 242, 240, 0.30);
+  background: var(--lightbox-dot-bg);
   border: none;
   cursor: pointer;
   padding: 0;
@@ -124,5 +124,5 @@
 
 .dotActive {
   composes: dot;
-  background: #EEF2F0;
+  background: var(--color-snow);
 }

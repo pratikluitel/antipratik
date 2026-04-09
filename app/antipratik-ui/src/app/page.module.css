@@ -5,8 +5,8 @@
 }
 
 .heroInner {
-  padding: 80px 20px;
-  padding-top: calc(80px + var(--nav-height));
+  padding: var(--space-10) var(--margin-mobile);
+  padding-top: calc(var(--space-10) + var(--nav-height));
   max-width: var(--content-column-width);
   margin: 0 auto;
 }
@@ -27,7 +27,7 @@
   font-size: var(--text-display);
   letter-spacing: var(--ls-display);
   line-height: var(--lh-display);
-  color: #EEF2F0; /* snow white — hero is intentionally always dark */
+  color: var(--color-snow); /* snow white — hero is intentionally always dark */
 }
 
 @media (max-width: 640px) {
@@ -114,7 +114,7 @@
 .sectionInner {
   max-width: var(--content-column-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--margin-mobile);
 }
 
 .sectionHeader {
@@ -159,5 +159,5 @@
 .feedWrapper {
   max-width: var(--content-column-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--margin-mobile);
 }

@@ -43,7 +43,7 @@
   font-weight: 500;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-1);
 }
 
 .tagEssay  { color: var(--pill-text-essays-dark); }
