@@ -45,7 +45,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--video-overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,7 +66,7 @@
   left: 10px;
   font-family: var(--font-sans);
   font-size: var(--text-nano);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--video-overlay-text);
 }
 
 /* ── Card body ── */

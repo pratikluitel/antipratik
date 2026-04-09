@@ -23,8 +23,8 @@
 
 .heroName {
   position: absolute;
-  bottom: 20px;
-  left: 24px;
+  bottom: var(--margin-mobile);
+  left: var(--space-3);
   font-family: var(--font-serif);
   font-size: var(--about-name-size);
   letter-spacing: var(--about-name-tracking);
@@ -36,7 +36,7 @@
 .bio {
   max-width: var(--content-column-width);
   margin: 0 auto;
-  padding: var(--space-6) 24px var(--space-8);
+  padding: var(--space-6) var(--gutter-desktop) var(--space-8);
 }
 
 .bioText {
@@ -100,7 +100,7 @@
 .newsletterWrapper {
   max-width: var(--content-column-width);
   margin: 0 auto;
-  padding: var(--space-6) 24px var(--space-16);
+  padding: var(--space-6) var(--gutter-desktop) var(--space-16);
   border-top: 0.5px solid var(--color-border-dark);
   padding-top: var(--space-6);
 }

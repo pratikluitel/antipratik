@@ -41,7 +41,7 @@
 
 .backBtn {
   position: fixed;
-  left: 24px;
+  left: var(--space-3);
   top: calc(var(--nav-height) + var(--space-2));
   font-family: var(--font-sans);
   font-size: var(--text-meta);
@@ -107,13 +107,13 @@
   max-width: var(--article-column-width);
   margin: 0 auto;
   padding: var(--article-padding-desktop);
-  padding-top: calc(var(--nav-height) + 40px);
+  padding-top: calc(var(--nav-height) + var(--nav-height-compact));
 }
 
 @media (max-width: 767px) {
   .article {
     padding: var(--article-padding-mobile);
-    padding-top: calc(var(--nav-height) + 24px);
+    padding-top: calc(var(--nav-height) + var(--space-3));
   }
 }
 
@@ -246,7 +246,7 @@
 
 .body code {
   font-family: monospace;
-  font-size: 13px;
+  font-size: var(--text-meta);
   background: var(--color-elevated-dark);
   padding: 1px 5px;
   border-radius: 4px;

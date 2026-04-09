@@ -121,7 +121,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -201,7 +201,7 @@
 .drawerArt {
   width: var(--player-art-size-drawer);
   height: var(--player-art-size-drawer);
-  border-radius: 10px;
+  border-radius: var(--music-thumb-radius);
   flex-shrink: 0;
   background: var(--color-elevated-dark);
   display: flex;
@@ -233,7 +233,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(238, 242, 240, 0.08);
+  background: var(--player-close-btn-bg);
   border: none;
   color: var(--color-text-primary-dark);
   cursor: pointer;

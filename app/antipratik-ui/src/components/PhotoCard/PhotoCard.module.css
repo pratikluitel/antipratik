@@ -36,7 +36,7 @@
 }
 
 .body {
-  padding: 12px 16px 14px;
+  padding: var(--photo-card-body-padding);
 }
 
 .tag {

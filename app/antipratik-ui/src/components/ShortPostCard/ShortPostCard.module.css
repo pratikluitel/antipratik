@@ -27,7 +27,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 14px;
-  gap: 12px;
+  gap: var(--card-excerpt-meta-gap);
 }
 
 .date {

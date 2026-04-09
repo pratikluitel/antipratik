@@ -3,7 +3,7 @@
 }
 
 .inner {
-  padding: 20px 22px 22px;
+  padding: var(--margin-mobile) var(--essay-card-padding-x);
   display: block;
   text-decoration: none;
   color: inherit;
@@ -46,7 +46,7 @@
 .meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--card-excerpt-meta-gap);
   margin-top: 14px;
   font-family: var(--font-sans);
   font-size: var(--text-meta);

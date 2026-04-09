@@ -22,7 +22,7 @@
   padding: 2px var(--space-1);
   background: var(--color-elevated-dark);
   border: 1px solid var(--color-border-dark);
-  border-radius: 4px;
+  border-radius: var(--admin-btn-radius);
   font-family: var(--font-sans);
   font-size: var(--text-meta);
   color: var(--color-text-body-dark);

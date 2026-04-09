@@ -35,7 +35,7 @@
 
 .content {
   flex: 1;
-  padding: 16px 18px;
+  padding: var(--space-2) var(--music-content-padding-x);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -185,6 +185,7 @@
 }
 
 @keyframes musicPulse {
+  /* rgba() permitted in @keyframes per Rule 7 — source token: --accent-music (#E03E35 = rgb(224,62,53)) */
   0%, 100% { border-color: rgba(224, 62, 53, 0.4); }
   50%       { border-color: rgba(224, 62, 53, 1); }
 }

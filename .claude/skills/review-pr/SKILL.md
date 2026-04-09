@@ -3,7 +3,7 @@ name: review-pr
 description: Review a GitHub pull request for pratikluitel/antipratik using the gh CLI. Use when the user says "review PR #N", "check PR", or "review pull request". Accepts a PR number as argument.
 ---
 
-Review pull request **#$ARGUMENTS** from the `pratikluitel/antipratik` repository and leave a comment with the findings.
+Review pull request **#$ARGUMENTS** from the `pratikluitel/antipratik` repository and submit a formal GitHub code review (not a plain comment).
 
 ## Workflow
 
@@ -102,10 +102,17 @@ One of:
 - **Minor notes** — small things to be aware of, not blocking
 - **Needs changes** — something incorrect or non-compliant that must be fixed before merging
 
-### 6. Post the review comment
+### 6. Submit the formal review
+
+Map the verdict to a GitHub review event:
+- **Ready to merge** → `APPROVE`
+- **Minor notes** → `COMMENT`
+- **Needs changes** → `REQUEST_CHANGES`
 
 ```bash
-gh pr comment $ARGUMENTS --repo pratikluitel/antipratik --body "$(cat <<'EOF'
+gh pr review $ARGUMENTS --repo pratikluitel/antipratik \
+  --comment \
+  --body "$(cat <<'EOF'
 <verdict line with emoji: ✅ ready / ⚠️ minor notes / ❌ needs changes>
 
 **Scope:** FE / BE / Both
@@ -120,4 +127,4 @@ EOF
 )"
 ```
 
-Keep the comment concise — full picture in under a minute.
+Keep the body concise — full picture in under a minute.
