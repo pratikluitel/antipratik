@@ -35,7 +35,7 @@
 
 .content {
   flex: 1;
-  padding: var(--space-2) 18px;
+  padding: var(--space-2) var(--music-content-padding-x);
   display: flex;
   align-items: center;
   gap: 14px;

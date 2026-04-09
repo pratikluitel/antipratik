@@ -3,7 +3,7 @@
 }
 
 .inner {
-  padding: var(--margin-mobile) 22px;
+  padding: var(--margin-mobile) var(--essay-card-padding-x);
   display: block;
   text-decoration: none;
   color: inherit;

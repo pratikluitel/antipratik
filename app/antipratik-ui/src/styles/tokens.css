@@ -219,11 +219,16 @@
 --card-radius:                       14px;
 --card-excerpt-meta-gap:             12px;
 
+/* Essay card */
+--essay-card-padding-x:              22px;
+
 /* Music card */
 --music-thumb-size:                  120px;
 --music-thumb-radius:                10px;
+--music-content-padding-x:           18px;
 
 /* Photo card */
+--photo-card-body-padding:           12px var(--space-2) 14px;
 --photo-ratio:                       4 / 3;
 
 /* Video card */

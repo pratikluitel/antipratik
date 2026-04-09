@@ -172,7 +172,6 @@ These tokens were added or modified during implementation (not in the original d
 | `--color-text-body` | *(theme alias)* | Theme-switching alias for `--color-text-body-dark/light` |
 | `--color-text-muted` | *(theme alias)* | Theme-switching alias for `--color-text-muted-dark/light` |
 | `--color-text-subtle` | *(theme alias)* | Theme-switching alias for `--color-text-subtle-dark/light` |
-| `--admin-sidebar-width` | `220px` | Admin panel sidebar width |
 | `--admin-content-max` | `860px` | Admin panel main content max-width |
 | `--admin-tab-height` | `44px` | Admin dashboard tab bar item height |
 | `--admin-top-bar-height` | `52px` | Admin top bar height |
@@ -181,6 +180,21 @@ These tokens were added or modified during implementation (not in the original d
 | `--admin-input-padding-y` | `10px` | Vertical padding for admin form inputs (between `--space-1`=8px and `--space-2`=16px) |
 | `--admin-danger` | `#C0392B` | Admin destructive/error colour (delete buttons, error states, required asterisk) — separate from `--accent-music` (Rule 6) |
 | `--admin-form-section-radius` | `8px` | Admin form section card border-radius — wider than `--admin-input-radius` (6px) |
+| `--admin-btn-radius` | `4px` | Smaller radius for inline action buttons (edit, delete) and tag chips |
+| `--nav-bg-dark-blur` | `rgba(15, 17, 24, 0.85)` | Navbar bg in dark mode with backdrop blur — replaces `--nav-bg-dark` (solid) |
+| `--nav-bg-light-blur` | `rgba(247, 245, 240, 0.85)` | Navbar bg in light mode with backdrop blur — replaces `--nav-bg-light` (solid) |
+| `--video-overlay-bg` | `rgba(255, 255, 255, 0.92)` | VideoCard play-button overlay background |
+| `--video-overlay-text` | `rgba(255, 255, 255, 0.55)` | VideoCard duration text overlay color |
+| `--lightbox-btn-bg` | `rgba(238, 242, 240, 0.12)` | Lightbox close/nav button background (`--color-snow` @ 12%) |
+| `--lightbox-btn-border` | `rgba(238, 242, 240, 0.20)` | Lightbox button border (`--color-snow` @ 20%) |
+| `--lightbox-counter-color` | `rgba(238, 242, 240, 0.50)` | Lightbox image counter text (`--color-snow` @ 50%) |
+| `--lightbox-caption-color` | `rgba(238, 242, 240, 0.55)` | Lightbox caption text (`--color-snow` @ 55%) |
+| `--lightbox-dot-bg` | `rgba(238, 242, 240, 0.30)` | Lightbox inactive dot background (`--color-snow` @ 30%) |
+| `--lightbox-nav-icon-size` | `18px` | Lightbox prev/next navigation icon size |
+| `--player-close-btn-bg` | `rgba(238, 242, 240, 0.08)` | MusicPlayer drawer close button background (`--color-snow` @ 8%) |
+| `--essay-card-padding-x` | `22px` | EssayCard inner horizontal padding |
+| `--music-content-padding-x` | `18px` | MusicCard content area horizontal padding |
+| `--photo-card-body-padding` | `12px var(--space-2) 14px` | PhotoCard body padding (top / sides / bottom) |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 
