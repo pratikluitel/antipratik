@@ -111,7 +111,7 @@ Map the verdict to a GitHub review event:
 
 ```bash
 gh pr review $ARGUMENTS --repo pratikluitel/antipratik \
-  --<event> \
+  --comment \
   --body "$(cat <<'EOF'
 <verdict line with emoji: ✅ ready / ⚠️ minor notes / ❌ needs changes>
 
@@ -126,7 +126,5 @@ gh pr review $ARGUMENTS --repo pratikluitel/antipratik \
 EOF
 )"
 ```
-
-Replace `--<event>` with `--approve`, `--comment`, or `--request-changes` based on the verdict.
 
 Keep the body concise — full picture in under a minute.
