@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/logic"
 	"github.com/pratikluitel/antipratik/models"
 )
@@ -11,18 +12,19 @@ import (
 // LinkHandlerImpl implements LinkHandler.
 type LinkHandlerImpl struct {
 	logic logic.LinkLogic
+	log   logging.Logger
 }
 
 // NewLinkHandler creates a new LinkHandlerImpl using the given logic layer.
-func NewLinkHandler(l logic.LinkLogic) *LinkHandlerImpl {
-	return &LinkHandlerImpl{logic: l}
+func NewLinkHandler(l logic.LinkLogic, log logging.Logger) *LinkHandlerImpl {
+	return &LinkHandlerImpl{logic: l, log: log}
 }
 
 // GetLinks handles GET /api/links
 func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetLinks(r.Context())
 	if err != nil {
-		handleLogicError(w, "GetLinks", err)
+		handleLogicError(w, h.log, "GetLinks", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, links)
@@ -32,7 +34,7 @@ func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
 func (h *LinkHandlerImpl) GetFeaturedLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetFeaturedLinks(r.Context())
 	if err != nil {
-		handleLogicError(w, "GetFeaturedLinks", err)
+		handleLogicError(w, h.log, "GetFeaturedLinks", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, links)
@@ -46,7 +48,7 @@ func (h *LinkHandlerImpl) CreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.logic.CreateLink(r.Context(), input)
 	if err != nil {
-		handleLogicError(w, "CreateLink", err)
+		handleLogicError(w, h.log, "CreateLink", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
@@ -61,7 +63,7 @@ func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	link, err := h.logic.UpdateLink(r.Context(), id, input)
 	if err != nil {
-		handleLogicError(w, "UpdateLink", err)
+		handleLogicError(w, h.log, "UpdateLink", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, link)
@@ -70,7 +72,7 @@ func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 func (h *LinkHandlerImpl) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeleteLink(r.Context(), id); err != nil {
-		handleLogicError(w, "DeleteLink", err)
+		handleLogicError(w, h.log, "DeleteLink", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

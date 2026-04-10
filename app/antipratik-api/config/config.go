@@ -15,6 +15,12 @@ type Config struct {
 	DB      DBConfig      `yaml:"db"`
 	Static  StaticConfig  `yaml:"static"`
 	Storage StorageConfig `yaml:"storage"`
+	Logging LoggingConfig `yaml:"logging"`
+}
+
+// LoggingConfig controls log verbosity. Level accepts "debug", "info", "warn", or "error".
+type LoggingConfig struct {
+	Level string `yaml:"level"`
 }
 
 // ServerConfig holds HTTP server settings.

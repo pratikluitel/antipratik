@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/logic"
 	"github.com/pratikluitel/antipratik/models"
 )
@@ -14,12 +15,13 @@ import (
 type PostHandlerImpl struct {
 	logic   logic.PostLogic
 	uploads logic.UploadLogic
+	log     logging.Logger
 }
 
 // NewPostHandler creates a new PostHandlerImpl.
 // uploads handles file storage for photo, music, video, and link post types.
-func NewPostHandler(l logic.PostLogic, u logic.UploadLogic) *PostHandlerImpl {
-	return &PostHandlerImpl{logic: l, uploads: u}
+func NewPostHandler(l logic.PostLogic, u logic.UploadLogic, log logging.Logger) *PostHandlerImpl {
+	return &PostHandlerImpl{logic: l, uploads: u, log: log}
 }
 
 // GetPosts handles GET /api/posts
@@ -33,7 +35,7 @@ func (h *PostHandlerImpl) GetPosts(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := h.logic.GetPosts(r.Context(), filter)
 	if err != nil {
-		handleLogicError(w, "GetPosts", err)
+		handleLogicError(w, h.log, "GetPosts", err)
 		return
 	}
 
@@ -46,7 +48,7 @@ func (h *PostHandlerImpl) GetPost(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.GetPost(r.Context(), slug)
 	if err != nil {
-		handleLogicError(w, "GetPost", err)
+		handleLogicError(w, h.log, "GetPost", err)
 		return
 	}
 	if post == nil {
@@ -67,7 +69,7 @@ func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
 	}
 	post, err := h.logic.CreateEssay(r.Context(), input)
 	if err != nil {
-		handleLogicError(w, "CreateEssay", err)
+		handleLogicError(w, h.log, "CreateEssay", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -81,7 +83,7 @@ func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
 	}
 	post, err := h.logic.CreateShort(r.Context(), input)
 	if err != nil {
-		handleLogicError(w, "CreateShort", err)
+		handleLogicError(w, h.log, "CreateShort", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -96,7 +98,7 @@ func (h *PostHandlerImpl) UpdateEssay(w http.ResponseWriter, r *http.Request) {
 	}
 	post, err := h.logic.UpdateEssay(r.Context(), id, input)
 	if err != nil {
-		handleLogicError(w, "UpdateEssay", err)
+		handleLogicError(w, h.log, "UpdateEssay", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -111,7 +113,7 @@ func (h *PostHandlerImpl) UpdateShort(w http.ResponseWriter, r *http.Request) {
 	}
 	post, err := h.logic.UpdateShort(r.Context(), id, input)
 	if err != nil {
-		handleLogicError(w, "UpdateShort", err)
+		handleLogicError(w, h.log, "UpdateShort", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -154,7 +156,7 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 	audioInput := &logic.FileInput{File: audioFile, Header: audioHeader}
 	uploaded, err := h.uploads.UploadMusicFiles(r.Context(), postID, audioInput, albumArtInput)
 	if err != nil {
-		handleLogicError(w, "CreateMusic upload", err)
+		handleLogicError(w, h.log, "CreateMusic upload", err)
 		return
 	}
 
@@ -177,7 +179,7 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.CreateMusic(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "CreateMusic", err)
+		handleLogicError(w, h.log, "CreateMusic", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -208,7 +210,7 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.UpdateMusic(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "UpdateMusic", err)
+		handleLogicError(w, h.log, "UpdateMusic", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -241,7 +243,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 
 	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, fileInputs)
 	if err != nil {
-		handleLogicError(w, "CreatePhoto upload", err)
+		handleLogicError(w, h.log, "CreatePhoto upload", err)
 		return
 	}
 
@@ -274,7 +276,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.CreatePhoto(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "CreatePhoto", err)
+		handleLogicError(w, h.log, "CreatePhoto", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -294,7 +296,7 @@ func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.UpdatePhoto(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "UpdatePhoto", err)
+		handleLogicError(w, h.log, "UpdatePhoto", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -314,7 +316,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			logic.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
-			handleLogicError(w, "CreateVideo thumbnail upload", err)
+			handleLogicError(w, h.log, "CreateVideo thumbnail upload", err)
 			return
 		}
 		thumbnailURL = url
@@ -334,7 +336,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.CreateVideo(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "CreateVideo", err)
+		handleLogicError(w, h.log, "CreateVideo", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -369,7 +371,7 @@ func (h *PostHandlerImpl) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.logic.UpdateVideo(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "UpdateVideo", err)
+		handleLogicError(w, h.log, "UpdateVideo", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -389,7 +391,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			logic.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
-			handleLogicError(w, "CreateLinkPost thumbnail upload", err)
+			handleLogicError(w, h.log, "CreateLinkPost thumbnail upload", err)
 			return
 		}
 		thumbnailURL = &url
@@ -410,7 +412,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 
 	post, err := h.logic.CreateLinkPost(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "CreateLinkPost", err)
+		handleLogicError(w, h.log, "CreateLinkPost", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, post)
@@ -439,7 +441,7 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 
 	post, err := h.logic.UpdateLinkPost(r.Context(), postID, input)
 	if err != nil {
-		handleLogicError(w, "UpdateLinkPost", err)
+		handleLogicError(w, h.log, "UpdateLinkPost", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, post)
@@ -448,7 +450,7 @@ func (h *PostHandlerImpl) UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeletePost(r.Context(), id); err != nil {
-		handleLogicError(w, "DeletePost", err)
+		handleLogicError(w, h.log, "DeletePost", err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

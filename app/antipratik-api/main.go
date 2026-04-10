@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/api"
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/config"
 	"github.com/pratikluitel/antipratik/logic"
 	"github.com/pratikluitel/antipratik/store"
@@ -19,6 +20,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config: %v", err)
 	}
+
+	logger := logging.New(cfg.Logging.Level)
 
 	db, err := store.Open(cfg.DB.Path)
 	if err != nil {
@@ -53,10 +56,10 @@ func main() {
 	linkLogic := logic.NewLinkService(linkStore)
 	authService := logic.NewAuthService(userStore, jwtSecret)
 
-	postH := api.NewPostHandler(postLogic, uploadSvc)
-	linkH := api.NewLinkHandler(linkLogic)
-	authH := api.NewAuthHandler(authService)
-	fileH := api.NewFileServingHandler(fileStore)
+	postH := api.NewPostHandler(postLogic, uploadSvc, logger)
+	linkH := api.NewLinkHandler(linkLogic, logger)
+	authH := api.NewAuthHandler(authService, logger)
+	fileH := api.NewFileServingHandler(fileStore, logger)
 
 	mux := http.NewServeMux()
 	api.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, "api/openapi.yaml", "api/swagger.html")
@@ -64,7 +67,7 @@ func main() {
 	handler := api.CORSMiddleware(mux)
 
 	addr := cfg.Addr()
-	log.Printf("listening on %s", addr)
+	logger.Info("listening on", "addr", addr)
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("serve: %v", err)
 	}
