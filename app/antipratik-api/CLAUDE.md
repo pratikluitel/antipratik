@@ -123,10 +123,19 @@ These rules are inviolable. Check them before writing any code.
 - Required for proper database operations
 
 ### Rule 7 — Structured Logging
-**Log errors with context, but never sensitive data.**
-- Wrong: `log.Printf("error: %v", err)`
-- Right: `log.Printf("CreateEssay error: %v", err)` with operation context
-- Never log passwords, tokens, or personal data
+**Use the `logging.Logger` interface from `common/logging`. Never use `log.Printf` or `fmt.Print` in application code.**
+
+The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed through every handler constructor. Level is controlled via `config.yaml` under `logging.level` (debug | info | warn | error), defaulting to `info`.
+
+**What to log and where:**
+- `INFO` — startup lifecycle only (server start, migrations). In `main.go`.
+- `ERROR` — internal failures that produce a 500 response. In the API layer via `handleLogicError`.
+- `WARN` / `DEBUG` — reserved; use sparingly and only for genuinely invisible, non-user-facing events.
+
+**What must never be logged:**
+- Validation errors (400) — they are returned to the user; logging them is noise.
+- Not found (404) and unauthorized (401) — expected, silent.
+- Passwords, tokens, or any personal data.
 
 ### Rule 8 — errors.go Per Package
 **Each package defines its own `errors.go` for error types specific to that layer.**

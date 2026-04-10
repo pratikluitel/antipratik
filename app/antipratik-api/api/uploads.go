@@ -2,20 +2,21 @@ package api
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/store"
 )
 
 // FileServingHandler serves uploaded files and thumbnails from storage.
 type FileServingHandler struct {
 	fileStore store.FileStore
+	log       logging.Logger
 }
 
 // NewFileServingHandler returns a new FileServingHandler.
-func NewFileServingHandler(fs store.FileStore) *FileServingHandler {
-	return &FileServingHandler{fileStore: fs}
+func NewFileServingHandler(fs store.FileStore, log logging.Logger) *FileServingHandler {
+	return &FileServingHandler{fileStore: fs, log: log}
 }
 
 // ServeFile handles GET /files/{fileId}.
@@ -34,7 +35,7 @@ func (h *FileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !errors.Is(err, store.ErrFileNotFound) {
-			log.Printf("ServeFile error (key=%s): %v", prefix+fileID, err)
+			h.log.Error("ServeFile error", "key", prefix+fileID, "err", err)
 			writeError(w, http.StatusInternalServerError, "internal server error")
 			return
 		}
@@ -56,7 +57,7 @@ func (h *FileServingHandler) ServeThumbnail(w http.ResponseWriter, r *http.Reque
 			writeError(w, http.StatusNotFound, "thumbnail not found")
 			return
 		}
-		log.Printf("ServeThumbnail error (key=thumbnails/%s): %v", thumbnailID, err)
+		h.log.Error("ServeThumbnail error", "key", "thumbnails/"+thumbnailID, "err", err)
 		writeError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}

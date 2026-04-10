@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/logic"
 )
 
 // AuthHandlerImpl handles authentication HTTP requests.
 type AuthHandlerImpl struct {
 	auth logic.AuthLogic
+	log  logging.Logger
 }
 
 // NewAuthHandler creates a new AuthHandlerImpl.
-func NewAuthHandler(auth logic.AuthLogic) *AuthHandlerImpl {
-	return &AuthHandlerImpl{auth: auth}
+func NewAuthHandler(auth logic.AuthLogic, log logging.Logger) *AuthHandlerImpl {
+	return &AuthHandlerImpl{auth: auth, log: log}
 }
 
 // Login handles POST /api/auth/login
