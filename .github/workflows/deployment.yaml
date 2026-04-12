@@ -46,7 +46,7 @@ jobs:
     - name: Build & push API
       uses: docker/build-push-action@v5
       with:
-        context: ./app/antipratik-api
+        context: .
         file: ./docker/Dockerfile.api
         push: true
         tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
@@ -54,7 +54,7 @@ jobs:
     - name: Build & push UI
       uses: docker/build-push-action@v5
       with:
-        context: ./app/antipratik-ui
+        context: .
         file: ./docker/Dockerfile.ui
         push: true
         tags: ${{ env.UI_IMAGE }}:${{ env.TAG }}
