@@ -33,10 +33,6 @@ func main() {
 		log.Fatalf("run migrations: %v", err)
 	}
 
-	if err := store.SeedIfEmpty(db); err != nil {
-		log.Fatalf("seed: %v", err)
-	}
-
 	if cfg.AdminPassword != "" {
 		if err := store.UpsertAdminUser(db, cfg.AdminPassword); err != nil {
 			log.Fatalf("upsert admin user: %v", err)

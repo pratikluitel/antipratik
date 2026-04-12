@@ -12,7 +12,7 @@ env:
   TAG: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
 
 jobs:
-  changes:
+  sidequest-changes:
     runs-on: ubuntu-latest
     outputs:
       app: ${{ steps.filter.outputs.app }}
@@ -136,7 +136,7 @@ jobs:
             /tmp/deploy.sh ${{ env.TAG }}
 
   deploy-sidequests:
-    needs: changes
+    needs: sidequest-changes
     if: needs.changes.outputs.sidequests == 'true' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
