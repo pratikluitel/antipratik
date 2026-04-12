@@ -1,0 +1,23 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+db:
+  path: "/data/antipratik.db"
+
+admin_password: "admin"
+
+static:
+  dir: ""
+
+storage:
+  backend: "local"        # "local" or "r2"
+  local_dir: "/data/uploads"
+  r2:
+    endpoint: "https://fb28ab9f2289a1ce960eb6a0004dc73e.r2.cloudflarestorage.com"
+    bucket: "antipratik"
+    access_key_id: "ff1ebe9bc48dc4fdab31fd86f3c41e39"
+    secret_access_key: "8882f343b692c4390bf38b40a3316c3b93aa1b331c7f7aa3e9941cad38611e0b"
+
+logging:
+  level: "info"         # debug | info | warn | error

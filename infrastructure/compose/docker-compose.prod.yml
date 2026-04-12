@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: ghcr.io/pratikluitel/antipratik-nginx:prod
+    ports:
+      - "80:80"
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    depends_on:
+      - api
+      - ui
+    networks:
+      - antipratik
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/pratikluitel/antipratik-api:prod
+    env_file: .env
+    volumes:
+      - /opt/antipratik-prod/config.yaml:/root/config.yaml
+      - /opt/antipratik-prod/data:/data
+    networks:
+      - antipratik
+    restart: unless-stopped
+
+  ui:
+    image: ghcr.io/pratikluitel/antipratik-ui:prod
+    networks:
+      - antipratik
+    environment:
+      - SERVER_API_URL=http://api:8080
+    restart: unless-stopped
+
+networks:
+  antipratik:

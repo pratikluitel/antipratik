@@ -11,11 +11,12 @@ import (
 
 // Config holds all runtime configuration for the server.
 type Config struct {
-	Server  ServerConfig  `yaml:"server"`
-	DB      DBConfig      `yaml:"db"`
-	Static  StaticConfig  `yaml:"static"`
-	Storage StorageConfig `yaml:"storage"`
-	Logging LoggingConfig `yaml:"logging"`
+	Server        ServerConfig  `yaml:"server"`
+	DB            DBConfig      `yaml:"db"`
+	AdminPassword string        `yaml:"admin_password"`
+	Static        StaticConfig  `yaml:"static"`
+	Storage       StorageConfig `yaml:"storage"`
+	Logging       LoggingConfig `yaml:"logging"`
 }
 
 // LoggingConfig controls log verbosity. Level accepts "debug", "info", "warn", or "error".
@@ -33,6 +34,7 @@ type ServerConfig struct {
 type DBConfig struct {
 	Path string `yaml:"path"`
 }
+
 
 // StaticConfig holds settings for serving the frontend static build.
 type StaticConfig struct {
@@ -76,9 +78,26 @@ func Load(path string) (*Config, error) {
 		}
 		cfg.Server.Port = port
 	}
-
-	if host := os.Getenv("ANTIPRATIK_HOST"); host != "" {
-		cfg.Server.Host = host
+	if v := os.Getenv("ANTIPRATIK_HOST"); v != "" {
+		cfg.Server.Host = v
+	}
+	if v := os.Getenv("ANTIPRATIK_DB_PATH"); v != "" {
+		cfg.DB.Path = v
+	}
+	if v := os.Getenv("ANTIPRATIK_ADMIN_PASSWORD"); v != "" {
+		cfg.AdminPassword = v
+	}
+	if v := os.Getenv("ANTIPRATIK_R2_ENDPOINT"); v != "" {
+		cfg.Storage.R2.Endpoint = v
+	}
+	if v := os.Getenv("ANTIPRATIK_R2_BUCKET"); v != "" {
+		cfg.Storage.R2.Bucket = v
+	}
+	if v := os.Getenv("ANTIPRATIK_R2_ACCESS_KEY_ID"); v != "" {
+		cfg.Storage.R2.AccessKeyID = v
+	}
+	if v := os.Getenv("ANTIPRATIK_R2_SECRET_ACCESS_KEY"); v != "" {
+		cfg.Storage.R2.SecretAccessKey = v
 	}
 
 	return &cfg, nil

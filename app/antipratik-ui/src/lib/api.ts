@@ -9,8 +9,24 @@
 
 import type { Post, MusicPost, PhotoPost, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const IS_API_DISABLED = !API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+// Server-side internal URL (not exposed to browser). Set SERVER_API_URL in the
+// container environment (e.g. http://api:8080) so SSR can reach the API over
+// the Docker internal network while the browser uses relative URLs via nginx.
+const SERVER_API_URL = process.env.SERVER_API_URL ?? '';
+
+function getFetchBase(): string {
+  if (typeof window === 'undefined' && SERVER_API_URL) {
+    return SERVER_API_URL;
+  }
+  return API_URL;
+}
+
+// Disable API calls only when there is genuinely no URL available to fetch from.
+const IS_API_DISABLED =
+  typeof window === 'undefined'
+    ? !SERVER_API_URL && !API_URL.startsWith('http')
+    : false;
 
 // ─── URL PREFIXING ────────────────────────────────────────────────────────────
 // The backend stores relative URLs (e.g. /files/abc.jpg, /thumbnails/abc-small.jpg).
@@ -85,7 +101,7 @@ export async function getPosts(filter?: FilterState): Promise<Post[]> {
     filter.activeTags.forEach((tag) => params.append('tag', tag));
   }
   const query = params.toString() ? `?${params.toString()}` : '';
-  const response = await fetch(`${API_URL}/api/posts${query}`);
+  const response = await fetch(`${getFetchBase()}/api/posts${query}`);
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getPosts`);
   }
@@ -104,7 +120,7 @@ export async function getPost(slug: string): Promise<EssayPost | null> {
     return null;
   }
 
-  const response = await fetch(`${API_URL}/api/posts/${slug}`);
+  const response = await fetch(`${getFetchBase()}/api/posts/${slug}`);
   if (response.status === 404) return null;
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getPost(${slug})`);
@@ -123,7 +139,7 @@ export async function getLinks(): Promise<ExternalLink[]> {
     return [];
   }
 
-  const response = await fetch(`${API_URL}/api/links`);
+  const response = await fetch(`${getFetchBase()}/api/links`);
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getLinks`);
   }
@@ -139,7 +155,7 @@ export async function getFeaturedLinks(): Promise<ExternalLink[]> {
     return [];
   }
 
-  const response = await fetch(`${API_URL}/api/links/featured`);
+  const response = await fetch(`${getFetchBase()}/api/links/featured`);
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText} — getFeaturedLinks`);
   }

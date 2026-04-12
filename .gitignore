@@ -48,10 +48,13 @@ next-env.d.ts
 *.db
 
 # uploaded files (local storage backend)
-app/antipratik-api/data/
+data/
 
 # TEMPORARY: ignore all public files until I decide how to handle them
 app/antipratik-ui/public/*
 
 # temporaty files
 tmp/
+
+# ssh
+.ssh

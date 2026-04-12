@@ -1,0 +1,5 @@
+app/antipratik-ui/.env.local
+app/antipratik-ui/.env*.local
+app/antipratik-ui/node_modules
+app/antipratik-ui/.next
+app/antipratik-api/data

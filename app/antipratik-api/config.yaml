@@ -5,6 +5,8 @@ server:
 db:
   path: "./data/antipratik.db"
 
+admin_password: "admin"   # Change this in production
+
 static:
   dir: "../antipratik-ui/out"
 

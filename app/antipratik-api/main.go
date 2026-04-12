@@ -37,6 +37,12 @@ func main() {
 		log.Fatalf("seed: %v", err)
 	}
 
+	if cfg.AdminPassword != "" {
+		if err := store.UpsertAdminUser(db, cfg.AdminPassword); err != nil {
+			log.Fatalf("upsert admin user: %v", err)
+		}
+	}
+
 	fileStore, err := store.NewFileStore(cfg.Storage)
 	if err != nil {
 		log.Fatalf("init file store: %v", err)

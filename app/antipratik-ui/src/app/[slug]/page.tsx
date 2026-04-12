@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { EssayPost } from '../../lib/types';
 import { getPost, getPosts } from '../../lib/api';
+
+export const dynamic = 'force-dynamic';
 import ArticleClient from '../../components/ArticleClient/ArticleClient';
 
 interface Props {

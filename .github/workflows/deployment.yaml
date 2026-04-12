@@ -2,14 +2,140 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      - 'sidequests/**'
+    branches: [master, prod]
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/antipratik-api
+  UI_IMAGE: ghcr.io/${{ github.repository_owner }}/antipratik-ui
+  TAG: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
 
 jobs:
-  deploy:
-    name: Deploy sidequests
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      sidequests: ${{ steps.filter.outputs.sidequests }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            app:
+              - 'app/**'
+              - 'docker/**'
+            sidequests:
+              - 'sidequests/**'
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: changes
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Build & push API
+      uses: docker/build-push-action@v5
+      with:
+        context: ./app/antipratik-api
+        file: ./docker/Dockerfile.api
+        push: true
+        tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
+
+    - name: Build & push UI
+      uses: docker/build-push-action@v5
+      with:
+        context: ./app/antipratik-ui
+        file: ./docker/Dockerfile.ui
+        push: true
+        tags: ${{ env.UI_IMAGE }}:${{ env.TAG }}
+
+    - name: Build & push Nginx
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile.nginx
+        push: true
+        tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
+
+  deploy-app:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: 
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Write secrets to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p /opt/antipratik-${{ env.TAG }}
+            printf 'SERVER_NAME=%s\n' '${{ secrets.SERVER_NAME }}' >  /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_ADMIN_PASSWORD=%s\n' '${{ secrets.ANTIPRATIK_ADMIN_PASSWORD }}' >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ENDPOINT=%s\n' '${{ secrets.ANTIPRATIK_R2_ENDPOINT }}' >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ACCESS_KEY_ID=%s\n' '${{ secrets.ANTIPRATIK_R2_ACCESS_KEY_ID }}'  >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_SECRET_ACCESS_KEY=%s\n' '${{ secrets.ANTIPRATIK_R2_SECRET_ACCESS_KEY }}' >> /opt/antipratik-${{ env.TAG }}/.env
+            chmod 600 /opt/antipratik-${{ env.TAG }}/.env
+
+      - name: Copy config to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          source: "infrastructure/config/config.${{ env.TAG }}.yaml"
+          target: "/opt/antipratik-${{ env.TAG }}/config.yaml"
+          strip_components: 2
+
+      - name: Copy compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          source: "infrastructure/compose/docker-compose.${{ env.TAG }}.yml"
+          target: "/tmp/"
+          strip_components: 3
+
+      - name: Copy deploy script to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          source: ".github/scripts/deploy.sh"
+          target: "/tmp/"
+          strip_components: 2
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            chmod +x /tmp/deploy.sh
+            GHCR_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+            GHCR_USER="${{ github.actor }}" \
+            /tmp/deploy.sh ${{ env.TAG }}
+
+  deploy-sidequests:
+    needs: changes
+    if: needs.changes.outputs.sidequests == 'true' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: read
