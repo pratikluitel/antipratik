@@ -4,7 +4,7 @@ services:
   nginx:
     image: ghcr.io/pratikluitel/antipratik-nginx:prod
     ports:
-      - "80:80"
+      - "9080:80"
     environment:
       - SERVER_NAME=${SERVER_NAME}
     depends_on:
