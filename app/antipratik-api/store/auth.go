@@ -3,7 +3,11 @@ package store
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // SQLiteUserStore implements UserStore using a SQLite database.
@@ -32,6 +36,37 @@ func (s *SQLiteUserStore) UpsertToken(ctx context.Context, username string, toke
 	_, err := s.db.ExecContext(ctx,
 		`UPDATE users SET current_token=?, token_expires_at=? WHERE username=?`,
 		token, expiresAt.UTC().Format(time.RFC3339), username)
+	return err
+}
+
+// UpsertAdminUser ensures an admin user exists with the given password.
+// Creates the user if absent; updates the password hash if it has changed.
+func UpsertAdminUser(db *sql.DB, password string) error {
+	var id, hash string
+	err := db.QueryRow(`SELECT id, password_hash FROM users WHERE username = ?`, "admin").Scan(&id, &hash)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("upsert admin: %w", err)
+	}
+
+	if err == sql.ErrNoRows {
+		newHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("hash admin password: %w", err)
+		}
+		_, err = db.Exec(`INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)`,
+			uuid.New().String(), "admin", string(newHash))
+		return err
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil {
+		return nil // password unchanged
+	}
+
+	newHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("hash admin password: %w", err)
+	}
+	_, err = db.Exec(`UPDATE users SET password_hash = ? WHERE username = ?`, string(newHash), "admin")
 	return err
 }
 

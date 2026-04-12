@@ -13,6 +13,11 @@ func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, au
 	mux.HandleFunc("GET /files/{fileId}", fileH.ServeFile)
 	mux.HandleFunc("GET /thumbnails/{thumbnailId}", fileH.ServeThumbnail)
 
+	// Health check
+	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "OK"})
+	})
+
 	// Public read routes
 	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
 	mux.HandleFunc("GET /api/posts", postH.GetPosts)
