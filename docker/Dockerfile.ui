@@ -28,7 +28,6 @@ RUN npm ci --only=production
 
 # Copy built app
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./
 
 # Needed at runtime: next.config.ts checks this to avoid "output: export" with next start
