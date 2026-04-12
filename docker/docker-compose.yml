@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.nginx
+    ports:
+      - "80:80"
+    environment:
+      - SERVER_NAME=localhost
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
+      - ui
+    networks:
+      - antipratik
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    volumes:
+      - ./config/api.yaml:/root/config.yaml
+      - /opt/antipratik/data:/data
+    networks:
+      - antipratik
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ui
+      args:
+        NEXT_PUBLIC_API_URL: ""
+    environment:
+      - SERVER_API_URL=http://api:8080
+    volumes:
+      - ./config/ui.yaml:/app/ui.yaml
+    networks:
+      - antipratik
+    restart: unless-stopped
+
+networks:
+  antipratik:

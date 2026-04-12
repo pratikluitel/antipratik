@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getPosts } from '../../lib/api';
 import FeedPageClient from '../../components/FeedPageClient/FeedPageClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Feed — antipratik',
 };

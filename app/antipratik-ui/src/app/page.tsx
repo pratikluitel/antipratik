@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { getPosts, getFeaturedLinks } from '../lib/api';
+
+export const dynamic = 'force-dynamic';
 import HomeFeedClient from '../components/HomeFeedClient/HomeFeedClient';
 import ExternalLinksBlock from '../components/ExternalLinksBlock/ExternalLinksBlock';
 import NewsletterBlock from '../components/NewsletterBlock/NewsletterBlock';

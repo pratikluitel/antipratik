@@ -55,3 +55,6 @@ app/antipratik-ui/public/*
 
 # temporaty files
 tmp/
+
+# ssh
+.ssh

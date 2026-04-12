@@ -1,0 +1,41 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY app/antipratik-ui/package*.json ./
+RUN npm ci
+
+# Copy source
+COPY app/antipratik-ui/ ./
+
+# Bake API URL and disable static export at build time
+ARG NEXT_PUBLIC_API_URL=""
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_DISABLE_EXPORT=1
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Copy package files
+COPY app/antipratik-ui/package*.json ./
+RUN npm ci --only=production
+
+# Copy built app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.ts ./
+
+# Needed at runtime: next.config.ts checks this to avoid "output: export" with next start
+ENV NEXT_DISABLE_EXPORT=1
+
+# Expose port
+EXPOSE 3000
+
+# Start the app
+CMD ["npm", "start"]

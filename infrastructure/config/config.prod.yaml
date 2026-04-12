@@ -1,0 +1,22 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+db:
+  path: "/data/antipratik.db"
+
+admin_password: ""
+
+static:
+  dir: ""
+
+storage:
+  backend: "r2"
+  r2:
+    bucket: "antipratik"
+    endpoint: ""   
+    access_key_id: ""
+    secret_access_key: ""
+
+logging:
+  level: "warning"

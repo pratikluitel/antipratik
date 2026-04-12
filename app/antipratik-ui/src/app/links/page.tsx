@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { getLinks } from '../../lib/api';
+
+export const dynamic = 'force-dynamic';
 import ExternalLinksBlock from '../../components/ExternalLinksBlock/ExternalLinksBlock';
 import styles from './page.module.css';
 
