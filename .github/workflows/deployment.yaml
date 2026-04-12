@@ -130,7 +130,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key:      ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            mv /tmp/config.${{ env.TAG }}.yaml /opt/antipratik-${{ env.TAG }}/config.yaml
             chmod +x /tmp/deploy.sh
             GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}" \
             GHCR_USER="${{ github.actor }}" \
