@@ -2,7 +2,6 @@ name: Deploy
 
 on:
   push:
-    branches: [master, prod]
 
 env:
   REGISTRY: ghcr.io
@@ -12,10 +11,11 @@ env:
   TAG: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
 
 jobs:
-  sidequest-changes:
+  changes:
     runs-on: ubuntu-latest
     outputs:
-      app: ${{ steps.filter.outputs.app }}
+      api: ${{ steps.filter.outputs.api }}
+      ui: ${{ steps.filter.outputs.ui }}
       sidequests: ${{ steps.filter.outputs.sidequests }}
     steps:
       - uses: actions/checkout@v4
@@ -23,54 +23,85 @@ jobs:
         id: filter
         with:
           filters: |
-            app:
-              - 'app/**'
-              - 'docker/**'
+            api:
+              - 'app/antipratik-api/**'
+              - 'docker/Dockerfile.api'
+            ui:
+              - 'app/antipratik-ui/**'
+              - 'docker/Dockerfile.ui'
             sidequests:
               - 'sidequests/**'
 
-  build-and-push:
+  build-api:
+    needs: [changes]
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     permissions:
       packages: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.api
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
+          tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
 
-    - uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+  build-ui:
+    needs: [changes]
+    if: needs.changes.outputs.ui == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build UI
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.ui
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
+          tags: ${{ env.UI_IMAGE }}:${{ env.TAG }}
 
-    - uses: docker/setup-buildx-action@v3
-
-    - name: Build & push API
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.api
-        push: true
-        tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
-
-    - name: Build & push UI
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.ui
-        push: true
-        tags: ${{ env.UI_IMAGE }}:${{ env.TAG }}
-
-    - name: Build & push Nginx
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./docker/Dockerfile.nginx
-        push: true
-        tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
+  build-nginx:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile.nginx
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
+          tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
 
   deploy-app:
-    needs: [build-and-push]
+    needs: [build-api, build-ui, build-nginx]
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && (github.ref_name == 'master' || github.ref_name == 'prod')
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
 
@@ -86,41 +117,24 @@ jobs:
           key:      ${{ secrets.SERVER_SSH_KEY }}
           script: |
             mkdir -p /opt/antipratik-${{ env.TAG }}
-            printf 'SERVER_NAME=%s\n' '${{ secrets.SERVER_NAME }}' >  /opt/antipratik-${{ env.TAG }}/.env
-            printf 'ANTIPRATIK_ADMIN_PASSWORD=%s\n' '${{ secrets.ANTIPRATIK_ADMIN_PASSWORD }}' >> /opt/antipratik-${{ env.TAG }}/.env
-            printf 'ANTIPRATIK_R2_ENDPOINT=%s\n' '${{ secrets.ANTIPRATIK_R2_ENDPOINT }}' >> /opt/antipratik-${{ env.TAG }}/.env
-            printf 'ANTIPRATIK_R2_ACCESS_KEY_ID=%s\n' '${{ secrets.ANTIPRATIK_R2_ACCESS_KEY_ID }}'  >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'SERVER_NAME=%s\n'                     '${{ secrets.SERVER_NAME }}'                    >  /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_ADMIN_PASSWORD=%s\n'       '${{ secrets.ANTIPRATIK_ADMIN_PASSWORD }}'      >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ENDPOINT=%s\n'          '${{ secrets.ANTIPRATIK_R2_ENDPOINT }}'         >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ACCESS_KEY_ID=%s\n'     '${{ secrets.ANTIPRATIK_R2_ACCESS_KEY_ID }}'    >> /opt/antipratik-${{ env.TAG }}/.env
             printf 'ANTIPRATIK_R2_SECRET_ACCESS_KEY=%s\n' '${{ secrets.ANTIPRATIK_R2_SECRET_ACCESS_KEY }}' >> /opt/antipratik-${{ env.TAG }}/.env
             chmod 600 /opt/antipratik-${{ env.TAG }}/.env
 
-      - name: Copy config to server
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host:     ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key:      ${{ secrets.SERVER_SSH_KEY }}
-          source: "infrastructure/config/config.${{ env.TAG }}.yaml"
-          target: "/tmp/"
-          strip_components: 2
-
-      - name: Copy compose file to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host:     ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key:      ${{ secrets.SERVER_SSH_KEY }}
-          source: "infrastructure/compose/docker-compose.${{ env.TAG }}.yml"
-          target: "/tmp/"
-          strip_components: 2
-
-      - name: Copy deploy script to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host:     ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key:      ${{ secrets.SERVER_SSH_KEY }}
-          source: ".github/scripts/deploy.sh"
-          target: "/tmp/"
+          source: >-
+            infrastructure/config/config.${{ env.TAG }}.yaml,
+            infrastructure/compose/docker-compose.${{ env.TAG }}.yml,
+            .github/scripts/deploy.sh
+          target: /tmp/
           strip_components: 2
 
       - name: SSH and deploy
@@ -136,7 +150,7 @@ jobs:
             /tmp/deploy.sh ${{ env.TAG }}
 
   deploy-sidequests:
-    needs: sidequest-changes
+    needs: [changes]
     if: needs.changes.outputs.sidequests == 'true' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:

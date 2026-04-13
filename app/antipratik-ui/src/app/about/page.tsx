@@ -4,7 +4,7 @@ import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'About — antipratik',
-  description: 'Developer, musician, writer, and photographer based in Kathmandu, Nepal.',
+  description: 'Developer, music tinkerer, and blogger based in Kathmandu, Nepal.',
 };
 
 export default function AboutPage() {

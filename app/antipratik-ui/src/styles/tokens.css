@@ -68,6 +68,23 @@
 --space-16:                          128px;
 
 /* ═══════════════════════════════════════════════
+   BORDER WIDTHS
+═══════════════════════════════════════════════ */
+--border-thin:                       1px;
+--border-hairline:                   0.5px;
+
+/* ═══════════════════════════════════════════════
+   ICON & BUTTON SIZES
+   Use these for fixed-dimension icon containers,
+   play buttons, and circular action buttons.
+═══════════════════════════════════════════════ */
+--icon-xs:                           20px;  /* inline icon (hamburger bars, close) */
+--icon-sm:                           32px;  /* small action button (mobile nav toggle) */
+--icon-md:                           36px;  /* medium icon button (music player controls) */
+--icon-lg:                           40px;  /* large icon button (lightbox nav) */
+--icon-xl:                           44px;  /* extra large icon/play button (video card) */
+
+/* ═══════════════════════════════════════════════
    GRID
 ═══════════════════════════════════════════════ */
 --grid-cols-desktop:                 12;
@@ -84,6 +101,7 @@
 --breakpoint-desktop:                1280px;
 --breakpoint-tablet:                 768px;
 --breakpoint-mobile:                 767px;
+--breakpoint-small:                  640px;
 
 /* ═══════════════════════════════════════════════
    PRAYER FLAG ACCENTS — content type mapping
