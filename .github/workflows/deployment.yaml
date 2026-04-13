@@ -32,9 +32,9 @@ jobs:
             sidequests:
               - 'sidequests/**'
 
-  build-api:
+  build-api-image:
     needs: [changes]
-    if: needs.changes.outputs.api == 'true'
+    if: needs.changes.outputs.api == 'true' || github.ref_name == 'master' || github.ref_name == 'prod'
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -55,9 +55,9 @@ jobs:
           push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
           tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
 
-  build-ui:
+  build-ui-image:
     needs: [changes]
-    if: needs.changes.outputs.ui == 'true'
+    if: needs.changes.outputs.ui == 'true' || github.ref_name == 'master' || github.ref_name == 'prod'
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -100,7 +100,7 @@ jobs:
           tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
 
   deploy-app:
-    needs: [build-api, build-ui, build-nginx]
+    needs: [build-api-image, build-ui-image, build-nginx]
     if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && (github.ref_name == 'master' || github.ref_name == 'prod')
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
