@@ -47,6 +47,7 @@ func main() {
 	postStore := store.NewPostStore(db)
 	linkStore := store.NewLinkStore(db)
 	userStore := store.NewUserStore(db)
+	newsletterStore := store.NewNewsletterStore(db)
 
 	jwtSecret, err := store.GetOrCreateJWTSecret(db)
 	if err != nil {
@@ -57,14 +58,16 @@ func main() {
 	postLogic := logic.NewPostService(postStore, fileStore)
 	linkLogic := logic.NewLinkService(linkStore)
 	authService := logic.NewAuthService(userStore, jwtSecret)
+	newsletterLogic := logic.NewNewsletterService(newsletterStore)
 
 	postH := api.NewPostHandler(postLogic, uploadSvc, logger)
 	linkH := api.NewLinkHandler(linkLogic, logger)
 	authH := api.NewAuthHandler(authService, logger)
 	fileH := api.NewFileServingHandler(fileStore, logger)
+	newsletterH := api.NewNewsletterHandler(newsletterLogic, logger)
 
 	mux := http.NewServeMux()
-	api.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, "api/openapi.yaml", "api/swagger.html")
+	api.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "api/openapi.yaml", "api/swagger.html")
 
 	handler := api.CORSMiddleware(mux)
 

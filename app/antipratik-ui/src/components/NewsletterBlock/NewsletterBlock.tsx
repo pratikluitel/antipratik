@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './NewsletterBlock.module.css';
+import { subscribeNewsletter } from '@/lib/api';
 
 interface Props {
   variant: 'page' | 'footer';
@@ -16,13 +17,20 @@ export default function NewsletterBlock({ variant }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMsg('Please enter a valid email address.');
+      setNLState('error');
+      return;
+    }
     setNLState('submitting');
     setErrorMsg('');
-    // Fake 1000ms delay simulating an API call.
-    // When wiring a real backend, replace with:
-    // await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscribe`, { method: 'POST', body: JSON.stringify({ email }) })
-    await new Promise((r) => setTimeout(r, 1000));
-    setNLState('success');
+    try {
+      await subscribeNewsletter(email.trim());
+      setNLState('success');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong.');
+      setNLState('error');
+    }
   }
 
   return (

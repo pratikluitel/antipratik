@@ -50,6 +50,12 @@ type LinkLogic interface {
 	DeleteLink(ctx context.Context, id string) error
 }
 
+// NewsletterLogic defines newsletter subscription operations.
+type NewsletterLogic interface {
+	// Subscribe validates the email and persists it as a subscriber.
+	Subscribe(ctx context.Context, email string) error
+}
+
 // AuthLogic defines authentication operations.
 type AuthLogic interface {
 	Login(ctx context.Context, username, password string) (string, error)
