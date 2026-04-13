@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 import type { VideoPost } from '../../lib/types';
 import styles from './VideoCard.module.css';
 
@@ -13,6 +16,7 @@ function formatDuration(seconds: number): string {
 }
 
 export default function VideoCard({ post }: Props) {
+  const [loaded, setLoaded] = useState(false);
   const date = new Date(post.createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -28,12 +32,21 @@ export default function VideoCard({ post }: Props) {
         className={styles.link}
       >
         <div className={styles.thumbnail}>
+          {post.thumbnailUrl && post.thumbnailTinyUrl && !loaded && (
+            <div
+              className={styles.imagePlaceholder}
+              style={{ backgroundImage: `url(${post.thumbnailTinyUrl})` }}
+              aria-hidden="true"
+            />
+          )}
           {post.thumbnailUrl && (
             <Image
               src={post.thumbnailUrl}
               alt={post.title}
               fill
               sizes="(max-width: 860px) 100vw, 860px"
+              onLoad={() => setLoaded(true)}
+              className={loaded ? styles.imageVisible : styles.imageHidden}
             />
           )}
           <div className={styles.scrim} />

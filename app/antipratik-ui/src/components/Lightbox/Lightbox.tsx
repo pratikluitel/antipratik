@@ -13,9 +13,14 @@ interface Props {
 
 export default function Lightbox({ images, startIndex, onClose }: Props) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
+  const [loaded, setLoaded] = useState(false);
 
   const next = () => setCurrentIndex(i => Math.min(i + 1, images.length - 1));
   const prev = () => setCurrentIndex(i => Math.max(i - 1, 0));
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [currentIndex]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -51,10 +56,19 @@ export default function Lightbox({ images, startIndex, onClose }: Props) {
       )}
 
       <div className={styles.imageContainer} onClick={e => e.stopPropagation()}>
+        {images[currentIndex].thumbnailTinyUrl && !loaded && (
+          <img
+            src={images[currentIndex].thumbnailTinyUrl}
+            alt=""
+            aria-hidden="true"
+            className={`${styles.image} ${styles.imagePlaceholder}`}
+          />
+        )}
         <img
           src={images[currentIndex].url}
           alt={images[currentIndex].alt}
-          className={styles.image}
+          className={`${styles.image} ${loaded ? styles.imageVisible : styles.imageHidden}`}
+          onLoad={() => setLoaded(true)}
         />
         {images[currentIndex].caption && (
           <div className={styles.caption}>

@@ -17,6 +17,24 @@
   display: block;
 }
 
+.imagePlaceholder {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  transform: scale(1.1);
+}
+
+.imageHidden {
+  opacity: 0;
+}
+
+.imageVisible {
+  opacity: 1;
+  transition: opacity var(--motion-default);
+}
+
 .galleryIndicator {
   position: absolute;
   top: 12px;

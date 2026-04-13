@@ -16,12 +16,39 @@
   color: inherit;
 }
 
+.thumbnailWrapper {
+  position: relative;
+  width: var(--link-og-thumb-size);
+  height: var(--link-og-thumb-size);
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--link-og-thumb-radius);
+}
+
+.thumbnailPlaceholder {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(6px);
+  transform: scale(1.1);
+}
+
 .thumbnail {
   width: var(--link-og-thumb-size);
   height: var(--link-og-thumb-size);
   border-radius: var(--link-og-thumb-radius);
   object-fit: cover;
   flex-shrink: 0;
+}
+
+.imageHidden {
+  opacity: 0;
+}
+
+.imageVisible {
+  opacity: 1;
+  transition: opacity var(--motion-default);
 }
 
 .textBlock {
