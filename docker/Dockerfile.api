@@ -1,7 +1,7 @@
 # Build stage
 FROM golang:1.25.1-alpine AS builder
 
-RUN apk add --no-cache gcc g++ musl-dev
+RUN apk add --no-cache gcc g++ musl-dev libheif-dev
 
 WORKDIR /app
 
@@ -13,12 +13,12 @@ RUN go mod download
 COPY app/antipratik-api/ ./
 
 # Build the application
-RUN GOOS=linux go build -o main .
+RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
 # Runtime stage
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates libstdc++ libgcc
+RUN apk --no-cache add ca-certificates libstdc++ libgcc libheif libde265
 WORKDIR /root/
 
 # Copy the binary from builder
