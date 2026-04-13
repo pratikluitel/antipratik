@@ -58,7 +58,7 @@ jobs:
           script: |
             chmod +x /tmp/deploy.sh
             GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}" \
-            GHCR_USER="${{ github.actor }}" \
+            GHCR_USER="${{ github.repository_owner }}" \
             /tmp/deploy.sh ${{ env.TAG }}
 
   deploy-sidequests:
