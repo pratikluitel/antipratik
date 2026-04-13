@@ -38,24 +38,26 @@ func (s ShortPost) postType() string { return "short" }
 
 // MusicPost is a music track with album art and audio URL.
 type MusicPost struct {
-	ID        string   `json:"id"`
-	Type      string   `json:"type"`
-	CreatedAt string   `json:"createdAt"`
-	Tags      []string `json:"tags"`
-	Title     string   `json:"title"`
-	AlbumArt  string   `json:"albumArt"`
-	AudioURL  string   `json:"audioUrl"`
-	Duration  int      `json:"duration"`
-	Album     *string  `json:"album,omitempty"`
+	ID              string   `json:"id"`
+	Type            string   `json:"type"`
+	CreatedAt       string   `json:"createdAt"`
+	Tags            []string `json:"tags"`
+	Title           string   `json:"title"`
+	AlbumArt        string   `json:"albumArt"`
+	AlbumArtTinyURL *string  `json:"albumArtTinyUrl,omitempty"`
+	AudioURL        string   `json:"audioUrl"`
+	Duration        int      `json:"duration"`
+	Album           *string  `json:"album,omitempty"`
 }
 
 func (m MusicPost) postType() string { return "music" }
 
 // PhotoImage is a single image within a PhotoPost.
 type PhotoImage struct {
-	URL               string  `json:"url"`
-	Alt               string  `json:"alt"`
-	Caption           *string `json:"caption,omitempty"`
+	URL              string  `json:"url"`
+	Alt              string  `json:"alt"`
+	Caption          *string `json:"caption,omitempty"`
+	ThumbnailTinyURL  *string `json:"thumbnailTinyUrl,omitempty"`
 	ThumbnailSmallURL *string `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string `json:"thumbnailLargeUrl,omitempty"`
@@ -75,31 +77,33 @@ func (p PhotoPost) postType() string { return "photo" }
 
 // VideoPost is a video with thumbnail, URL, and duration.
 type VideoPost struct {
-	ID           string   `json:"id"`
-	Type         string   `json:"type"`
-	CreatedAt    string   `json:"createdAt"`
-	Tags         []string `json:"tags"`
-	Title        string   `json:"title"`
-	ThumbnailURL string   `json:"thumbnailUrl"`
-	VideoURL     string   `json:"videoUrl"`
-	Duration     int      `json:"duration"`
-	Playlist     *string  `json:"playlist,omitempty"`
+	ID               string   `json:"id"`
+	Type             string   `json:"type"`
+	CreatedAt        string   `json:"createdAt"`
+	Tags             []string `json:"tags"`
+	Title            string   `json:"title"`
+	ThumbnailURL     string   `json:"thumbnailUrl"`
+	ThumbnailTinyURL *string  `json:"thumbnailTinyUrl,omitempty"`
+	VideoURL         string   `json:"videoUrl"`
+	Duration         int      `json:"duration"`
+	Playlist         *string  `json:"playlist,omitempty"`
 }
 
 func (v VideoPost) postType() string { return "video" }
 
 // LinkPost is a curated external link shared as a post.
 type LinkPost struct {
-	ID           string   `json:"id"`
-	Type         string   `json:"type"`
-	CreatedAt    string   `json:"createdAt"`
-	Tags         []string `json:"tags"`
-	Title        string   `json:"title"`
-	URL          string   `json:"url"`
-	Domain       string   `json:"domain"`
-	Description  *string  `json:"description,omitempty"`
-	ThumbnailURL *string  `json:"thumbnailUrl,omitempty"`
-	Category     *string  `json:"category,omitempty"`
+	ID               string   `json:"id"`
+	Type             string   `json:"type"`
+	CreatedAt        string   `json:"createdAt"`
+	Tags             []string `json:"tags"`
+	Title            string   `json:"title"`
+	URL              string   `json:"url"`
+	Domain           string   `json:"domain"`
+	Description      *string  `json:"description,omitempty"`
+	ThumbnailURL     *string  `json:"thumbnailUrl,omitempty"`
+	ThumbnailTinyURL *string  `json:"thumbnailTinyUrl,omitempty"`
+	Category         *string  `json:"category,omitempty"`
 }
 
 func (l LinkPost) postType() string { return "link" }
@@ -143,12 +147,13 @@ type CreateShortPost struct {
 }
 
 type CreateMusicPost struct {
-	Title    string   `json:"title"`
-	AlbumArt string   `json:"albumArt"`
-	AudioURL string   `json:"audioURL"`
-	Duration int      `json:"duration"`
-	Album    *string  `json:"album,omitempty"`
-	Tags     []string `json:"tags"`
+	Title           string   `json:"title"`
+	AlbumArt        string   `json:"albumArt"`
+	AlbumArtTinyURL string   `json:"albumArtTinyUrl,omitempty"`
+	AudioURL        string   `json:"audioURL"`
+	Duration        int      `json:"duration"`
+	Album           *string  `json:"album,omitempty"`
+	Tags            []string `json:"tags"`
 }
 
 type CreatePhotoPost struct {
@@ -158,22 +163,24 @@ type CreatePhotoPost struct {
 }
 
 type CreateVideoPost struct {
-	Title        string   `json:"title"`
-	ThumbnailURL string   `json:"thumbnailURL"`
-	VideoURL     string   `json:"videoURL"`
-	Duration     int      `json:"duration"`
-	Playlist     *string  `json:"playlist,omitempty"`
-	Tags         []string `json:"tags"`
+	Title            string   `json:"title"`
+	ThumbnailURL     string   `json:"thumbnailURL"`
+	ThumbnailTinyURL string   `json:"thumbnailTinyUrl,omitempty"`
+	VideoURL         string   `json:"videoURL"`
+	Duration         int      `json:"duration"`
+	Playlist         *string  `json:"playlist,omitempty"`
+	Tags             []string `json:"tags"`
 }
 
 type CreateLinkPost struct {
-	Title        string   `json:"title"`
-	URL          string   `json:"url"`
-	Domain       string   `json:"-"`
-	Description  *string  `json:"description,omitempty"`
-	ThumbnailURL *string  `json:"thumbnailURL,omitempty"`
-	Category     *string  `json:"category,omitempty"`
-	Tags         []string `json:"tags"`
+	Title            string   `json:"title"`
+	URL              string   `json:"url"`
+	Domain           string   `json:"-"`
+	Description      *string  `json:"description,omitempty"`
+	ThumbnailURL     *string  `json:"thumbnailURL,omitempty"`
+	ThumbnailTinyURL *string  `json:"thumbnailTinyUrl,omitempty"`
+	Category         *string  `json:"category,omitempty"`
+	Tags             []string `json:"tags"`
 }
 
 type CreateExternalLink struct {
@@ -204,12 +211,13 @@ type UpdateShortPost struct {
 
 // UpdateMusicPost is the partial-update input for music posts (multipart/form-data).
 type UpdateMusicPost struct {
-	Title    *string
-	AudioURL *string
-	AlbumArt *string
-	Duration *int
-	Album    *string
-	Tags     []string
+	Title           *string
+	AudioURL        *string
+	AlbumArt        *string
+	AlbumArtTinyURL *string
+	Duration        *int
+	Album           *string
+	Tags            []string
 }
 
 // UpdatePhotoPost is the partial-update input for photo posts (multipart/form-data).
@@ -221,22 +229,24 @@ type UpdatePhotoPost struct {
 
 // UpdateVideoPost is the partial-update input for video posts (multipart/form-data).
 type UpdateVideoPost struct {
-	Title        *string
-	ThumbnailURL *string
-	VideoURL     *string
-	Duration     *int
-	Playlist     *string
-	Tags         []string
+	Title            *string
+	ThumbnailURL     *string
+	ThumbnailTinyURL *string
+	VideoURL         *string
+	Duration         *int
+	Playlist         *string
+	Tags             []string
 }
 
 // UpdateLinkPost is the partial-update input for link posts (multipart/form-data).
 type UpdateLinkPost struct {
-	Title        *string
-	URL          *string
-	ThumbnailURL *string
-	Description  *string
-	Category     *string
-	Tags         []string
+	Title            *string
+	URL              *string
+	ThumbnailURL     *string
+	ThumbnailTinyURL *string
+	Description      *string
+	Category         *string
+	Tags             []string
 }
 
 // UpdateExternalLink is the partial-update input for external links (JSON body).

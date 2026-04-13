@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import type { MusicPost } from '../../lib/types';
 import { useMusicPlayer } from '../MusicProvider/MusicProvider';
 import styles from './MusicCard.module.css';
@@ -13,6 +14,28 @@ function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function AlbumArtImage({ post }: { post: MusicPost }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={styles.albumArtPanel}>
+      {post.albumArtTinyUrl && !loaded && (
+        <div
+          className={styles.albumArtPlaceholder_lqip}
+          style={{ backgroundImage: `url(${post.albumArtTinyUrl})` }}
+          aria-hidden="true"
+        />
+      )}
+      <Image
+        src={post.albumArt}
+        alt={post.title}
+        fill
+        onLoad={() => setLoaded(true)}
+        className={`${styles.albumArt} ${loaded ? styles.imageVisible : styles.imageHidden}`}
+      />
+    </div>
+  );
 }
 
 export default function MusicCard({ post }: Props) {
@@ -32,14 +55,7 @@ export default function MusicCard({ post }: Props) {
       onClick={() => play(post)}
     >
       {post.albumArt ? (
-        <div className={styles.albumArtPanel}>
-          <Image
-            src={post.albumArt}
-            alt={post.title}
-            fill
-            className={styles.albumArt}
-          />
-        </div>
+        <AlbumArtImage post={post} />
       ) : (
         <div className={styles.albumArtPlaceholder} aria-hidden="true">
           ♪

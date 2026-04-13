@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 import type { LinkPost } from '../../lib/types';
 import styles from './LinkCard.module.css';
 
@@ -33,6 +36,29 @@ function tagLabel(category: LinkPost['category']): string | null {
   }
 }
 
+function LinkThumbnail({ post }: { post: LinkPost }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className={styles.thumbnailWrapper}>
+      {post.thumbnailTinyUrl && !loaded && (
+        <div
+          className={styles.thumbnailPlaceholder}
+          style={{ backgroundImage: `url(${post.thumbnailTinyUrl})` }}
+          aria-hidden="true"
+        />
+      )}
+      <Image
+        src={post.thumbnailUrl!}
+        alt={post.title}
+        width={52}
+        height={52}
+        onLoad={() => setLoaded(true)}
+        className={`${styles.thumbnail} ${loaded ? styles.imageVisible : styles.imageHidden}`}
+      />
+    </div>
+  );
+}
+
 export default function LinkCard({ post }: Props) {
   const tagCls = tagClass(post.category);
   const label = tagLabel(post.category);
@@ -51,13 +77,7 @@ export default function LinkCard({ post }: Props) {
         className={styles.link}
       >
         {post.thumbnailUrl && (
-          <Image
-            src={post.thumbnailUrl}
-            alt={post.title}
-            width={52}
-            height={52}
-            className={styles.thumbnail}
-          />
+          <LinkThumbnail post={post} />
         )}
 
         <div className={styles.textBlock}>

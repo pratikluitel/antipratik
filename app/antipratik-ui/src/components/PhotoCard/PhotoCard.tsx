@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import type { PhotoPost } from '../../lib/types';
 import styles from './PhotoCard.module.css';
 
@@ -29,6 +30,7 @@ export default function PhotoCard({ post, onOpen }: Props) {
   const { images } = post;
   const count = images.length;
   const mainImage = images[0];
+  const [loaded, setLoaded] = useState(false);
 
   const date = new Date(post.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -38,15 +40,24 @@ export default function PhotoCard({ post, onOpen }: Props) {
 
   return (
     <article className={styles.card}>
-      <div 
+      <div
         className={styles.imageWrapper}
         onClick={() => onOpen(images, 0)}
       >
+        {mainImage.thumbnailTinyUrl && !loaded && (
+          <div
+            className={styles.imagePlaceholder}
+            style={{ backgroundImage: `url(${mainImage.thumbnailTinyUrl})` }}
+            aria-hidden="true"
+          />
+        )}
         <Image
           src={mainImage.url}
           alt={mainImage.alt}
           fill
           sizes="(max-width: 860px) 100vw, 860px"
+          onLoad={() => setLoaded(true)}
+          className={loaded ? styles.imageVisible : styles.imageHidden}
         />
         {count > 1 && (
           <div className={styles.galleryIndicator}>
