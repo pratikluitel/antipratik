@@ -20,6 +20,9 @@ jobs:
           go-version-file: app/antipratik-api/go.mod
           cache-dependency-path: app/antipratik-api/go.sum
 
+      - name: Install libheif
+        run: sudo apt-get install -y libheif-dev
+
       - name: Build
         working-directory: app/antipratik-api
         run: go build ./...

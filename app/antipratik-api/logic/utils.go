@@ -2,6 +2,7 @@ package logic
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -13,9 +14,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jdeng/goheif"
 	"github.com/pratikluitel/antipratik/models"
-	"github.com/rwcarlsen/goexif/exif"
+	"github.com/strukturag/libheif/go/heif"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/webp"
 )
@@ -106,7 +106,22 @@ func decodeImage(r multipart.File, ext string) (image.Image, error) {
 	case ".webp":
 		img, err = webp.Decode(bytes.NewReader(data))
 	case ".heic", ".heif":
-		img, err = goheif.Decode(bytes.NewReader(data))
+		hctx, hErr := heif.NewContext()
+		if hErr != nil {
+			return nil, fmt.Errorf("creating heif context: %w", hErr)
+		}
+		if hErr = hctx.ReadFromMemory(data); hErr != nil {
+			return nil, fmt.Errorf("reading heif data: %w", hErr)
+		}
+		handle, hErr := hctx.GetPrimaryImageHandle()
+		if hErr != nil {
+			return nil, fmt.Errorf("getting heif primary image: %w", hErr)
+		}
+		decoded, hErr := handle.DecodeImage(heif.ColorspaceUndefined, heif.ChromaUndefined, nil)
+		if hErr != nil {
+			return nil, fmt.Errorf("decoding heif image: %w", hErr)
+		}
+		img, err = decoded.GetImage()
 	default:
 		img, _, err = image.Decode(bytes.NewReader(data))
 	}
@@ -128,19 +143,131 @@ func decodeImage(r multipart.File, ext string) (image.Image, error) {
 // getEXIFOrientation extracts the orientation tag from EXIF metadata.
 // Returns 1 (normal) if no EXIF orientation is found or if there's an error.
 func getEXIFOrientation(r io.Reader) uint32 {
-	exifData, err := exif.Decode(r)
-	if err != nil {
-		return 1 // Default to normal orientation
-	}
-	orientation, err := exifData.Get(exif.Orientation)
-	if err != nil {
-		return 1 // Default to normal orientation
-	}
-	val, err := orientation.Int(0)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return 1
 	}
-	return uint32(val)
+	orientation, err := parseEXIFOrientation(data)
+	if err != nil {
+		return orientation
+	}
+	return orientation
+}
+
+// parseEXIFOrientation extracts the orientation tag (0x0112) from raw bytes.
+// Supports JPEG (APP1/EXIF) and raw TIFF containers.
+func parseEXIFOrientation(data []byte) (uint32, error) {
+	if len(data) < 4 {
+		return 1, fmt.Errorf("too short")
+	}
+
+	var tiffData []byte
+
+	switch {
+	case data[0] == 0xFF && data[1] == 0xD8:
+		// JPEG: scan APP1 markers to find the EXIF block
+		tiffData = extractJPEGExifBlock(data)
+		if tiffData == nil {
+			return 1, fmt.Errorf("no EXIF block in JPEG")
+		}
+	case (data[0] == 0x49 && data[1] == 0x49) || (data[0] == 0x4D && data[1] == 0x4D):
+		// Raw TIFF
+		tiffData = data
+	default:
+		return 1, fmt.Errorf("not a JPEG or TIFF")
+	}
+
+	return readTIFFOrientation(tiffData)
+}
+
+// extractJPEGExifBlock scans JPEG markers until it finds APP1 with an EXIF header.
+func extractJPEGExifBlock(data []byte) []byte {
+	i := 2 // skip SOI (0xFF 0xD8)
+	for i+4 <= len(data) {
+		if data[i] != 0xFF {
+			return nil
+		}
+		marker := data[i+1]
+		if i+4 > len(data) {
+			return nil
+		}
+		segLen := int(data[i+2])<<8 | int(data[i+3]) // includes the 2 length bytes
+		if segLen < 2 || i+2+segLen > len(data) {
+			return nil
+		}
+		if marker == 0xE1 { // APP1
+			payload := data[i+4 : i+2+segLen]
+			// EXIF header: "Exif\x00\x00"
+			if len(payload) > 6 && string(payload[:6]) == "Exif\x00\x00" {
+				return payload[6:]
+			}
+		}
+		// Stop at compressed image data — no EXIF will follow
+		if marker == 0xDA {
+			return nil
+		}
+		i += 2 + segLen
+	}
+	return nil
+}
+
+// readTIFFOrientation parses a TIFF structure and returns the Orientation tag value.
+func readTIFFOrientation(data []byte) (uint32, error) {
+	if len(data) < 8 {
+		return 1, fmt.Errorf("TIFF data too short")
+	}
+
+	var bo binary.ByteOrder
+	switch {
+	case data[0] == 0x49 && data[1] == 0x49:
+		bo = binary.LittleEndian // "II" = Intel = little-endian
+	case data[0] == 0x4D && data[1] == 0x4D:
+		bo = binary.BigEndian // "MM" = Motorola = big-endian
+	default:
+		return 1, fmt.Errorf("invalid TIFF byte order marker")
+	}
+
+	if bo.Uint16(data[2:4]) != 42 {
+		return 1, fmt.Errorf("invalid TIFF magic number")
+	}
+
+	ifdOffset := bo.Uint32(data[4:8])
+	if uint64(ifdOffset)+2 > uint64(len(data)) {
+		return 1, fmt.Errorf("IFD offset out of bounds")
+	}
+
+	numEntries := bo.Uint16(data[ifdOffset : ifdOffset+2])
+	const entrySize = 12
+	const orientationTag = 0x0112
+
+	for i := 0; i < int(numEntries); i++ {
+		entryOffset := int(ifdOffset) + 2 + i*entrySize
+		if entryOffset+entrySize > len(data) {
+			break
+		}
+		entry := data[entryOffset : entryOffset+entrySize]
+
+		tagID := bo.Uint16(entry[0:2])
+		if tagID != orientationTag {
+			continue
+		}
+
+		// type=3 (SHORT, uint16), count must be 1
+		dataType := bo.Uint16(entry[2:4])
+		count := bo.Uint32(entry[4:8])
+		if dataType != 3 || count != 1 {
+			return 1, fmt.Errorf("unexpected orientation tag format")
+		}
+
+		// Value is stored in the first 2 bytes of the value/offset field
+		val := bo.Uint16(entry[8:10])
+		if val < 1 || val > 8 {
+			return 1, fmt.Errorf("orientation value out of EXIF spec range")
+		}
+		return uint32(val), nil
+	}
+
+	return 1, fmt.Errorf("orientation tag not found")
 }
 
 // applyOrientation transforms an image based on EXIF orientation tag.
