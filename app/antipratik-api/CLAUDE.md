@@ -6,7 +6,7 @@ Read this file at the start of every session before writing any code.
 
 ## Project Overview & Philosophy
 
-**antipratik-api** is the backend REST API for antipratik.com, a personal brand site for a Kathmandu-based developer, musician, writer, and photographer.
+**antipratik-api** is the backend REST API for antipratik.com, a personal brand site for a Kathmandu-based developer, music tinkerer, and blogger.
 
 ### The Backend Philosophy
 
