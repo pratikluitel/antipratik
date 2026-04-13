@@ -1,11 +1,7 @@
 #!/bin/bash
 set -e
 ENVIRONMENT=$1
-if [ "$ENVIRONMENT" = "prod" ]; then
-    DEPLOY_DIR="/opt/antipratik"
-else
-    DEPLOY_DIR="/opt/antipratik-${ENVIRONMENT}"
-fi
+DEPLOY_DIR="/opt/antipratik-${ENVIRONMENT}"
 mkdir -p "$DEPLOY_DIR"
 cp "/tmp/docker-compose.${ENVIRONMENT}.yml" "${DEPLOY_DIR}/docker-compose.yml"
 cp "/tmp/config.${ENVIRONMENT}.yaml" "${DEPLOY_DIR}/config.yaml"
