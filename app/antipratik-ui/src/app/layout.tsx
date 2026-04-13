@@ -10,6 +10,14 @@ import '../styles/globals.css';
 export const metadata: Metadata = {
   title: 'antipratik',
   description: 'Developer, musician, writer, and photographer based in Kathmandu, Nepal.',
+  openGraph: {
+    title: 'antipratik',
+    description: 'Developer, music tinkerer, writer, and photographer based in Kathmandu, Nepal.',
+    url: 'https://antipratik.com',
+    siteName: 'antipratik',
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({

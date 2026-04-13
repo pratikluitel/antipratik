@@ -54,6 +54,13 @@ type LinkStore interface {
 	DeleteLink(ctx context.Context, id string) error
 }
 
+// NewsletterStore handles newsletter subscriber database operations.
+type NewsletterStore interface {
+	// Subscribe inserts an email into newsletter_subscribers.
+	// Returns ErrDuplicate if the email already exists.
+	Subscribe(ctx context.Context, email string) error
+}
+
 // UserStore handles user authentication database operations.
 type UserStore interface {
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
