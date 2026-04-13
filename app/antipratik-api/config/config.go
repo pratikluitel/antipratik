@@ -35,7 +35,6 @@ type DBConfig struct {
 	Path string `yaml:"path"`
 }
 
-
 // StaticConfig holds settings for serving the frontend static build.
 type StaticConfig struct {
 	Dir string `yaml:"dir"`
@@ -58,7 +57,7 @@ type R2Config struct {
 	SecretAccessKey string `yaml:"secret_access_key"`
 }
 
-// Load reads and parses the YAML config file at the given path.
+// Load reads and parses the YAML config file at the given path, overrides config with ENV VARs if present
 func Load(path string) (*Config, error) {
 	f, err := os.Open(path)
 	if err != nil {

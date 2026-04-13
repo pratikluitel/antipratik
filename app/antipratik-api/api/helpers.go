@@ -55,7 +55,3 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	// the response is already partially written and unrecoverable, so discard silently.
 	_ = json.NewEncoder(w).Encode(v)
 }
-
-func writeError(w http.ResponseWriter, status int, msg string) {
-	writeJSON(w, status, map[string]string{"error": msg})
-}
