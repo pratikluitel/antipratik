@@ -3,6 +3,9 @@ package api
 import (
 	"net/http"
 	"os"
+	"time"
+
+	"golang.org/x/time/rate"
 
 	"github.com/pratikluitel/antipratik/logic"
 )
@@ -27,8 +30,9 @@ func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, au
 	// Auth
 	mux.HandleFunc("POST /api/auth/login", authH.Login)
 
-	// Newsletter
-	mux.HandleFunc("POST /api/subscribe", newsletterH.Subscribe)
+	// Newsletter — 3 requests/hour per IP, burst of 3
+	subscribeRL := RateLimitMiddleware(rate.Every(time.Hour/3), 3, time.Hour)
+	mux.Handle("POST /api/subscribe", subscribeRL(http.HandlerFunc(newsletterH.Subscribe)))
 
 	// OpenAPI spec + Swagger UI
 	mux.HandleFunc("GET /api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
