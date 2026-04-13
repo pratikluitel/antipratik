@@ -225,7 +225,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 
 1. **Never Skip Input Validation** — Every parameter from users must be checked. No exceptions.
 2. **Never Return Sensitive Data** — Passwords, tokens, or internal IDs in error messages.
-3. **Never Use String Formatting for SQL** — Always use prepared statements to prevent SQL injection.
+3. **Never Use String Formatting for SQL** — Always use prepared statements (`?` placeholders) to prevent SQL injection. This applies to every query in every store file. Never concatenate or `fmt.Sprintf` user input into a SQL string.
 4. **Never Log Sensitive Information** — Passwords, JWT secrets, or user data in logs.
 5. **Never Bypass Authentication** — All write operations must check JWT tokens.
 6. **Never Hardcode Secrets** — Use config files and environment variables.
@@ -235,6 +235,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 10. **Never Trust Client-Side Validation** — Server must validate everything again.
 11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
 12. **Never add a separate upload endpoint** — File uploads belong inside the existing `POST/PUT /api/posts/<type>` handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes.
+13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` in `api/routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
 
 ---
 
@@ -260,7 +261,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 ### Network Security
 - **CORS Configuration:** Permissive in dev, locked down in production
 - **HTTPS Enforcement:** Required for production deployments
-- **Rate Limiting:** Consider adding for production (not yet implemented)
+- **Rate Limiting:** Per-IP rate limiting via `RateLimitMiddleware` (`api/middleware.go`) — required on all public POST endpoints that write to the database
 
 ---
 
@@ -317,7 +318,11 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
 - Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
 - File URLs always route through the backend's own `/files/` and `/thumbnails/` endpoints — the storage backend (local or R2) is never exposed.
-- **Tag handling in PUT multipart requests:** If `tags[]` is absent, has no values, or contains only empty strings, all existing tags are cleared. Clients must re-send desired tags to preserve them. Non-multipart (JSON) update endpoints preserve existing tags when `tags` is omitted.
+- **Tag handling in multipart requests:** Use the `formTags(r)` helper (defined in `api/helpers.go`) in all multipart handlers — both CREATE and UPDATE. It reads either `tags` or `tags[]` from the form, splits comma-separated values, and returns:
+  - `nil` — key was absent in a non-multipart request → preserve existing tags (UPDATE only)
+  - `[]string{}` — key was absent in a multipart request, or present but empty → **clear all tags**
+  - `[]string{…}` — the parsed tag values
+  Never read `r.Form["tags"]` or `r.Form["tags[]"]` directly in handlers; always call `formTags(r)`.
 
 ### Post Types Supported
 - **essay:** Long-form writing with title, slug, excerpt, body, reading time
@@ -326,6 +331,32 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
 - **photo:** Photo galleries with metadata
 - **video:** Videos with thumbnails and metadata
 - **link:** Curated external links as posts
+
+---
+
+## HTTP Status Code Contract
+
+Every handler must return the appropriate status using these rules. Do not deviate.
+
+| Status | Meaning | When to use |
+|--------|---------|-------------|
+| `200 OK` | Success with body | GET, successful POST that returns data |
+| `201 Created` | Resource created | POST that creates a new resource (returns `{"id": "…"}`) |
+| `204 No Content` | Success, no body | DELETE |
+| `400 Bad Request` | Client error | `logic.ValidationError` — bad input, failed validation, duplicate entry |
+| `401 Unauthorized` | Auth failure | Missing/invalid JWT token |
+| `404 Not Found` | Missing resource | Resource with given ID/slug does not exist |
+| `429 Too Many Requests` | Rate limited | IP exceeded the per-endpoint rate limit |
+| `500 Internal Server Error` | Server error | Any non-ValidationError from the logic or store layer |
+
+The `handleLogicError` helper in `api/errors.go` maps `ValidationError → 400` and everything else `→ 500`. Use it for all logic layer errors. Never manually write a 500 — let the helper do it so the log entry is consistent.
+
+---
+
+## Transaction Pattern
+
+Multi-step database writes that must be atomic (e.g. insert a post row then insert its tags) use `*sql.Tx`.
+Never split a logically atomic operation across two separate store calls from the logic layer — if one succeeds and the other fails, the database will be in a partial state.
 
 ---
 

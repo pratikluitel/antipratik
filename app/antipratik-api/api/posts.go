@@ -325,7 +325,11 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		thumbnailTinyURL = result.TinyURL
 	}
 
-	duration, _ := strconv.Atoi(r.FormValue("duration"))
+	duration, err := strconv.Atoi(r.FormValue("duration"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "duration must be an integer")
+		return
+	}
 	input := models.CreateVideoPost{
 		Title:            r.FormValue("title"),
 		VideoURL:         r.FormValue("videoURL"),
