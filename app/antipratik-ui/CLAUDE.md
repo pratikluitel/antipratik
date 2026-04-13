@@ -6,7 +6,7 @@ Read this file at the start of every session before writing any code.
 
 ## Project Overview & Philosophy
 
-**antipratik.com** is a personal brand site for a Kathmandu-based developer, musician, writer, and photographer.
+**antipratik.com** is a personal brand site for a Kathmandu-based developer, music tinkerer, and blogger.
 
 ### The Design Language
 
@@ -105,6 +105,8 @@ All tokens live in `src/styles/tokens.css`. Never import tokens.css anywhere exc
 | `--ls-*` | Letter spacing |
 | `--measure-*` | Max line lengths (ch/px) |
 | `--space-1` through `--space-16` | 8px-grid spacing scale |
+| `--border-thin`, `--border-hairline` | Border widths (1px, 0.5px) |
+| `--icon-xs` through `--icon-xl` | Icon and circular button sizes (20–44px) |
 | `--gutter-*`, `--margin-*` | Grid gutters and margins |
 | `--content-max-width`, `--content-column-width`, `--breakpoint-*` | Layout bounds |
 | `--accent-music/essays/short/photos/videos/links/social` | Prayer flag accents |
@@ -195,8 +197,35 @@ These tokens were added or modified during implementation (not in the original d
 | `--essay-card-padding-x` | `22px` | EssayCard inner horizontal padding |
 | `--music-content-padding-x` | `18px` | MusicCard content area horizontal padding |
 | `--photo-card-body-padding` | `12px var(--space-2) 14px` | PhotoCard body padding (top / sides / bottom) |
+| `--border-thin` | `1px` | Standard border width — use instead of hardcoding `1px` |
+| `--border-hairline` | `0.5px` | Hairline border (retina) — use instead of hardcoding `0.5px` |
+| `--icon-xs` | `20px` | Inline icon size (hamburger bars, close icons) |
+| `--icon-sm` | `32px` | Small action button (mobile nav toggle) |
+| `--icon-md` | `36px` | Medium icon button (music player controls) |
+| `--icon-lg` | `40px` | Large icon button (lightbox nav) |
+| `--icon-xl` | `44px` | Extra-large play/action button (video card) |
+| `--breakpoint-small` | `640px` | Small breakpoint for narrow mobile layouts |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
+
+### Spacing Policy — sub-8px values
+
+The `--space-*` scale starts at 8px (`--space-1`). Values smaller than 8px (e.g. `2px`, `4px`, `5px`, `6px`) have **no token** and **may be hardcoded** in CSS modules. These are fine-grained optical adjustments for padding, gap, and margin that fall between grid increments. This is the one accepted exception to the no-hardcoded-values rule.
+
+Values ≥ 8px that match a `--space-*` token must always use the token.
+
+### Breakpoints Policy
+
+CSS custom properties cannot be used inside `@media` queries. Use the pixel values directly in media queries, but they **must exactly match** the corresponding token:
+
+| Token | Value | Use for |
+|---|---|---|
+| `--breakpoint-desktop` | `1280px` | Desktop+ layouts |
+| `--breakpoint-tablet` | `768px` | Tablet+ (min-width) |
+| `--breakpoint-mobile` | `767px` | Mobile (max-width) |
+| `--breakpoint-small` | `640px` | Narrow mobile (max-width) |
+
+Always use `767px` (not `768px`) for `max-width` mobile media queries — they are matched pairs. Never introduce a new breakpoint value without first adding a `--breakpoint-*` token.
 
 ---
 

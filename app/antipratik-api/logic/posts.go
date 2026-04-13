@@ -3,13 +3,13 @@ package logic
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
@@ -18,11 +18,12 @@ import (
 type PostService struct {
 	store store.PostStore
 	files store.FileStore
+	log   logging.Logger
 }
 
 // NewPostService creates a new PostService backed by the given store and file store.
-func NewPostService(s store.PostStore, files store.FileStore) *PostService {
-	return &PostService{store: s, files: files}
+func NewPostService(s store.PostStore, files store.FileStore, log logging.Logger) *PostService {
+	return &PostService{store: s, files: files, log: log}
 }
 
 var validTypes = map[string]bool{
@@ -600,7 +601,7 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 	}
 	for _, key := range fileKeysForPost(post) {
 		if err := s.files.Delete(ctx, key); err != nil {
-			log.Printf("DeletePost: failed to delete file %q: %v", key, err)
+			s.log.Error("DeletePost: failed to delete file", "key", key, "err", err)
 		}
 	}
 	return s.store.DeletePost(ctx, id)

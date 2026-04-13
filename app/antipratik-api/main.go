@@ -55,7 +55,7 @@ func main() {
 	}
 
 	uploadSvc := logic.NewUploadService(fileStore)
-	postLogic := logic.NewPostService(postStore, fileStore)
+	postLogic := logic.NewPostService(postStore, fileStore, logger)
 	linkLogic := logic.NewLinkService(linkStore)
 	authService := logic.NewAuthService(userStore, jwtSecret)
 	newsletterLogic := logic.NewNewsletterService(newsletterStore)
