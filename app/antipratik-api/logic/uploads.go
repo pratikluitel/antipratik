@@ -5,23 +5,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"mime/multipart"
 	"path/filepath"
 	"strings"
 
+	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
 
-// FileInput bundles a multipart file and its header for upload operations.
-type FileInput struct {
-	File   multipart.File
-	Header *multipart.FileHeader
-}
-
 // PhotoImageResult holds the URL fields for a single uploaded photo image.
 type PhotoImageResult struct {
-	OriginalURL      string
-	ThumbnailTinyURL string
+	OriginalURL       string
+	ThumbnailTinyURL  string
 	ThumbnailSmallURL string
 	ThumbnailMedURL   string
 	ThumbnailLargeURL string
@@ -45,16 +39,16 @@ type UploadLogic interface {
 	// UploadPhotoFiles stores multiple photo images (with 3 thumbnail variants each) for the
 	// given post. File IDs follow <postID>-<index>.<ext>; thumbnail IDs follow
 	// <postID>-<index>-<size>.<ext> where size is small/medium/large.
-	UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error)
+	UploadPhotoFiles(ctx context.Context, postID string, files []models.FileInput) ([]PhotoImageResult, error)
 
 	// UploadMusicFiles stores audio and/or album art for the given post.
 	// Either file may be nil (to skip that upload), but at least one must be non-nil.
 	// Audio is stored at music/<postID>.<ext>; album art at photos/<postID>-albumart.<ext>.
-	UploadMusicFiles(ctx context.Context, postID string, audioFile *FileInput, albumArtFile *FileInput) (MusicFilesResult, error)
+	UploadMusicFiles(ctx context.Context, postID string, audioFile *models.FileInput, albumArtFile *models.FileInput) (MusicFilesResult, error)
 
 	// UploadThumbnail stores a single thumbnail image plus a 20px-wide tiny variant.
 	// suffix is appended to the postID in the stored file name (e.g. "thumb").
-	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error)
+	UploadThumbnail(ctx context.Context, postID string, suffix string, file models.FileInput) (ThumbnailResult, error)
 }
 
 // UploadService implements UploadLogic.
@@ -80,7 +74,7 @@ func storageExt(ext string) string {
 }
 
 // UploadPhotoFiles implements UploadLogic.
-func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error) {
+func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, files []models.FileInput) ([]PhotoImageResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
 		return nil, err
 	}
@@ -137,8 +131,8 @@ func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, fil
 		}
 
 		results = append(results, PhotoImageResult{
-			OriginalURL:      "/files/" + fileID,
-			ThumbnailTinyURL: thumbURLs[0],
+			OriginalURL:       "/files/" + fileID,
+			ThumbnailTinyURL:  thumbURLs[0],
 			ThumbnailSmallURL: thumbURLs[1],
 			ThumbnailMedURL:   thumbURLs[2],
 			ThumbnailLargeURL: thumbURLs[3],
@@ -148,7 +142,7 @@ func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, fil
 }
 
 // UploadMusicFiles implements UploadLogic.
-func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, audioFile *FileInput, albumArtFile *FileInput) (MusicFilesResult, error) {
+func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, audioFile *models.FileInput, albumArtFile *models.FileInput) (MusicFilesResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
 		return MusicFilesResult{}, err
 	}
@@ -208,7 +202,7 @@ func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, aud
 }
 
 // UploadThumbnail implements UploadLogic.
-func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error) {
+func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suffix string, file models.FileInput) (ThumbnailResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
 		return ThumbnailResult{}, err
 	}

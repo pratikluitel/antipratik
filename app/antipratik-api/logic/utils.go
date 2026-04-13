@@ -8,12 +8,89 @@ import (
 	"image/png"
 	"io"
 	"mime/multipart"
+	"path/filepath"
+	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jdeng/goheif"
+	"github.com/pratikluitel/antipratik/models"
 	"github.com/rwcarlsen/goexif/exif"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/webp"
 )
+
+func newID() string  { return uuid.New().String() }
+func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
+
+// requirePositive returns a ValidationError if v is not greater than zero.
+func requirePositive(field string, v int) error {
+	if v <= 0 {
+		return validationErr(fmt.Sprintf("%s must be greater than zero", field))
+	}
+	return nil
+}
+
+// requireNonEmpty returns a ValidationError if the trimmed value is empty.
+func requireNonEmpty(field, value string) error {
+	if strings.TrimSpace(value) == "" {
+		return validationErr(fmt.Sprintf("%s cannot be empty", field))
+	}
+	return nil
+}
+
+// model conversions
+func fileKeysForPost(post models.Post) []string {
+	var keys []string
+	switch p := post.(type) {
+	case models.MusicPost:
+		if p.AudioURL != "" {
+			keys = append(keys, urlToStorageKey(p.AudioURL))
+		}
+		if p.AlbumArt != "" {
+			keys = append(keys, urlToStorageKey(p.AlbumArt))
+		}
+	case models.PhotoPost:
+		for _, img := range p.Images {
+			keys = append(keys, urlToStorageKey(img.URL))
+			if img.ThumbnailSmallURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailSmallURL))
+			}
+			if img.ThumbnailMedURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailMedURL))
+			}
+			if img.ThumbnailLargeURL != nil {
+				keys = append(keys, urlToStorageKey(*img.ThumbnailLargeURL))
+			}
+		}
+	case models.VideoPost:
+		if p.ThumbnailURL != "" {
+			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
+		}
+	case models.LinkPost:
+		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
+			keys = append(keys, urlToStorageKey(*p.ThumbnailURL))
+		}
+	}
+	return keys
+}
+
+// urlToStorageKey converts a serving URL (/files/<id> or /thumbnails/<id>)
+// to a storage key (photos/<id>, music/<id>, or thumbnails/<id>).
+func urlToStorageKey(u string) string {
+	if after, ok := strings.CutPrefix(u, "/thumbnails/"); ok {
+		return "thumbnails/" + after
+	}
+	if after, ok := strings.CutPrefix(u, "/files/"); ok {
+		switch strings.ToLower(filepath.Ext(after)) {
+		case ".mp3", ".wav", ".ogg", ".m4a":
+			return "music/" + after
+		default:
+			return "photos/" + after
+		}
+	}
+	return u
+}
 
 // ── Image helpers ─────────────────────────────────────────────────────────────
 

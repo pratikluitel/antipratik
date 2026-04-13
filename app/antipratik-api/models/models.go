@@ -2,6 +2,8 @@
 // JSON tags use camelCase to match the TypeScript types in the frontend.
 package models
 
+import "mime/multipart"
+
 // Post is an interface satisfied by all content types.
 // The unexported method prevents external implementations.
 type Post interface {
@@ -54,9 +56,9 @@ func (m MusicPost) postType() string { return "music" }
 
 // PhotoImage is a single image within a PhotoPost.
 type PhotoImage struct {
-	URL              string  `json:"url"`
-	Alt              string  `json:"alt"`
-	Caption          *string `json:"caption,omitempty"`
+	URL               string  `json:"url"`
+	Alt               string  `json:"alt"`
+	Caption           *string `json:"caption,omitempty"`
 	ThumbnailTinyURL  *string `json:"thumbnailTinyUrl,omitempty"`
 	ThumbnailSmallURL *string `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string `json:"thumbnailMediumUrl,omitempty"`
@@ -256,4 +258,10 @@ type UpdateExternalLink struct {
 	Description *string `json:"description"`
 	Featured    *bool   `json:"featured"`
 	Category    *string `json:"category"`
+}
+
+// FileInput bundles a multipart file and its header for upload operations.
+type FileInput struct {
+	File   multipart.File
+	Header *multipart.FileHeader
 }

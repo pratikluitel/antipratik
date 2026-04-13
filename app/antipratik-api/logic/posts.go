@@ -3,12 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
-	"net/url"
-	"path/filepath"
-	"strings"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
@@ -61,29 +56,6 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 }
 
 // ── Write methods ─────────────────────────────────────────────────────────────
-
-func newID() string  { return uuid.New().String() }
-func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
-
-// extractDomain parses rawURL and returns the hostname with www. stripped.
-// Returns a ValidationError if the URL is malformed or missing scheme/host.
-func extractDomain(rawURL string) (string, error) {
-	u, err := url.Parse(rawURL)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return "", validationErr("url must be a valid absolute URL (e.g. https://example.com/path)")
-	}
-	host := strings.TrimPrefix(u.Hostname(), "www.")
-	return host, nil
-}
-
-// computeReadingTime returns ceil(wordCount / 200), minimum 1.
-func computeReadingTime(body string) int {
-	words := len(strings.Fields(body))
-	if words == 0 {
-		return 1
-	}
-	return (words + 199) / 200
-}
 
 func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
@@ -178,17 +150,17 @@ func (s *PostService) CreatePhoto(ctx context.Context, preID string, input model
 		}
 	}
 
-	id := preID
+	id, createdAt := preID, nowUTC()
 	if id == "" {
 		id = newID()
 	}
-	createdAt := nowUTC()
 	if err := s.store.CreatePost(ctx, "photo", id, createdAt); err != nil {
 		return models.PhotoPost{}, fmt.Errorf("PostService.CreatePhoto: %w", err)
 	}
 	if err := s.store.CreatePhotoData(ctx, id, input); err != nil {
 		return models.PhotoPost{}, fmt.Errorf("PostService.CreatePhoto data: %w", err)
 	}
+
 	tags := input.Tags
 	if tags == nil {
 		tags = []string{}
@@ -210,17 +182,17 @@ func (s *PostService) CreateVideo(ctx context.Context, preID string, input model
 		return models.VideoPost{}, err
 	}
 
-	id := preID
+	id, createdAt := preID, nowUTC()
 	if id == "" {
 		id = newID()
 	}
-	createdAt := nowUTC()
 	if err := s.store.CreatePost(ctx, "video", id, createdAt); err != nil {
 		return models.VideoPost{}, fmt.Errorf("PostService.CreateVideo: %w", err)
 	}
 	if err := s.store.CreateVideoData(ctx, id, input); err != nil {
 		return models.VideoPost{}, fmt.Errorf("PostService.CreateVideo data: %w", err)
 	}
+
 	tags := input.Tags
 	if tags == nil {
 		tags = []string{}
@@ -249,17 +221,17 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 	}
 	input.Domain = domain
 
-	id := preID
+	id, createdAt := preID, nowUTC()
 	if id == "" {
 		id = newID()
 	}
-	createdAt := nowUTC()
 	if err := s.store.CreatePost(ctx, "link", id, createdAt); err != nil {
 		return models.LinkPost{}, fmt.Errorf("PostService.CreateLinkPost: %w", err)
 	}
 	if err := s.store.CreateLinkPostData(ctx, id, input); err != nil {
 		return models.LinkPost{}, fmt.Errorf("PostService.CreateLinkPost data: %w", err)
 	}
+
 	tags := input.Tags
 	if tags == nil {
 		tags = []string{}
@@ -366,6 +338,7 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 	if err := requireNonEmpty("id", id); err != nil {
 		return models.MusicPost{}, err
 	}
+
 	post, err := s.store.GetPostByID(ctx, id)
 	if err != nil {
 		return models.MusicPost{}, fmt.Errorf("PostService.UpdateMusic: %w", err)
@@ -383,6 +356,7 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 		Title: cur.Title, AudioURL: cur.AudioURL, AlbumArt: cur.AlbumArt,
 		AlbumArtTinyURL: curAlbumArtTiny, Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
 	}
+
 	if input.Title != nil {
 		merged.Title = *input.Title
 	}
@@ -415,6 +389,7 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 	if err := s.store.UpdateMusic(ctx, id, merged); err != nil {
 		return models.MusicPost{}, fmt.Errorf("PostService.UpdateMusic: %w", err)
 	}
+
 	tags := merged.Tags
 	if tags == nil {
 		tags = []string{}
@@ -434,6 +409,7 @@ func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.U
 	if err := requireNonEmpty("id", id); err != nil {
 		return models.PhotoPost{}, err
 	}
+
 	post, err := s.store.GetPostByID(ctx, id)
 	if err != nil {
 		return models.PhotoPost{}, fmt.Errorf("PostService.UpdatePhoto: %w", err)
@@ -454,6 +430,7 @@ func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.U
 	if err := s.store.UpdatePhoto(ctx, id, merged); err != nil {
 		return models.PhotoPost{}, fmt.Errorf("PostService.UpdatePhoto: %w", err)
 	}
+
 	tags := merged.Tags
 	if tags == nil {
 		tags = []string{}
@@ -514,6 +491,7 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 	if err := s.store.UpdateVideo(ctx, id, merged); err != nil {
 		return models.VideoPost{}, fmt.Errorf("PostService.UpdateVideo: %w", err)
 	}
+
 	tags := merged.Tags
 	if tags == nil {
 		tags = []string{}
@@ -546,7 +524,7 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
 		Description: cur.Description, ThumbnailURL: cur.ThumbnailURL,
 		ThumbnailTinyURL: cur.ThumbnailTinyURL,
-		Category: cur.Category, Tags: cur.Tags,
+		Category:         cur.Category, Tags: cur.Tags,
 	}
 	if input.Title != nil {
 		merged.Title = *input.Title
@@ -583,6 +561,7 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 	if tags == nil {
 		tags = []string{}
 	}
+
 	return models.LinkPost{
 		ID: id, Type: "link", CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
@@ -605,56 +584,4 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 		}
 	}
 	return s.store.DeletePost(ctx, id)
-}
-
-func fileKeysForPost(post models.Post) []string {
-	var keys []string
-	switch p := post.(type) {
-	case models.MusicPost:
-		if p.AudioURL != "" {
-			keys = append(keys, urlToStorageKey(p.AudioURL))
-		}
-		if p.AlbumArt != "" {
-			keys = append(keys, urlToStorageKey(p.AlbumArt))
-		}
-	case models.PhotoPost:
-		for _, img := range p.Images {
-			keys = append(keys, urlToStorageKey(img.URL))
-			if img.ThumbnailSmallURL != nil {
-				keys = append(keys, urlToStorageKey(*img.ThumbnailSmallURL))
-			}
-			if img.ThumbnailMedURL != nil {
-				keys = append(keys, urlToStorageKey(*img.ThumbnailMedURL))
-			}
-			if img.ThumbnailLargeURL != nil {
-				keys = append(keys, urlToStorageKey(*img.ThumbnailLargeURL))
-			}
-		}
-	case models.VideoPost:
-		if p.ThumbnailURL != "" {
-			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
-		}
-	case models.LinkPost:
-		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
-			keys = append(keys, urlToStorageKey(*p.ThumbnailURL))
-		}
-	}
-	return keys
-}
-
-// urlToStorageKey converts a serving URL (/files/<id> or /thumbnails/<id>)
-// to a storage key (photos/<id>, music/<id>, or thumbnails/<id>).
-func urlToStorageKey(u string) string {
-	if after, ok := strings.CutPrefix(u, "/thumbnails/"); ok {
-		return "thumbnails/" + after
-	}
-	if after, ok := strings.CutPrefix(u, "/files/"); ok {
-		switch strings.ToLower(filepath.Ext(after)) {
-		case ".mp3", ".wav", ".ogg", ".m4a":
-			return "music/" + after
-		default:
-			return "photos/" + after
-		}
-	}
-	return u
 }

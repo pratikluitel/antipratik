@@ -2,8 +2,6 @@ package logic
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 )
 
 // ValidationError is returned when user input fails validation.
@@ -21,20 +19,4 @@ func validationErr(msg string) error { return &ValidationError{msg: msg} }
 func IsValidationError(err error) bool {
 	var ve *ValidationError
 	return errors.As(err, &ve)
-}
-
-// requireNonEmpty returns a ValidationError if the trimmed value is empty.
-func requireNonEmpty(field, value string) error {
-	if strings.TrimSpace(value) == "" {
-		return validationErr(fmt.Sprintf("%s cannot be empty", field))
-	}
-	return nil
-}
-
-// requirePositive returns a ValidationError if v is not greater than zero.
-func requirePositive(field string, v int) error {
-	if v <= 0 {
-		return validationErr(fmt.Sprintf("%s must be greater than zero", field))
-	}
-	return nil
 }
