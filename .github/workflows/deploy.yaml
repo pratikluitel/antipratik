@@ -1,0 +1,93 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types: [completed]
+    branches: [master, prod]
+
+env:
+  TAG: ${{ github.event.workflow_run.head_branch == 'prod' && 'prod' || 'dev' }}
+
+jobs:
+  deploy-app:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.workflow_run.head_branch == 'prod' && 'prod' || 'dev' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Write secrets to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p /opt/antipratik-${{ env.TAG }}
+            printf 'SERVER_NAME=%s\n'                     '${{ secrets.SERVER_NAME }}'                     >  /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_ADMIN_PASSWORD=%s\n'       '${{ secrets.ANTIPRATIK_ADMIN_PASSWORD }}'       >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ENDPOINT=%s\n'          '${{ secrets.ANTIPRATIK_R2_ENDPOINT }}'          >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_ACCESS_KEY_ID=%s\n'     '${{ secrets.ANTIPRATIK_R2_ACCESS_KEY_ID }}'     >> /opt/antipratik-${{ env.TAG }}/.env
+            printf 'ANTIPRATIK_R2_SECRET_ACCESS_KEY=%s\n' '${{ secrets.ANTIPRATIK_R2_SECRET_ACCESS_KEY }}' >> /opt/antipratik-${{ env.TAG }}/.env
+            chmod 600 /opt/antipratik-${{ env.TAG }}/.env
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          source: >-
+            infrastructure/config/config.${{ env.TAG }}.yaml,
+            infrastructure/compose/docker-compose.${{ env.TAG }}.yml,
+            .github/scripts/deploy.sh
+          target: /tmp/
+          strip_components: 2
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            chmod +x /tmp/deploy.sh
+            GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}" \
+            GHCR_USER="${{ github.repository_owner }}" \
+            /tmp/deploy.sh ${{ env.TAG }}
+
+  deploy-sidequests:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.workflow_run.head_sha }}
+          filters: |
+            sidequests:
+              - 'sidequests/**'
+
+      - name: Publish sidequests to Cloudflare Pages
+        if: steps.filter.outputs.sidequests == 'true'
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: antipratik-sidequests
+          directory: sidequests
+          branch: master

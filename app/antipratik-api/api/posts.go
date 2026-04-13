@@ -146,14 +146,13 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 	}
 	defer audioFile.Close()
 
-	var albumArtInput *logic.FileInput
+	var albumArtInput *models.FileInput
 	if artFile, artHeader, err := r.FormFile("albumArtFile"); err == nil {
 		defer artFile.Close()
-		fi := logic.FileInput{File: artFile, Header: artHeader}
-		albumArtInput = &fi
+		albumArtInput = &models.FileInput{File: artFile, Header: artHeader}
 	}
 
-	audioInput := &logic.FileInput{File: audioFile, Header: audioHeader}
+	audioInput := &models.FileInput{File: audioFile, Header: audioHeader}
 	uploaded, err := h.uploads.UploadMusicFiles(r.Context(), postID, audioInput, albumArtInput)
 	if err != nil {
 		handleLogicError(w, h.log, "CreateMusic upload", err)
@@ -231,7 +230,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 
 	postID := uuid.New().String()
 
-	fileInputs := make([]logic.FileInput, 0, len(fileHeaders))
+	fileInputs := make([]models.FileInput, 0, len(fileHeaders))
 	for _, fh := range fileHeaders {
 		f, err := fh.Open()
 		if err != nil {
@@ -239,7 +238,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer f.Close()
-		fileInputs = append(fileInputs, logic.FileInput{File: f, Header: fh})
+		fileInputs = append(fileInputs, models.FileInput{File: f, Header: fh})
 	}
 
 	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, fileInputs)
@@ -258,8 +257,8 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		}
 		tiny, small, med, large := u.ThumbnailTinyURL, u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
 		images[i] = models.PhotoImage{
-			URL:              u.OriginalURL,
-			Alt:              alt,
+			URL:               u.OriginalURL,
+			Alt:               alt,
 			ThumbnailTinyURL:  &tiny,
 			ThumbnailSmallURL: &small,
 			ThumbnailMedURL:   &med,
@@ -316,7 +315,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
 		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
-			logic.FileInput{File: thumbFile, Header: thumbHeader})
+			models.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
 			handleLogicError(w, h.log, "CreateVideo thumbnail upload", err)
 			return
@@ -397,7 +396,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
 		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
-			logic.FileInput{File: thumbFile, Header: thumbHeader})
+			models.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
 			handleLogicError(w, h.log, "CreateLinkPost thumbnail upload", err)
 			return
