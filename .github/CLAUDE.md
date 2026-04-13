@@ -33,14 +33,15 @@ This file governs how CI/CD works in this repo. Read it before touching any work
 ### Job DAG (`deployment.yaml`)
 
 ```
-sidequest-changes  ──────────────────────────────── deploy-sidequests
+sidequest-changes  ──────────────────────────────── deploy-sidequests (master only)
        │
-       ├── build-api   (if app/antipratik-api/** changed) ──┐
-       ├── build-ui    (if app/antipratik-ui/** changed)  ──┤── deploy-app (always)
-       └── build-nginx (always)                           ──┘
+       ├── build-api   (if app/antipratik-api/** changed, any branch) ──┐
+       ├── build-ui    (if app/antipratik-ui/** changed, any branch)  ──┤── deploy-app (master/prod only)
+       └── build-nginx (always, any branch)                           ──┘
 ```
 
-- **`deploy-app` always runs** on push to `master`/`prod`, even if all build jobs were skipped. It re-deploys whatever images are current in GHCR, which picks up config/compose changes too.
+- **Build jobs run on every push to any branch** when relevant paths change — on feature branches they build only (no push) to verify the image compiles. Images are pushed to GHCR only on `master` (`:dev`) and `prod` (`:prod`).
+- **`deploy-app` only runs on `master`/`prod`**, even if all build jobs were skipped. It re-deploys whatever images are current in GHCR, which picks up config/compose changes too.
 - **`deploy-sidequests`** only runs when `sidequests/**` changed and the branch is `master`.
 - Build jobs for API and UI are path-filtered to avoid rebuilding unchanged services.
 - Build jobs are fully parallel — never collapse them back into a single job.

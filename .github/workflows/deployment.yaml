@@ -2,7 +2,6 @@ name: Deploy
 
 on:
   push:
-    branches: [master, prod]
 
 env:
   REGISTRY: ghcr.io
@@ -41,7 +40,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -52,7 +52,7 @@ jobs:
         with:
           context: .
           file: ./docker/Dockerfile.api
-          push: true
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
           tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
 
   build-ui:
@@ -63,18 +63,19 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@v3
-      - name: Build & push UI
+      - name: Build UI
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./docker/Dockerfile.ui
-          push: true
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
           tags: ${{ env.UI_IMAGE }}:${{ env.TAG }}
 
   build-nginx:
@@ -83,23 +84,24 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - if: github.ref_name == 'master' || github.ref_name == 'prod'
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-buildx-action@v3
-      - name: Build & push Nginx
+      - name: Build Nginx
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./docker/Dockerfile.nginx
-          push: true
+          push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
           tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
 
   deploy-app:
     needs: [build-api, build-ui, build-nginx]
-    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    if: always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && (github.ref_name == 'master' || github.ref_name == 'prod')
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'prod' && 'prod' || 'dev' }}
 
