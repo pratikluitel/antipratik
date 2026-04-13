@@ -167,11 +167,12 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := models.CreateMusicPost{
-		Title:    r.FormValue("title"),
-		AudioURL: uploaded.AudioURL,
-		AlbumArt: uploaded.AlbumArtURL,
-		Duration: duration,
-		Tags:     r.Form["tags"],
+		Title:           r.FormValue("title"),
+		AudioURL:        uploaded.AudioURL,
+		AlbumArt:        uploaded.AlbumArtURL,
+		AlbumArtTinyURL: uploaded.AlbumArtTinyURL,
+		Duration:        duration,
+		Tags:            r.Form["tags"],
 	}
 	if album := r.FormValue("album"); album != "" {
 		input.Album = &album
@@ -255,10 +256,11 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		if i < len(alts) {
 			alt = alts[i]
 		}
-		small, med, large := u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
+		tiny, small, med, large := u.ThumbnailTinyURL, u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
 		images[i] = models.PhotoImage{
-			URL:               u.OriginalURL,
-			Alt:               alt,
+			URL:              u.OriginalURL,
+			Alt:              alt,
+			ThumbnailTinyURL:  &tiny,
 			ThumbnailSmallURL: &small,
 			ThumbnailMedURL:   &med,
 			ThumbnailLargeURL: &large,
@@ -310,25 +312,27 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	postID := uuid.New().String()
 
-	thumbnailURL := ""
+	var thumbnailURL, thumbnailTinyURL string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
-		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			logic.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
 			handleLogicError(w, h.log, "CreateVideo thumbnail upload", err)
 			return
 		}
-		thumbnailURL = url
+		thumbnailURL = result.URL
+		thumbnailTinyURL = result.TinyURL
 	}
 
 	duration, _ := strconv.Atoi(r.FormValue("duration"))
 	input := models.CreateVideoPost{
-		Title:        r.FormValue("title"),
-		VideoURL:     r.FormValue("videoURL"),
-		ThumbnailURL: thumbnailURL,
-		Duration:     duration,
-		Tags:         r.Form["tags"],
+		Title:            r.FormValue("title"),
+		VideoURL:         r.FormValue("videoURL"),
+		ThumbnailURL:     thumbnailURL,
+		ThumbnailTinyURL: thumbnailTinyURL,
+		Duration:         duration,
+		Tags:             r.Form["tags"],
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl
@@ -385,23 +389,25 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 
 	postID := uuid.New().String()
 
-	var thumbnailURL *string
+	var thumbnailURL, thumbnailTinyURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
-		url, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			logic.FileInput{File: thumbFile, Header: thumbHeader})
 		if err != nil {
 			handleLogicError(w, h.log, "CreateLinkPost thumbnail upload", err)
 			return
 		}
-		thumbnailURL = &url
+		thumbnailURL = &result.URL
+		thumbnailTinyURL = &result.TinyURL
 	}
 
 	input := models.CreateLinkPost{
-		Title:        r.FormValue("title"),
-		URL:          r.FormValue("url"),
-		ThumbnailURL: thumbnailURL,
-		Tags:         r.Form["tags"],
+		Title:            r.FormValue("title"),
+		URL:              r.FormValue("url"),
+		ThumbnailURL:     thumbnailURL,
+		ThumbnailTinyURL: thumbnailTinyURL,
+		Tags:             r.Form["tags"],
 	}
 	if desc := r.FormValue("description"); desc != "" {
 		input.Description = &desc

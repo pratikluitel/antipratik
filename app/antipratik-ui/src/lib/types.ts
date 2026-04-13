@@ -38,6 +38,7 @@ export interface MusicPost extends BasePost {
   type: 'music';
   title: string;
   albumArt: string; // URL
+  albumArtTinyUrl?: string; // 20px wide — LQIP blur placeholder
   audioUrl: string;
   duration: number; // seconds
   album?: string;
@@ -47,6 +48,7 @@ export interface PhotoImage {
   url: string;                // original — served via GET /files/{fileId}
   alt: string;
   caption?: string;
+  thumbnailTinyUrl?: string;   // 20px wide — used as LQIP blur placeholder
   thumbnailSmallUrl?: string;  // 300px wide — served via GET /thumbnails/{id}-small.ext
   thumbnailMediumUrl?: string; // 600px wide
   thumbnailLargeUrl?: string;  // 1200px wide
@@ -62,6 +64,7 @@ export interface VideoPost extends BasePost {
   type: 'video';
   title: string;
   thumbnailUrl: string;
+  thumbnailTinyUrl?: string; // 20px wide — LQIP blur placeholder
   videoUrl: string;
   duration: number; // seconds
   playlist?: string;
@@ -74,6 +77,7 @@ export interface LinkPost extends BasePost {
   domain: string;
   description?: string;
   thumbnailUrl?: string;
+  thumbnailTinyUrl?: string; // 20px wide — LQIP blur placeholder
   category?: 'music' | 'writing' | 'video' | 'social';
 }
 

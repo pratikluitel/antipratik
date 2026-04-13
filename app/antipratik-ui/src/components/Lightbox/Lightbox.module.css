@@ -64,6 +64,21 @@
   display: block;
 }
 
+.imagePlaceholder {
+  filter: blur(12px);
+  transform: scale(1.03);
+  position: absolute;
+}
+
+.imageHidden {
+  opacity: 0;
+}
+
+.imageVisible {
+  opacity: 1;
+  transition: opacity var(--motion-default);
+}
+
 .caption {
   margin-top: var(--space-2);
   font-family: var(--font-sans);
