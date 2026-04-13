@@ -8,7 +8,7 @@ import (
 )
 
 // RegisterRoutes registers all HTTP routes on mux.
-func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, authH *AuthHandlerImpl, authSvc logic.AuthLogic, fileH *FileServingHandler, openAPIPath, swaggerPath string) {
+func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, authH *AuthHandlerImpl, authSvc logic.AuthLogic, fileH *FileServingHandler, newsletterH *NewsletterHandlerImpl, openAPIPath, swaggerPath string) {
 	// Public file serving routes
 	mux.HandleFunc("GET /files/{fileId}", fileH.ServeFile)
 	mux.HandleFunc("GET /thumbnails/{thumbnailId}", fileH.ServeThumbnail)
@@ -26,6 +26,9 @@ func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, au
 
 	// Auth
 	mux.HandleFunc("POST /api/auth/login", authH.Login)
+
+	// Newsletter
+	mux.HandleFunc("POST /api/subscribe", newsletterH.Subscribe)
 
 	// OpenAPI spec + Swagger UI
 	mux.HandleFunc("GET /api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {

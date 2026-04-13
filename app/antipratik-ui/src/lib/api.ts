@@ -408,3 +408,15 @@ export async function deleteExternalLink(id: string, token: string): Promise<voi
   });
   await throwOnError(response, 'deleteExternalLink');
 }
+
+export async function subscribeNewsletter(email: string): Promise<void> {
+  const res = await fetch(`${getFetchBase()}/api/subscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as { error?: string }).error ?? 'subscription failed');
+  }
+}
