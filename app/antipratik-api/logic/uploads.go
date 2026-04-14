@@ -7,10 +7,15 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
+
+// maxConcurrentUploads caps the number of photo images processed in parallel
+// to avoid overwhelming the file store or exhausting memory on the server.
+const maxConcurrentUploads = 4
 
 // PhotoImageResult holds the URL fields for a single uploaded photo image.
 type PhotoImageResult struct {
@@ -73,7 +78,17 @@ func storageExt(ext string) string {
 	return ext
 }
 
+// photoImageWork is the result (or error) for a single image in a concurrent upload batch.
+type photoImageWork struct {
+	index  int
+	result PhotoImageResult
+	err    error
+}
+
 // UploadPhotoFiles implements UploadLogic.
+// Images are processed concurrently up to maxConcurrentUploads at a time so
+// that large photo batches don't serialize unnecessarily, while avoiding
+// unbounded goroutine or memory growth.
 func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, files []models.FileInput) ([]PhotoImageResult, error) {
 	if err := requireNonEmpty("postId", postID); err != nil {
 		return nil, err
@@ -82,63 +97,91 @@ func (s *UploadService) UploadPhotoFiles(ctx context.Context, postID string, fil
 		return nil, validationErr("at least one image file is required")
 	}
 
-	results := make([]PhotoImageResult, 0, len(files))
+	results := make([]PhotoImageResult, len(files))
+	sem := make(chan struct{}, maxConcurrentUploads)
+	work := make(chan photoImageWork, len(files))
+
+	var wg sync.WaitGroup
 	for i, fi := range files {
-		ext := strings.ToLower(filepath.Ext(fi.Header.Filename))
-		if !allowedPhotoExts[ext] {
-			return nil, validationErr(fmt.Sprintf("images[%d]: file must be one of jpg, jpeg, png, webp — got %q", i, ext))
-		}
+		wg.Add(1)
+		go func(i int, fi models.FileInput) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			result, err := s.uploadOnePhoto(ctx, postID, i, fi)
+			work <- photoImageWork{index: i, result: result, err: err}
+		}(i, fi)
+	}
 
-		src, err := decodeImage(fi.File, ext)
-		if err != nil {
-			return nil, validationErr(fmt.Sprintf("images[%d]: could not decode image: %v", i, err))
-		}
+	go func() {
+		wg.Wait()
+		close(work)
+	}()
 
-		sExt := storageExt(ext)
-		ct := contentTypeForExt(sExt)
-		fileID := fmt.Sprintf("%s-%d%s", postID, i, sExt)
-		origKey := "photos/" + fileID
-
-		origBuf, err := encodeImage(src, ext)
-		if err != nil {
-			return nil, fmt.Errorf("UploadPhotoFiles encode original[%d]: %w", i, err)
+	for w := range work {
+		if w.err != nil {
+			return nil, w.err
 		}
-		if err := s.files.Put(ctx, origKey, bytes.NewReader(origBuf), ct); err != nil {
-			return nil, fmt.Errorf("UploadPhotoFiles store original[%d]: %w", i, err)
-		}
-
-		sizes := []struct {
-			name     string
-			maxWidth int
-		}{
-			{"tiny", 20},
-			{"small", 300},
-			{"medium", 600},
-			{"large", 1200},
-		}
-		thumbURLs := make([]string, len(sizes))
-		for j, sz := range sizes {
-			thumb := resizeImage(src, sz.maxWidth)
-			buf, err := encodeImage(thumb, ext)
-			if err != nil {
-				return nil, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
-			}
-			thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, sExt)
-			if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
-				return nil, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
-			}
-			thumbURLs[j] = "/thumbnails/" + thumbID
-		}
-
-		results = append(results, PhotoImageResult{
-			OriginalURL:       "/files/" + fileID,
-			ThumbnailTinyURL:  thumbURLs[0],
-			ThumbnailSmallURL: thumbURLs[1],
-			ThumbnailMedURL:   thumbURLs[2],
-			ThumbnailLargeURL: thumbURLs[3],
-		})
+		results[w.index] = w.result
 	}
 	return results, nil
+}
+
+var thumbnailSizes = []struct {
+	name     string
+	maxWidth int
+}{
+	{"tiny", 20},
+	{"small", 300},
+	{"medium", 600},
+	{"large", 1200},
+}
+
+// uploadOnePhoto encodes, resizes, and stores a single photo image and its thumbnails.
+func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int, fi models.FileInput) (PhotoImageResult, error) {
+	ext := strings.ToLower(filepath.Ext(fi.Header.Filename))
+	if !allowedPhotoExts[ext] {
+		return PhotoImageResult{}, validationErr(fmt.Sprintf("images[%d]: file must be one of jpg, jpeg, png, webp — got %q", i, ext))
+	}
+
+	src, err := decodeImage(fi.File, ext)
+	if err != nil {
+		return PhotoImageResult{}, validationErr(fmt.Sprintf("images[%d]: could not decode image: %v", i, err))
+	}
+
+	sExt := storageExt(ext)
+	ct := contentTypeForExt(sExt)
+	fileID := fmt.Sprintf("%s-%d%s", postID, i, sExt)
+
+	origBuf, err := encodeImage(src, ext)
+	if err != nil {
+		return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles encode original[%d]: %w", i, err)
+	}
+	if err := s.files.Put(ctx, "photos/"+fileID, bytes.NewReader(origBuf), ct); err != nil {
+		return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles store original[%d]: %w", i, err)
+	}
+
+	thumbURLs := make([]string, len(thumbnailSizes))
+	for j, sz := range thumbnailSizes {
+		thumb := resizeImage(src, sz.maxWidth)
+		buf, err := encodeImage(thumb, ext)
+		if err != nil {
+			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
+		}
+		thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, sExt)
+		if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
+			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
+		}
+		thumbURLs[j] = "/thumbnails/" + thumbID
+	}
+
+	return PhotoImageResult{
+		OriginalURL:       "/files/" + fileID,
+		ThumbnailTinyURL:  thumbURLs[0],
+		ThumbnailSmallURL: thumbURLs[1],
+		ThumbnailMedURL:   thumbURLs[2],
+		ThumbnailLargeURL: thumbURLs[3],
+	}, nil
 }
 
 // UploadMusicFiles implements UploadLogic.

@@ -578,10 +578,26 @@ func (s *PostService) DeletePost(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	for _, key := range fileKeysForPost(post) {
-		if err := s.files.Delete(ctx, key); err != nil {
-			s.log.Error("DeletePost: failed to delete file", "key", key, "err", err)
-		}
+
+	// Delete the database record first so the post is immediately gone for readers.
+	// File cleanup runs in the background — errors are logged but do not affect the
+	// response, since orphaned files are recoverable but a partial delete is not.
+	if err := s.store.DeletePost(ctx, id); err != nil {
+		return err
 	}
-	return s.store.DeletePost(ctx, id)
+
+	keys := fileKeysForPost(post)
+	if len(keys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range keys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("DeletePost: failed to delete file", "key", key, "err", err)
+				}
+			}
+		}()
+	}
+
+	return nil
 }
