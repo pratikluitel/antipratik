@@ -1,8 +1,8 @@
-// Package store defines the database interfaces and their SQLite implementations.
 package store
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/pratikluitel/antipratik/models"
@@ -74,11 +74,15 @@ type SettingsStore interface {
 	GetOrCreateJWTSecret(ctx context.Context) (string, error)
 }
 
-// User represents an authenticated user.
-type User struct {
-	ID             string
-	Username       string
-	PasswordHash   string
-	CurrentToken   *string
-	TokenExpiresAt *time.Time
+// FileStore is the interface for storing and retrieving uploaded files.
+// All keys are slash-separated paths, e.g. "photos/abc.jpg" or "thumbnails/abc-small.jpg".
+type FileStore interface {
+	// Put stores the content from r under key with the given MIME content type.
+	Put(ctx context.Context, key string, r io.Reader, contentType string) error
+	// Get retrieves the content stored at key.
+	// Returns a seekable body (caller must close), the content type, and any error.
+	// The returned body implements io.ReadSeekCloser so callers can serve Range requests.
+	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
+	// Delete removes the file stored at key. It is not an error if the key does not exist.
+	Delete(ctx context.Context, key string) error
 }

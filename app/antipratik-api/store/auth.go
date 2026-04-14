@@ -15,6 +15,15 @@ type SQLiteUserStore struct {
 	db *sql.DB
 }
 
+// User represents an authenticated user.
+type User struct {
+	ID             string
+	Username       string
+	PasswordHash   string
+	CurrentToken   *string
+	TokenExpiresAt *time.Time
+}
+
 // NewUserStore creates a new SQLiteUserStore backed by db.
 func NewUserStore(db *sql.DB) *SQLiteUserStore {
 	return &SQLiteUserStore{db: db}
