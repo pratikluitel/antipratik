@@ -61,3 +61,13 @@ type AuthLogic interface {
 	Login(ctx context.Context, username, password string) (string, error)
 	ValidateToken(ctx context.Context, token string) error
 }
+
+// SetupLogic defines application bootstrapping operations that run at startup.
+// It ensures main.go never calls the store layer directly.
+type SetupLogic interface {
+	// UpsertAdminUser creates or updates the admin user with the given password.
+	UpsertAdminUser(ctx context.Context, password string) error
+	// GetOrCreateJWTSecret returns the persisted JWT signing secret,
+	// generating and storing a new one if none exists yet.
+	GetOrCreateJWTSecret(ctx context.Context) (string, error)
+}

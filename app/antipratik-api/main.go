@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/pratikluitel/antipratik/api"
 	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/config"
+	"github.com/pratikluitel/antipratik/db"
 	"github.com/pratikluitel/antipratik/logic"
 	"github.com/pratikluitel/antipratik/store"
 )
@@ -23,20 +25,14 @@ func main() {
 
 	logger := logging.New(cfg.Logging.Level)
 
-	db, err := store.Open(cfg.DB.Path)
+	sqlDB, err := db.Open(cfg.DB.Path)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
-	defer db.Close()
+	defer sqlDB.Close()
 
-	if err := store.RunMigrations(db); err != nil {
+	if err := db.RunMigrations(sqlDB); err != nil {
 		log.Fatalf("run migrations: %v", err)
-	}
-
-	if cfg.AdminPassword != "" {
-		if err := store.UpsertAdminUser(db, cfg.AdminPassword); err != nil {
-			log.Fatalf("upsert admin user: %v", err)
-		}
 	}
 
 	fileStore, err := store.NewFileStore(cfg.Storage)
@@ -44,12 +40,23 @@ func main() {
 		log.Fatalf("init file store: %v", err)
 	}
 
-	postStore := store.NewPostStore(db)
-	linkStore := store.NewLinkStore(db)
-	userStore := store.NewUserStore(db)
-	newsletterStore := store.NewNewsletterStore(db)
+	postStore := store.NewPostStore(sqlDB)
+	linkStore := store.NewLinkStore(sqlDB)
+	userStore := store.NewUserStore(sqlDB)
+	newsletterStore := store.NewNewsletterStore(sqlDB)
+	settingsStore := store.NewSettingsStore(sqlDB)
 
-	jwtSecret, err := store.GetOrCreateJWTSecret(db)
+	setupSvc := logic.NewSetupService(userStore, settingsStore)
+
+	ctx := context.Background()
+
+	if cfg.AdminPassword != "" {
+		if err := setupSvc.UpsertAdminUser(ctx, cfg.AdminPassword); err != nil {
+			log.Fatalf("upsert admin user: %v", err)
+		}
+	}
+
+	jwtSecret, err := setupSvc.GetOrCreateJWTSecret(ctx)
 	if err != nil {
 		log.Fatalf("jwt secret: %v", err)
 	}

@@ -41,9 +41,9 @@ func (s *SQLiteUserStore) UpsertToken(ctx context.Context, username string, toke
 
 // UpsertAdminUser ensures an admin user exists with the given password.
 // Creates the user if absent; updates the password hash if it has changed.
-func UpsertAdminUser(db *sql.DB, password string) error {
+func (s *SQLiteUserStore) UpsertAdminUser(ctx context.Context, password string) error {
 	var id, hash string
-	err := db.QueryRow(`SELECT id, password_hash FROM users WHERE username = ?`, "admin").Scan(&id, &hash)
+	err := s.db.QueryRowContext(ctx, `SELECT id, password_hash FROM users WHERE username = ?`, "admin").Scan(&id, &hash)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("upsert admin: %w", err)
 	}
@@ -53,7 +53,7 @@ func UpsertAdminUser(db *sql.DB, password string) error {
 		if err != nil {
 			return fmt.Errorf("hash admin password: %w", err)
 		}
-		_, err = db.Exec(`INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)`,
+		_, err = s.db.ExecContext(ctx, `INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)`,
 			uuid.New().String(), "admin", string(newHash))
 		return err
 	}
@@ -66,7 +66,7 @@ func UpsertAdminUser(db *sql.DB, password string) error {
 	if err != nil {
 		return fmt.Errorf("hash admin password: %w", err)
 	}
-	_, err = db.Exec(`UPDATE users SET password_hash = ? WHERE username = ?`, string(newHash), "admin")
+	_, err = s.db.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE username = ?`, string(newHash), "admin")
 	return err
 }
 
