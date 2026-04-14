@@ -191,8 +191,8 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 **Key Components:**
 - `PostHandler`, `LinkHandler`, `AuthHandler`, `UploadHandler` interfaces
 - `CORSMiddleware` for cross-origin requests
-- `JWTAuthMiddleware` for authentication
-- Route registration in `routes.go`
+- `JWTAuthMiddleware` and `RateLimitMiddleware` in `api/middleware.go`
+- Route registration in top-level `routes.go` (package main) — **not** inside `api/`
 
 **Never Does:** Business logic, database queries, complex validation.
 

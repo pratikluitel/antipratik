@@ -1,25 +1,34 @@
-package api
+package main
 
 import (
 	"net/http"
-	"os"
 	"time"
 
 	"golang.org/x/time/rate"
 
+	"github.com/pratikluitel/antipratik/api"
 	"github.com/pratikluitel/antipratik/logic"
 )
 
 // RegisterRoutes registers all HTTP routes on mux.
-func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, authH *AuthHandlerImpl, authSvc logic.AuthLogic, fileH *FileServingHandler, newsletterH *NewsletterHandlerImpl, openAPIPath, swaggerPath string) {
-	// Public file serving routes
+// Middleware (CORS, JWT auth, rate limiting) is applied per-route here;
+// it lives in api/middleware.go and is imported rather than defined alongside routes.
+func RegisterRoutes(
+	mux *http.ServeMux,
+	postH api.PostHandler,
+	linkH api.LinkHandler,
+	authH *api.AuthHandlerImpl,
+	authSvc logic.AuthLogic,
+	fileH *api.FileServingHandler,
+	newsletterH *api.NewsletterHandlerImpl,
+	openAPIPath, swaggerPath string,
+) {
+	// Public file serving
 	mux.HandleFunc("GET /files/{fileId}", fileH.ServeFile)
 	mux.HandleFunc("GET /thumbnails/{thumbnailId}", fileH.ServeThumbnail)
 
 	// Health check
-	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, map[string]string{"status": "OK"})
-	})
+	mux.HandleFunc("GET /api/health", api.HealthHandler)
 
 	// Public read routes
 	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
@@ -31,31 +40,15 @@ func RegisterRoutes(mux *http.ServeMux, postH PostHandler, linkH LinkHandler, au
 	mux.HandleFunc("POST /api/auth/login", authH.Login)
 
 	// Newsletter — 3 requests/hour per IP, burst of 3
-	subscribeRL := RateLimitMiddleware(rate.Every(time.Hour/3), 3, time.Hour)
+	subscribeRL := api.RateLimitMiddleware(rate.Every(time.Hour/3), 3, time.Hour)
 	mux.Handle("POST /api/subscribe", subscribeRL(http.HandlerFunc(newsletterH.Subscribe)))
 
 	// OpenAPI spec + Swagger UI
-	mux.HandleFunc("GET /api/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
-		data, err := os.ReadFile(openAPIPath)
-		if err != nil {
-			http.Error(w, "not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "application/yaml")
-		w.Write(data)
-	})
-	mux.HandleFunc("GET /api/index.html", func(w http.ResponseWriter, r *http.Request) {
-		data, err := os.ReadFile(swaggerPath)
-		if err != nil {
-			http.Error(w, "not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html")
-		w.Write(data)
-	})
+	mux.HandleFunc("GET /api/openapi.yaml", api.OpenAPIHandler(openAPIPath))
+	mux.HandleFunc("GET /api/index.html", api.SwaggerHandler(swaggerPath))
 
 	// Protected write routes
-	protect := JWTAuthMiddleware(authSvc)
+	protect := api.JWTAuthMiddleware(authSvc)
 	mux.Handle("POST /api/posts/essay", protect(http.HandlerFunc(postH.CreateEssay)))
 	mux.Handle("POST /api/posts/short", protect(http.HandlerFunc(postH.CreateShort)))
 	mux.Handle("POST /api/posts/music", protect(http.HandlerFunc(postH.CreateMusic)))
