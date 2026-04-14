@@ -63,6 +63,11 @@ The API follows a **3-Layer Clean Architecture** with dependency injection:
 │  Store Layer    │  ← Data persistence, SQL queries
 │ (store/*.go)    │
 └─────────────────┘
+
+┌─────────────────┐
+│   DB Package    │  ← SQLite connection + schema migrations (infrastructure only)
+│   (db/*.go)     │     Called from main.go; not a business-logic store
+└─────────────────┘
 ```
 
 Each layer has an **interface** and a **concrete implementation** created via factory functions. Dependencies flow downward through constructor injection.
@@ -158,9 +163,16 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 
 ### Rule 11 — Migration-Based Schema Evolution
 **Database schema changes via SQL migrations.**
-- Versioned migration files in `store/migrations/`
-- Run migrations on startup with `store.RunMigrations()`
+- Versioned migration files in `db/migrations/`
+- Run migrations on startup with `db.RunMigrations()`
 - Ensures consistent schema across environments
+
+### Rule 12 — Store Is Never Called Directly from `main`
+**`main.go` must never import or call the `store` layer for business operations.**
+- Wrong: `store.UpsertAdminUser(db, password)` or `store.GetOrCreateJWTSecret(db)` in `main.go`
+- Right: Delegate to a `logic.SetupService` which wraps the relevant store interfaces
+- The `db/` package (Open, RunMigrations) is infrastructure and may be called from `main.go` directly — it is not a business logic store.
+- Any future bootstrapping operations (seeding data, secrets rotation) must go through a logic-layer service.
 
 ---
 

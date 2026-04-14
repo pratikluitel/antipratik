@@ -1,10 +1,11 @@
-package store
+// Package db handles database connection and schema migrations.
+// It is responsible only for opening the SQLite connection and applying
+// migration files — data persistence belongs to the store layer.
+package db
 
 import (
-	"crypto/rand"
 	"database/sql"
 	"embed"
-	"encoding/hex"
 	"fmt"
 	"io/fs"
 	"os"
@@ -37,7 +38,7 @@ func Open(path string) (*sql.DB, error) {
 	return db, nil
 }
 
-// RunMigrations applies any unapplied SQL migration files from store/migrations/
+// RunMigrations applies any unapplied SQL migration files from db/migrations/
 // in filename order. Applied migrations are recorded in the schema_migrations table.
 func RunMigrations(db *sql.DB) error {
 	if err := ensureMigrationsTable(db); err != nil {
@@ -49,7 +50,6 @@ func RunMigrations(db *sql.DB) error {
 		return fmt.Errorf("read migrations dir: %w", err)
 	}
 
-	// Collect and sort .sql files by name (001_, 002_, …).
 	var files []string
 	for _, e := range entries {
 		if !e.IsDir() && strings.HasSuffix(e.Name(), ".sql") {
@@ -112,28 +112,4 @@ func recordMigration(db *sql.DB, name string) error {
 		return fmt.Errorf("record migration %s: %w", name, err)
 	}
 	return nil
-}
-
-// GetOrCreateJWTSecret returns the persisted JWT secret from the settings table,
-// generating and storing a new one if none exists yet.
-func GetOrCreateJWTSecret(db *sql.DB) (string, error) {
-	var secret string
-	err := db.QueryRow(`SELECT value FROM settings WHERE key='jwt_secret'`).Scan(&secret)
-	if err == nil {
-		return secret, nil
-	}
-	if err != sql.ErrNoRows {
-		return "", fmt.Errorf("read jwt_secret: %w", err)
-	}
-
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		return "", fmt.Errorf("generate jwt_secret: %w", err)
-	}
-	secret = hex.EncodeToString(b)
-
-	if _, err := db.Exec(`INSERT INTO settings (key, value) VALUES ('jwt_secret', ?)`, secret); err != nil {
-		return "", fmt.Errorf("store jwt_secret: %w", err)
-	}
-	return secret, nil
 }
