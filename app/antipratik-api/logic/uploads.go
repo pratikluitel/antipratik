@@ -17,6 +17,23 @@ import (
 // to avoid overwhelming the file store or exhausting memory on the server.
 const maxConcurrentUploads = 4
 
+// Thumbnail width constants — change these to adjust all generated variants.
+const (
+	thumbWidthTiny   = 20
+	thumbWidthSmall  = 300
+	thumbWidthMedium = 600
+	thumbWidthLarge  = 1200
+)
+
+// Storage key prefixes and URL prefixes — never hardcode these inline.
+const (
+	storePrefixPhotos     = "photos/"
+	storePrefixMusic      = "music/"
+	storePrefixThumbnails = "thumbnails/"
+	urlPrefixFiles        = "/files/"
+	urlPrefixThumbnails   = "/thumbnails/"
+)
+
 // PhotoImageResult holds the URL fields for a single uploaded photo image.
 type PhotoImageResult struct {
 	OriginalURL       string
@@ -131,10 +148,10 @@ var thumbnailSizes = []struct {
 	name     string
 	maxWidth int
 }{
-	{"tiny", 20},
-	{"small", 300},
-	{"medium", 600},
-	{"large", 1200},
+	{"tiny", thumbWidthTiny},
+	{"small", thumbWidthSmall},
+	{"medium", thumbWidthMedium},
+	{"large", thumbWidthLarge},
 }
 
 // uploadOnePhoto encodes, resizes, and stores a single photo image and its thumbnails.
@@ -157,7 +174,7 @@ func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int
 	if err != nil {
 		return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles encode original[%d]: %w", i, err)
 	}
-	if err := s.files.Put(ctx, "photos/"+fileID, bytes.NewReader(origBuf), ct); err != nil {
+	if err := s.files.Put(ctx, storePrefixPhotos+fileID, bytes.NewReader(origBuf), ct); err != nil {
 		return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles store original[%d]: %w", i, err)
 	}
 
@@ -169,19 +186,53 @@ func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int
 			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
 		}
 		thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, sExt)
-		if err := s.files.Put(ctx, "thumbnails/"+thumbID, bytes.NewReader(buf), ct); err != nil {
+		if err := s.files.Put(ctx, storePrefixThumbnails+thumbID, bytes.NewReader(buf), ct); err != nil {
 			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
 		}
-		thumbURLs[j] = "/thumbnails/" + thumbID
+		thumbURLs[j] = urlPrefixThumbnails + thumbID
 	}
 
 	return PhotoImageResult{
-		OriginalURL:       "/files/" + fileID,
+		OriginalURL:       urlPrefixFiles + fileID,
 		ThumbnailTinyURL:  thumbURLs[0],
 		ThumbnailSmallURL: thumbURLs[1],
 		ThumbnailMedURL:   thumbURLs[2],
 		ThumbnailLargeURL: thumbURLs[3],
 	}, nil
+}
+
+// storeImageWithTiny decodes, encodes, and stores an image at photos/<fileID>
+// and a 20px-wide tiny variant at thumbnails/<fileID>-tiny<ext>.
+// It returns the /files/ and /thumbnails/ URLs for both.
+func (s *UploadService) storeImageWithTiny(ctx context.Context, fileID string, file models.FileInput, ext string) (photoURL, tinyURL string, err error) {
+	sExt := storageExt(ext)
+	ct := contentTypeForExt(sExt)
+	storeID := fileID + sExt
+
+	src, err := decodeImage(file.File, ext)
+	if err != nil {
+		return "", "", validationErr(fmt.Sprintf("%s: could not decode image: %v", fileID, err))
+	}
+
+	buf, err := encodeImage(src, ext)
+	if err != nil {
+		return "", "", fmt.Errorf("storeImageWithTiny encode %s: %w", fileID, err)
+	}
+	if err := s.files.Put(ctx, storePrefixPhotos+storeID, bytes.NewReader(buf), ct); err != nil {
+		return "", "", fmt.Errorf("storeImageWithTiny store %s: %w", fileID, err)
+	}
+
+	tiny := resizeImage(src, thumbWidthTiny)
+	tinyBuf, err := encodeImage(tiny, ext)
+	if err != nil {
+		return "", "", fmt.Errorf("storeImageWithTiny encode tiny %s: %w", fileID, err)
+	}
+	tinyStoreID := fileID + "-tiny" + sExt
+	if err := s.files.Put(ctx, storePrefixThumbnails+tinyStoreID, bytes.NewReader(tinyBuf), ct); err != nil {
+		return "", "", fmt.Errorf("storeImageWithTiny store tiny %s: %w", fileID, err)
+	}
+
+	return urlPrefixFiles + storeID, urlPrefixThumbnails + tinyStoreID, nil
 }
 
 // UploadMusicFiles implements UploadLogic.
@@ -199,10 +250,10 @@ func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, aud
 			return MusicFilesResult{}, validationErr(fmt.Sprintf("audioFile must be one of mp3, wav, ogg, m4a — got %q", audioExt))
 		}
 		audioFileID := postID + audioExt
-		if err := s.files.Put(ctx, "music/"+audioFileID, audioFile.File, contentTypeForExt(audioExt)); err != nil {
+		if err := s.files.Put(ctx, storePrefixMusic+audioFileID, audioFile.File, contentTypeForExt(audioExt)); err != nil {
 			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store audio: %w", err)
 		}
-		result.AudioURL = "/files/" + audioFileID
+		result.AudioURL = urlPrefixFiles + audioFileID
 	}
 
 	// Upload album art (optional)
@@ -211,34 +262,12 @@ func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, aud
 		if !allowedPhotoExts[artExt] {
 			return MusicFilesResult{}, validationErr(fmt.Sprintf("albumArtFile must be one of jpg, jpeg, png, webp, heic, heif — got %q", artExt))
 		}
-		artSExt := storageExt(artExt)
-		artFileID := postID + "-albumart" + artSExt
-		artKey := "photos/" + artFileID
-		artCT := contentTypeForExt(artSExt)
-
-		src, err := decodeImage(albumArtFile.File, artExt)
+		artURL, artTinyURL, err := s.storeImageWithTiny(ctx, postID+"-albumart", *albumArtFile, artExt)
 		if err != nil {
-			return MusicFilesResult{}, validationErr(fmt.Sprintf("albumArtFile: could not decode: %v", err))
+			return MusicFilesResult{}, err
 		}
-		buf, err := encodeImage(src, artExt)
-		if err != nil {
-			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles encode album art: %w", err)
-		}
-		if err := s.files.Put(ctx, artKey, bytes.NewReader(buf), artCT); err != nil {
-			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store album art: %w", err)
-		}
-		result.AlbumArtURL = "/files/" + artFileID
-
-		tiny := resizeImage(src, 20)
-		tinyBuf, err := encodeImage(tiny, artExt)
-		if err != nil {
-			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles encode album art tiny: %w", err)
-		}
-		tinyID := postID + "-albumart-tiny" + artSExt
-		if err := s.files.Put(ctx, "thumbnails/"+tinyID, bytes.NewReader(tinyBuf), artCT); err != nil {
-			return MusicFilesResult{}, fmt.Errorf("UploadMusicFiles store album art tiny: %w", err)
-		}
-		result.AlbumArtTinyURL = "/thumbnails/" + tinyID
+		result.AlbumArtURL = artURL
+		result.AlbumArtTinyURL = artTinyURL
 	}
 
 	return result, nil
@@ -253,32 +282,9 @@ func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suff
 	if !allowedPhotoExts[ext] {
 		return ThumbnailResult{}, validationErr(fmt.Sprintf("thumbnailFile must be one of jpg, jpeg, png, webp — got %q", ext))
 	}
-	sExt := storageExt(ext)
-	fileID := postID + "-" + suffix + sExt
-	key := "photos/" + fileID
-	ct := contentTypeForExt(sExt)
-
-	src, err := decodeImage(file.File, ext)
+	photoURL, tinyURL, err := s.storeImageWithTiny(ctx, postID+"-"+suffix, file, ext)
 	if err != nil {
-		return ThumbnailResult{}, validationErr(fmt.Sprintf("thumbnail: could not decode: %v", err))
+		return ThumbnailResult{}, err
 	}
-	buf, err := encodeImage(src, ext)
-	if err != nil {
-		return ThumbnailResult{}, fmt.Errorf("UploadThumbnail encode: %w", err)
-	}
-	if err := s.files.Put(ctx, key, bytes.NewReader(buf), ct); err != nil {
-		return ThumbnailResult{}, fmt.Errorf("UploadThumbnail store: %w", err)
-	}
-
-	tiny := resizeImage(src, 20)
-	tinyBuf, err := encodeImage(tiny, ext)
-	if err != nil {
-		return ThumbnailResult{}, fmt.Errorf("UploadThumbnail encode tiny: %w", err)
-	}
-	tinyID := postID + "-" + suffix + "-tiny" + sExt
-	if err := s.files.Put(ctx, "thumbnails/"+tinyID, bytes.NewReader(tinyBuf), ct); err != nil {
-		return ThumbnailResult{}, fmt.Errorf("UploadThumbnail store tiny: %w", err)
-	}
-
-	return ThumbnailResult{URL: "/files/" + fileID, TinyURL: "/thumbnails/" + tinyID}, nil
+	return ThumbnailResult{URL: photoURL, TinyURL: tinyURL}, nil
 }

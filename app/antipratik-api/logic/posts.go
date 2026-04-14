@@ -21,9 +21,13 @@ func NewPostService(s store.PostStore, files store.FileStore, log logging.Logger
 	return &PostService{store: s, files: files, log: log}
 }
 
-var validTypes = map[string]bool{
-	"essay": true, "short": true, "music": true,
-	"photo": true, "video": true, "link": true,
+var validTypes = map[models.PostType]bool{
+	models.PostTypeEssay: true,
+	models.PostTypeShort: true,
+	models.PostTypeMusic: true,
+	models.PostTypePhoto: true,
+	models.PostTypeVideo: true,
+	models.PostTypeLink:  true,
 }
 
 // GetPosts validates the filter and delegates to the store.
@@ -70,7 +74,7 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 	input.ReadingTimeMinutes = computeReadingTime(input.Body)
 
 	id, createdAt := newID(), nowUTC()
-	if err := s.store.CreatePost(ctx, "essay", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypeEssay, id, createdAt); err != nil {
 		return models.EssayPost{}, fmt.Errorf("PostService.CreateEssay: %w", err)
 	}
 	if err := s.store.CreateEssayData(ctx, id, input); err != nil {
@@ -81,7 +85,7 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 		tags = []string{}
 	}
 	return models.EssayPost{
-		ID: id, Type: "essay", CreatedAt: createdAt, Tags: tags,
+		ID: id, Type: models.PostTypeEssay, CreatedAt: createdAt, Tags: tags,
 		Title: input.Title, Slug: input.Slug, Excerpt: input.Excerpt,
 		Body: input.Body, ReadingTimeMinutes: input.ReadingTimeMinutes,
 	}, nil
@@ -93,7 +97,7 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 	}
 
 	id, createdAt := newID(), nowUTC()
-	if err := s.store.CreatePost(ctx, "short", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypeShort, id, createdAt); err != nil {
 		return models.ShortPost{}, fmt.Errorf("PostService.CreateShort: %w", err)
 	}
 	if err := s.store.CreateShortData(ctx, id, input); err != nil {
@@ -103,7 +107,7 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 	if tags == nil {
 		tags = []string{}
 	}
-	return models.ShortPost{ID: id, Type: "short", CreatedAt: createdAt, Tags: tags, Body: input.Body}, nil
+	return models.ShortPost{ID: id, Type: models.PostTypeShort, CreatedAt: createdAt, Tags: tags, Body: input.Body}, nil
 }
 
 func (s *PostService) CreateMusic(ctx context.Context, id string, input models.CreateMusicPost) (models.MusicPost, error) {
@@ -118,7 +122,7 @@ func (s *PostService) CreateMusic(ctx context.Context, id string, input models.C
 	}
 
 	createdAt := nowUTC()
-	if err := s.store.CreatePost(ctx, "music", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypeMusic, id, createdAt); err != nil {
 		return models.MusicPost{}, fmt.Errorf("PostService.CreateMusic: %w", err)
 	}
 	if err := s.store.CreateMusicData(ctx, id, input); err != nil {
@@ -134,7 +138,7 @@ func (s *PostService) CreateMusic(ctx context.Context, id string, input models.C
 		albumArtTiny = &input.AlbumArtTinyURL
 	}
 	return models.MusicPost{
-		ID: id, Type: "music", CreatedAt: createdAt, Tags: tags,
+		ID: id, Type: models.PostTypeMusic, CreatedAt: createdAt, Tags: tags,
 		Title: input.Title, AlbumArt: input.AlbumArt, AlbumArtTinyURL: albumArtTiny,
 		AudioURL: input.AudioURL, Duration: input.Duration, Album: input.Album,
 	}, nil
@@ -154,7 +158,7 @@ func (s *PostService) CreatePhoto(ctx context.Context, preID string, input model
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "photo", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypePhoto, id, createdAt); err != nil {
 		return models.PhotoPost{}, fmt.Errorf("PostService.CreatePhoto: %w", err)
 	}
 	if err := s.store.CreatePhotoData(ctx, id, input); err != nil {
@@ -166,7 +170,7 @@ func (s *PostService) CreatePhoto(ctx context.Context, preID string, input model
 		tags = []string{}
 	}
 	return models.PhotoPost{
-		ID: id, Type: "photo", CreatedAt: createdAt, Tags: tags,
+		ID: id, Type: models.PostTypePhoto, CreatedAt: createdAt, Tags: tags,
 		Images: input.Images, Location: input.Location,
 	}, nil
 }
@@ -186,7 +190,7 @@ func (s *PostService) CreateVideo(ctx context.Context, preID string, input model
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "video", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypeVideo, id, createdAt); err != nil {
 		return models.VideoPost{}, fmt.Errorf("PostService.CreateVideo: %w", err)
 	}
 	if err := s.store.CreateVideoData(ctx, id, input); err != nil {
@@ -202,7 +206,7 @@ func (s *PostService) CreateVideo(ctx context.Context, preID string, input model
 		thumbTiny = &input.ThumbnailTinyURL
 	}
 	return models.VideoPost{
-		ID: id, Type: "video", CreatedAt: createdAt, Tags: tags,
+		ID: id, Type: models.PostTypeVideo, CreatedAt: createdAt, Tags: tags,
 		Title: input.Title, ThumbnailURL: input.ThumbnailURL, ThumbnailTinyURL: thumbTiny,
 		VideoURL: input.VideoURL, Duration: input.Duration, Playlist: input.Playlist,
 	}, nil
@@ -225,7 +229,7 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 	if id == "" {
 		id = newID()
 	}
-	if err := s.store.CreatePost(ctx, "link", id, createdAt); err != nil {
+	if err := s.store.CreatePost(ctx, models.PostTypeLink, id, createdAt); err != nil {
 		return models.LinkPost{}, fmt.Errorf("PostService.CreateLinkPost: %w", err)
 	}
 	if err := s.store.CreateLinkPostData(ctx, id, input); err != nil {
@@ -237,7 +241,7 @@ func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input mo
 		tags = []string{}
 	}
 	return models.LinkPost{
-		ID: id, Type: "link", CreatedAt: createdAt, Tags: tags,
+		ID: id, Type: models.PostTypeLink, CreatedAt: createdAt, Tags: tags,
 		Title: input.Title, URL: input.URL, Domain: input.Domain,
 		Description: input.Description, ThumbnailURL: input.ThumbnailURL,
 		ThumbnailTinyURL: input.ThumbnailTinyURL, Category: input.Category,
@@ -293,7 +297,7 @@ func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.U
 		tags = []string{}
 	}
 	return models.EssayPost{
-		ID: id, Type: "essay", CreatedAt: cur.CreatedAt, Tags: tags,
+		ID: id, Type: models.PostTypeEssay, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, Slug: merged.Slug, Excerpt: merged.Excerpt,
 		Body: merged.Body, ReadingTimeMinutes: merged.ReadingTimeMinutes,
 	}, nil
@@ -331,7 +335,7 @@ func (s *PostService) UpdateShort(ctx context.Context, id string, input models.U
 	if tags == nil {
 		tags = []string{}
 	}
-	return models.ShortPost{ID: id, Type: "short", CreatedAt: cur.CreatedAt, Tags: tags, Body: merged.Body}, nil
+	return models.ShortPost{ID: id, Type: models.PostTypeShort, CreatedAt: cur.CreatedAt, Tags: tags, Body: merged.Body}, nil
 }
 
 func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.UpdateMusicPost) (models.MusicPost, error) {
@@ -399,7 +403,7 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 		mergedAlbumArtTiny = &merged.AlbumArtTinyURL
 	}
 	return models.MusicPost{
-		ID: id, Type: "music", CreatedAt: cur.CreatedAt, Tags: tags,
+		ID: id, Type: models.PostTypeMusic, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, AlbumArt: merged.AlbumArt, AlbumArtTinyURL: mergedAlbumArtTiny,
 		AudioURL: merged.AudioURL, Duration: merged.Duration, Album: merged.Album,
 	}, nil
@@ -436,7 +440,7 @@ func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.U
 		tags = []string{}
 	}
 	return models.PhotoPost{
-		ID: id, Type: "photo", CreatedAt: cur.CreatedAt, Tags: tags,
+		ID: id, Type: models.PostTypePhoto, CreatedAt: cur.CreatedAt, Tags: tags,
 		Images: merged.Images, Location: merged.Location,
 	}, nil
 }
@@ -501,7 +505,7 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 		mergedThumbTiny = &merged.ThumbnailTinyURL
 	}
 	return models.VideoPost{
-		ID: id, Type: "video", CreatedAt: cur.CreatedAt, Tags: tags,
+		ID: id, Type: models.PostTypeVideo, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: mergedThumbTiny,
 		VideoURL: merged.VideoURL, Duration: merged.Duration, Playlist: merged.Playlist,
 	}, nil
@@ -563,7 +567,7 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 	}
 
 	return models.LinkPost{
-		ID: id, Type: "link", CreatedAt: cur.CreatedAt, Tags: tags,
+		ID: id, Type: models.PostTypeLink, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
 		Description: merged.Description, ThumbnailURL: merged.ThumbnailURL,
 		ThumbnailTinyURL: merged.ThumbnailTinyURL, Category: merged.Category,
