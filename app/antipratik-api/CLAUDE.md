@@ -206,8 +206,8 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle business logic errors
 
 **Key Components:**
-- `PostLogic`, `LinkLogic`, `AuthLogic`, `UploadLogic` interfaces
-- `PostService`, `LinkService`, `AuthService`, `UploadService` implementations
+- `PostLogic`, `LinkLogic`, `AuthLogic`, `UploadLogic`, `SetupLogic` interfaces
+- `PostService`, `LinkService`, `AuthService`, `UploadService`, `SetupService` implementations
 - Input validation and sanitization
 
 **Never Does:** HTTP concerns, direct database access.
@@ -222,10 +222,9 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Manage connections and migrations
 
 **Key Components:**
-- `PostStore`, `LinkStore`, `UserStore` interfaces
+- `PostStore`, `LinkStore`, `UserStore`, `SettingsStore` interfaces
 - `FileStore` interface with `LocalFileStore` and `R2FileStore` implementations
 - SQLite implementations with prepared statements
-- Migration execution on startup
 
 **Never Does:** Business logic, HTTP responses.
 
@@ -247,7 +246,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 10. **Never Trust Client-Side Validation** — Server must validate everything again.
 11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
 12. **Never add a separate upload endpoint** — File uploads belong inside the existing `POST/PUT /api/posts/<type>` handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes.
-13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` in `api/routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
+13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` in the top-level `routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
 
 ---
 
@@ -326,7 +325,7 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
 - `POST /api/posts/music` supports optional `albumArtFile`.
 - `POST /api/posts/video` and `POST /api/posts/link` support optional `thumbnailFile`.
 - Link URLs must be absolute; the server derives `domain` automatically from the submitted `url`.
-- Photo uploads auto-generate 3 thumbnail variants: small (300px), medium (600px), large (1200px) wide.
+- Photo uploads auto-generate 4 thumbnail variants: tiny (20px), small (300px), medium (600px), large (1200px) wide. Widths are defined as constants in `logic/uploads.go` — change them there.
 - Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
 - File URLs always route through the backend's own `/files/` and `/thumbnails/` endpoints — the storage backend (local or R2) is never exposed.
@@ -343,6 +342,32 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
 - **photo:** Photo galleries with metadata
 - **video:** Videos with thumbnails and metadata
 - **link:** Curated external links as posts
+
+---
+
+## Conventions
+
+### Input Type Naming
+Input types (passed into logic/store layers) follow the `*PostInput` pattern — never `Create*Post`.
+
+| Input type | Used for |
+|-----------|----------|
+| `EssayPostInput`, `ShortPostInput` | create **and** the merged value inside update |
+| `MusicPostInput`, `VideoPostInput`, `LinkPostInput`, `PhotoPostInput` | same |
+| `Update*Post` (e.g. `UpdateEssayPost`) | **partial** update inputs only — all fields are pointers; `nil` means "leave unchanged" |
+
+Rule: if a field is required on create but optional on update, the Create type uses a value type and the Update type uses a pointer. Never add pointer fields to `*PostInput` types just to support partial updates — keep a separate `Update*Post` for that.
+
+### Post Type Constants
+Use `models.PostType*` constants instead of bare string literals everywhere:
+```go
+models.PostTypeEssay, models.PostTypeShort, models.PostTypeMusic,
+models.PostTypePhoto, models.PostTypeVideo, models.PostTypeLink
+```
+
+### Concurrency
+- `UploadPhotoFiles` processes images concurrently, bounded by `maxConcurrentUploads = 4` (defined in `logic/uploads.go`). Do not raise this without considering memory and file-store rate limits.
+- `DeletePost` deletes the database record first (post immediately invisible to readers), then cleans up files in a background goroutine using `context.Background()`. File-delete failures are logged but do not affect the response — this is intentional.
 
 ---
 
@@ -391,7 +416,7 @@ SQLite database with foreign key constraints and cascading deletes.
 | `users` | User accounts for authentication |
 | `settings` | Key-value configuration storage |
 
-`photo_images` has nullable columns `thumbnail_small_url`, `thumbnail_medium_url`, `thumbnail_large_url` (added in migration `004`). Existing rows have `NULL` in these columns; rows created via the upload endpoint have them populated.
+`photo_images` has nullable thumbnail columns added across migrations `004`–`005`: `thumbnail_tiny_url`, `thumbnail_small_url`, `thumbnail_medium_url`, `thumbnail_large_url`. Existing rows may have `NULL`; rows created via the upload endpoint have all four populated.
 
 ### Key Relationships
 - All post types reference `posts.id` with CASCADE DELETE
