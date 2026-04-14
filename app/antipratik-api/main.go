@@ -74,7 +74,7 @@ func main() {
 	newsletterH := api.NewNewsletterHandler(newsletterLogic, logger)
 
 	mux := http.NewServeMux()
-	api.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "api/openapi.yaml", "api/swagger.html")
+	RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "api/openapi.yaml", "api/swagger.html")
 
 	handler := api.CORSMiddleware(mux)
 
