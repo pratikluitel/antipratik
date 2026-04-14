@@ -147,7 +147,7 @@ type FilterState struct {
 
 // ── Create/Update input types ─────────────────────────────────────────────────
 
-type CreateEssayPost struct {
+type EssayPostInput struct {
 	Title              string   `json:"title"`
 	Slug               string   `json:"slug"`
 	Excerpt            string   `json:"excerpt"`
@@ -156,38 +156,41 @@ type CreateEssayPost struct {
 	Tags               []string `json:"tags"`
 }
 
-type CreateShortPost struct {
+type ShortPostInput struct {
 	Body string   `json:"body"`
 	Tags []string `json:"tags"`
 }
 
-type CreateMusicPost struct {
+type MusicPostInput struct {
 	Title           string   `json:"title"`
 	AlbumArt        string   `json:"albumArt"`
-	AlbumArtTinyURL string   `json:"albumArtTinyUrl,omitempty"`
+	AlbumArtTinyURL *string  `json:"albumArtTinyUrl,omitempty"`
 	AudioURL        string   `json:"audioURL"`
 	Duration        int      `json:"duration"`
 	Album           *string  `json:"album,omitempty"`
 	Tags            []string `json:"tags"`
 }
 
-type CreatePhotoPost struct {
+// PhotoPostInput is the input type for both creating and updating photo posts.
+// There is no separate Update type because all fields are optional on update
+// (images replace in full when provided; location and tags use nil = no-change semantics).
+type PhotoPostInput struct {
 	Images   []PhotoImage `json:"images"`
 	Location *string      `json:"location,omitempty"`
 	Tags     []string     `json:"tags"`
 }
 
-type CreateVideoPost struct {
+type VideoPostInput struct {
 	Title            string   `json:"title"`
 	ThumbnailURL     string   `json:"thumbnailURL"`
-	ThumbnailTinyURL string   `json:"thumbnailTinyUrl,omitempty"`
+	ThumbnailTinyURL *string  `json:"thumbnailTinyUrl,omitempty"`
 	VideoURL         string   `json:"videoURL"`
 	Duration         int      `json:"duration"`
 	Playlist         *string  `json:"playlist,omitempty"`
 	Tags             []string `json:"tags"`
 }
 
-type CreateLinkPost struct {
+type LinkPostInput struct {
 	Title            string   `json:"title"`
 	URL              string   `json:"url"`
 	Domain           string   `json:"-"`
@@ -233,13 +236,6 @@ type UpdateMusicPost struct {
 	Duration        *int
 	Album           *string
 	Tags            []string
-}
-
-// UpdatePhotoPost is the partial-update input for photo posts (multipart/form-data).
-type UpdatePhotoPost struct {
-	Images   []PhotoImage
-	Location *string
-	Tags     []string
 }
 
 // UpdateVideoPost is the partial-update input for video posts (multipart/form-data).

@@ -61,7 +61,7 @@ func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPo
 
 // ── Write methods ─────────────────────────────────────────────────────────────
 
-func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error) {
+func (s *PostService) CreateEssay(ctx context.Context, input models.EssayPostInput) (models.EssayPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.EssayPost{}, err
 	}
@@ -91,7 +91,7 @@ func (s *PostService) CreateEssay(ctx context.Context, input models.CreateEssayP
 	}, nil
 }
 
-func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortPost) (models.ShortPost, error) {
+func (s *PostService) CreateShort(ctx context.Context, input models.ShortPostInput) (models.ShortPost, error) {
 	if err := requireNonEmpty("body", input.Body); err != nil {
 		return models.ShortPost{}, err
 	}
@@ -110,7 +110,7 @@ func (s *PostService) CreateShort(ctx context.Context, input models.CreateShortP
 	return models.ShortPost{ID: id, Type: models.PostTypeShort, CreatedAt: createdAt, Tags: tags, Body: input.Body}, nil
 }
 
-func (s *PostService) CreateMusic(ctx context.Context, id string, input models.CreateMusicPost) (models.MusicPost, error) {
+func (s *PostService) CreateMusic(ctx context.Context, id string, input models.MusicPostInput) (models.MusicPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.MusicPost{}, err
 	}
@@ -133,18 +133,14 @@ func (s *PostService) CreateMusic(ctx context.Context, id string, input models.C
 	if tags == nil {
 		tags = []string{}
 	}
-	var albumArtTiny *string
-	if input.AlbumArtTinyURL != "" {
-		albumArtTiny = &input.AlbumArtTinyURL
-	}
 	return models.MusicPost{
 		ID: id, Type: models.PostTypeMusic, CreatedAt: createdAt, Tags: tags,
-		Title: input.Title, AlbumArt: input.AlbumArt, AlbumArtTinyURL: albumArtTiny,
+		Title: input.Title, AlbumArt: input.AlbumArt, AlbumArtTinyURL: input.AlbumArtTinyURL,
 		AudioURL: input.AudioURL, Duration: input.Duration, Album: input.Album,
 	}, nil
 }
 
-func (s *PostService) CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error) {
+func (s *PostService) CreatePhoto(ctx context.Context, preID string, input models.PhotoPostInput) (models.PhotoPost, error) {
 	if len(input.Images) == 0 {
 		return models.PhotoPost{}, validationErr("images cannot be empty")
 	}
@@ -175,7 +171,7 @@ func (s *PostService) CreatePhoto(ctx context.Context, preID string, input model
 	}, nil
 }
 
-func (s *PostService) CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error) {
+func (s *PostService) CreateVideo(ctx context.Context, preID string, input models.VideoPostInput) (models.VideoPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.VideoPost{}, err
 	}
@@ -201,18 +197,14 @@ func (s *PostService) CreateVideo(ctx context.Context, preID string, input model
 	if tags == nil {
 		tags = []string{}
 	}
-	var thumbTiny *string
-	if input.ThumbnailTinyURL != "" {
-		thumbTiny = &input.ThumbnailTinyURL
-	}
 	return models.VideoPost{
 		ID: id, Type: models.PostTypeVideo, CreatedAt: createdAt, Tags: tags,
-		Title: input.Title, ThumbnailURL: input.ThumbnailURL, ThumbnailTinyURL: thumbTiny,
+		Title: input.Title, ThumbnailURL: input.ThumbnailURL, ThumbnailTinyURL: input.ThumbnailTinyURL,
 		VideoURL: input.VideoURL, Duration: input.Duration, Playlist: input.Playlist,
 	}, nil
 }
 
-func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error) {
+func (s *PostService) CreateLinkPost(ctx context.Context, preID string, input models.LinkPostInput) (models.LinkPost, error) {
 	if err := requireNonEmpty("title", input.Title); err != nil {
 		return models.LinkPost{}, err
 	}
@@ -261,7 +253,7 @@ func (s *PostService) UpdateEssay(ctx context.Context, id string, input models.U
 		return models.EssayPost{}, validationErr("post is not an essay")
 	}
 
-	merged := models.CreateEssayPost{Title: cur.Title, Slug: cur.Slug, Excerpt: cur.Excerpt, Body: cur.Body, Tags: cur.Tags}
+	merged := models.EssayPostInput{Title: cur.Title, Slug: cur.Slug, Excerpt: cur.Excerpt, Body: cur.Body, Tags: cur.Tags}
 	if input.Title != nil {
 		merged.Title = *input.Title
 	}
@@ -316,7 +308,7 @@ func (s *PostService) UpdateShort(ctx context.Context, id string, input models.U
 		return models.ShortPost{}, validationErr("post is not a short post")
 	}
 
-	merged := models.CreateShortPost{Body: cur.Body, Tags: cur.Tags}
+	merged := models.ShortPostInput{Body: cur.Body, Tags: cur.Tags}
 	if input.Body != nil {
 		merged.Body = *input.Body
 	}
@@ -352,13 +344,9 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 		return models.MusicPost{}, validationErr("post is not a music post")
 	}
 
-	curAlbumArtTiny := ""
-	if cur.AlbumArtTinyURL != nil {
-		curAlbumArtTiny = *cur.AlbumArtTinyURL
-	}
-	merged := models.CreateMusicPost{
+	merged := models.MusicPostInput{
 		Title: cur.Title, AudioURL: cur.AudioURL, AlbumArt: cur.AlbumArt,
-		AlbumArtTinyURL: curAlbumArtTiny, Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
+		AlbumArtTinyURL: cur.AlbumArtTinyURL, Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
 	}
 
 	if input.Title != nil {
@@ -398,18 +386,14 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 	if tags == nil {
 		tags = []string{}
 	}
-	var mergedAlbumArtTiny *string
-	if merged.AlbumArtTinyURL != "" {
-		mergedAlbumArtTiny = &merged.AlbumArtTinyURL
-	}
 	return models.MusicPost{
 		ID: id, Type: models.PostTypeMusic, CreatedAt: cur.CreatedAt, Tags: tags,
-		Title: merged.Title, AlbumArt: merged.AlbumArt, AlbumArtTinyURL: mergedAlbumArtTiny,
+		Title: merged.Title, AlbumArt: merged.AlbumArt, AlbumArtTinyURL: merged.AlbumArtTinyURL,
 		AudioURL: merged.AudioURL, Duration: merged.Duration, Album: merged.Album,
 	}, nil
 }
 
-func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.UpdatePhotoPost) (models.PhotoPost, error) {
+func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) (models.PhotoPost, error) {
 	if err := requireNonEmpty("id", id); err != nil {
 		return models.PhotoPost{}, err
 	}
@@ -423,7 +407,7 @@ func (s *PostService) UpdatePhoto(ctx context.Context, id string, input models.U
 		return models.PhotoPost{}, validationErr("post is not a photo post")
 	}
 
-	merged := models.CreatePhotoPost{Images: cur.Images, Location: cur.Location, Tags: cur.Tags}
+	merged := models.PhotoPostInput{Images: cur.Images, Location: cur.Location, Tags: cur.Tags}
 	if input.Location != nil {
 		merged.Location = input.Location
 	}
@@ -458,12 +442,8 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 		return models.VideoPost{}, validationErr("post is not a video post")
 	}
 
-	curThumbTiny := ""
-	if cur.ThumbnailTinyURL != nil {
-		curThumbTiny = *cur.ThumbnailTinyURL
-	}
-	merged := models.CreateVideoPost{
-		Title: cur.Title, ThumbnailURL: cur.ThumbnailURL, ThumbnailTinyURL: curThumbTiny,
+	merged := models.VideoPostInput{
+		Title: cur.Title, ThumbnailURL: cur.ThumbnailURL, ThumbnailTinyURL: cur.ThumbnailTinyURL,
 		VideoURL: cur.VideoURL, Duration: cur.Duration, Playlist: cur.Playlist, Tags: cur.Tags,
 	}
 	if input.Title != nil {
@@ -500,13 +480,9 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 	if tags == nil {
 		tags = []string{}
 	}
-	var mergedThumbTiny *string
-	if merged.ThumbnailTinyURL != "" {
-		mergedThumbTiny = &merged.ThumbnailTinyURL
-	}
 	return models.VideoPost{
 		ID: id, Type: models.PostTypeVideo, CreatedAt: cur.CreatedAt, Tags: tags,
-		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: mergedThumbTiny,
+		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: merged.ThumbnailTinyURL,
 		VideoURL: merged.VideoURL, Duration: merged.Duration, Playlist: merged.Playlist,
 	}, nil
 }
@@ -524,7 +500,7 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 		return models.LinkPost{}, validationErr("post is not a link post")
 	}
 
-	merged := models.CreateLinkPost{
+	merged := models.LinkPostInput{
 		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
 		Description: cur.Description, ThumbnailURL: cur.ThumbnailURL,
 		ThumbnailTinyURL: cur.ThumbnailTinyURL,

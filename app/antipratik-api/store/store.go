@@ -22,18 +22,18 @@ type PostStore interface {
 
 	// Write operations
 	CreatePost(ctx context.Context, postType string, id string, createdAt string) error
-	CreateEssayData(ctx context.Context, id string, input models.CreateEssayPost) error
-	CreateShortData(ctx context.Context, id string, input models.CreateShortPost) error
-	CreateMusicData(ctx context.Context, id string, input models.CreateMusicPost) error
-	CreatePhotoData(ctx context.Context, id string, input models.CreatePhotoPost) error
-	CreateVideoData(ctx context.Context, id string, input models.CreateVideoPost) error
-	CreateLinkPostData(ctx context.Context, id string, input models.CreateLinkPost) error
-	UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error
-	UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error
-	UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error
-	UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error
-	UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error
-	UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error
+	CreateEssayData(ctx context.Context, id string, input models.EssayPostInput) error
+	CreateShortData(ctx context.Context, id string, input models.ShortPostInput) error
+	CreateMusicData(ctx context.Context, id string, input models.MusicPostInput) error
+	CreatePhotoData(ctx context.Context, id string, input models.PhotoPostInput) error
+	CreateVideoData(ctx context.Context, id string, input models.VideoPostInput) error
+	CreateLinkPostData(ctx context.Context, id string, input models.LinkPostInput) error
+	UpdateEssay(ctx context.Context, id string, input models.EssayPostInput) error
+	UpdateShort(ctx context.Context, id string, input models.ShortPostInput) error
+	UpdateMusic(ctx context.Context, id string, input models.MusicPostInput) error
+	UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) error
+	UpdateVideo(ctx context.Context, id string, input models.VideoPostInput) error
+	UpdateLinkPost(ctx context.Context, id string, input models.LinkPostInput) error
 	DeletePost(ctx context.Context, id string) error
 }
 

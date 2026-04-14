@@ -62,7 +62,7 @@ func (h *PostHandlerImpl) GetPost(w http.ResponseWriter, r *http.Request) {
 // ── JSON-body write handlers (essay, short) ───────────────────────────────────
 
 func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
-	var input models.CreateEssayPost
+	var input models.EssayPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -76,7 +76,7 @@ func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
-	var input models.CreateShortPost
+	var input models.ShortPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -165,11 +165,15 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := models.CreateMusicPost{
+	var albumArtTiny *string
+	if uploaded.AlbumArtTinyURL != "" {
+		albumArtTiny = &uploaded.AlbumArtTinyURL
+	}
+	input := models.MusicPostInput{
 		Title:           r.FormValue("title"),
 		AudioURL:        uploaded.AudioURL,
 		AlbumArt:        uploaded.AlbumArtURL,
-		AlbumArtTinyURL: uploaded.AlbumArtTinyURL,
+		AlbumArtTinyURL: albumArtTiny,
 		Duration:        duration,
 		Tags:            r.Form["tags"],
 	}
@@ -270,7 +274,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	input := models.CreatePhotoPost{Images: images, Tags: r.Form["tags[]"]}
+	input := models.PhotoPostInput{Images: images, Tags: r.Form["tags[]"]}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
@@ -290,7 +294,7 @@ func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := models.UpdatePhotoPost{Tags: formTags(r)}
+	input := models.PhotoPostInput{Tags: formTags(r)}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
@@ -311,7 +315,8 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	postID := uuid.New().String()
 
-	var thumbnailURL, thumbnailTinyURL string
+	var thumbnailURL string
+	var thumbnailTinyURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
 		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
@@ -321,7 +326,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		thumbnailURL = result.URL
-		thumbnailTinyURL = result.TinyURL
+		thumbnailTinyURL = &result.TinyURL
 	}
 
 	duration, err := strconv.Atoi(r.FormValue("duration"))
@@ -329,7 +334,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "duration must be an integer")
 		return
 	}
-	input := models.CreateVideoPost{
+	input := models.VideoPostInput{
 		Title:            r.FormValue("title"),
 		VideoURL:         r.FormValue("videoURL"),
 		ThumbnailURL:     thumbnailURL,
@@ -405,7 +410,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		thumbnailTinyURL = &result.TinyURL
 	}
 
-	input := models.CreateLinkPost{
+	input := models.LinkPostInput{
 		Title:            r.FormValue("title"),
 		URL:              r.FormValue("url"),
 		ThumbnailURL:     thumbnailURL,
