@@ -21,16 +21,16 @@ type PostLogic interface {
 	// Music, Photo, Video, and LinkPost accept a preID: if non-empty it is used as the post ID
 	// (so the API layer can generate the ID before uploading files and keep them in sync);
 	// if empty, a new UUID is generated.
-	CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error)
-	CreateShort(ctx context.Context, input models.CreateShortPost) (models.ShortPost, error)
-	CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (models.MusicPost, error)
-	CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error)
-	CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error)
-	CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error)
+	CreateEssay(ctx context.Context, input models.EssayPostInput) (models.EssayPost, error)
+	CreateShort(ctx context.Context, input models.ShortPostInput) (models.ShortPost, error)
+	CreateMusic(ctx context.Context, preID string, input models.MusicPostInput) (models.MusicPost, error)
+	CreatePhoto(ctx context.Context, preID string, input models.PhotoPostInput) (models.PhotoPost, error)
+	CreateVideo(ctx context.Context, preID string, input models.VideoPostInput) (models.VideoPost, error)
+	CreateLinkPost(ctx context.Context, preID string, input models.LinkPostInput) (models.LinkPost, error)
 	UpdateEssay(ctx context.Context, id string, input models.UpdateEssayPost) (models.EssayPost, error)
 	UpdateShort(ctx context.Context, id string, input models.UpdateShortPost) (models.ShortPost, error)
 	UpdateMusic(ctx context.Context, id string, input models.UpdateMusicPost) (models.MusicPost, error)
-	UpdatePhoto(ctx context.Context, id string, input models.UpdatePhotoPost) (models.PhotoPost, error)
+	UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) (models.PhotoPost, error)
 	UpdateVideo(ctx context.Context, id string, input models.UpdateVideoPost) (models.VideoPost, error)
 	UpdateLinkPost(ctx context.Context, id string, input models.UpdateLinkPost) (models.LinkPost, error)
 	DeletePost(ctx context.Context, id string) error

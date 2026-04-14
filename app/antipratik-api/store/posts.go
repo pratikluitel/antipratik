@@ -26,7 +26,7 @@ func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string,
 	return nil
 }
 
-func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input models.CreateEssayPost) error {
+func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input models.EssayPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input models.CreateShortPost) error {
+func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input models.ShortPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -59,18 +59,14 @@ func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input models.CreateMusicPost) error {
+func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input models.MusicPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	var albumArtTiny any
-	if input.AlbumArtTinyURL != "" {
-		albumArtTiny = input.AlbumArtTinyURL
-	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO music_posts (post_id, title, album_art, album_art_tiny, audio_url, duration, album) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.AlbumArt, albumArtTiny, input.AudioURL, input.Duration, input.Album)
+		id, input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album)
 	if err != nil {
 		return err
 	}
@@ -80,7 +76,7 @@ func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input models.CreatePhotoPost) error {
+func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input models.PhotoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -104,18 +100,14 @@ func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input models.CreateVideoPost) error {
+func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input models.VideoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	var videoThumbTiny any
-	if input.ThumbnailTinyURL != "" {
-		videoThumbTiny = input.ThumbnailTinyURL
-	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, thumbnail_tiny_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.ThumbnailURL, videoThumbTiny, input.VideoURL, input.Duration, input.Playlist)
+		id, input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist)
 	if err != nil {
 		return err
 	}
@@ -125,7 +117,7 @@ func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, input models.CreateLinkPost) error {
+func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, input models.LinkPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -142,7 +134,7 @@ func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, inp
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input models.CreateEssayPost) error {
+func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input models.EssayPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -162,7 +154,7 @@ func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input models.CreateShortPost) error {
+func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input models.ShortPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -180,18 +172,14 @@ func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input models.CreateMusicPost) error {
+func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input models.MusicPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	var updateAlbumArtTiny any
-	if input.AlbumArtTinyURL != "" {
-		updateAlbumArtTiny = input.AlbumArtTinyURL
-	}
 	if _, err = tx.ExecContext(ctx, `UPDATE music_posts SET title=?, album_art=?, album_art_tiny=?, audio_url=?, duration=?, album=? WHERE post_id=?`,
-		input.Title, input.AlbumArt, updateAlbumArtTiny, input.AudioURL, input.Duration, input.Album, id); err != nil {
+		input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
@@ -203,7 +191,7 @@ func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input models.CreatePhotoPost) error {
+func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -231,18 +219,14 @@ func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input models.CreateVideoPost) error {
+func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input models.VideoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	var updateVideoThumbTiny any
-	if input.ThumbnailTinyURL != "" {
-		updateVideoThumbTiny = input.ThumbnailTinyURL
-	}
 	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, thumbnail_tiny_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
-		input.Title, input.ThumbnailURL, updateVideoThumbTiny, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
+		input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
@@ -254,7 +238,7 @@ func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input models.CreateLinkPost) error {
+func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input models.LinkPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -349,7 +333,7 @@ func (s *SQLitePostStore) GetPostBySlug(ctx context.Context, slug string) (*mode
 	row := s.db.QueryRowContext(ctx, q, slug)
 	var (
 		id, createdAt, title, slugVal, excerpt, body string
-		readingTime                                   int
+		readingTime                                  int
 	)
 	if err := row.Scan(&id, &createdAt, &title, &slugVal, &excerpt, &body, &readingTime); err != nil {
 		if err == sql.ErrNoRows {
