@@ -4,6 +4,19 @@ package models
 
 import "mime/multipart"
 
+// PostType is the discriminator string stored in the posts table.
+type PostType = string
+
+// Named post type constants — use these instead of bare string literals.
+const (
+	PostTypeEssay PostType = "essay"
+	PostTypeShort PostType = "short"
+	PostTypeMusic PostType = "music"
+	PostTypePhoto PostType = "photo"
+	PostTypeVideo PostType = "video"
+	PostTypeLink  PostType = "link"
+)
+
 // Post is an interface satisfied by all content types.
 // The unexported method prevents external implementations.
 type Post interface {
