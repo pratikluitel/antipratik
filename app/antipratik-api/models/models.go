@@ -233,7 +233,6 @@ type UpdateMusicPost struct {
 	AudioURL        *string
 	AlbumArt        *string
 	AlbumArtTinyURL *string
-	Duration        *int
 	Album           *string
 	Tags            []string
 }

@@ -200,14 +200,6 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 	if title := r.FormValue("title"); title != "" {
 		input.Title = &title
 	}
-	if durStr := r.FormValue("duration"); durStr != "" {
-		if d, err := strconv.Atoi(durStr); err == nil {
-			input.Duration = &d
-		} else {
-			writeError(w, http.StatusBadRequest, "duration must be an integer")
-			return
-		}
-	}
 	if albumStr := r.FormValue("album"); albumStr != "" {
 		input.Album = &albumStr
 	}

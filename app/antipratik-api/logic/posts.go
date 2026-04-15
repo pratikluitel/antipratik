@@ -358,9 +358,6 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 	if input.AlbumArt != nil {
 		merged.AlbumArt = *input.AlbumArt
 	}
-	if input.Duration != nil {
-		merged.Duration = *input.Duration
-	}
 	if input.Album != nil {
 		merged.Album = input.Album
 	}
