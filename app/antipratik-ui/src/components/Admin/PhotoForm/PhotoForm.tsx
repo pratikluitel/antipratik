@@ -45,6 +45,8 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   const [newCaption, setNewCaption] = useState('');
   const [addingImage, setAddingImage] = useState(false);
   const addFileInputRef = useRef<HTMLInputElement>(null);
+  // Track whether any image was added or deleted so cancel can refresh the list.
+  const [imagesMutated, setImagesMutated] = useState(false);
 
   // Cleanup object URLs to prevent memory leaks
   useEffect(() => {
@@ -94,7 +96,6 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   // Edit-mode: save alt + caption for an existing image
   async function saveImageMeta(img: PhotoImage) {
     if (!initial) return;
-    if (!editAlt.trim()) { setImageError('Alt text is required.'); return; }
     setImageError(null);
     try {
       const updated = await updatePhotoImage(initial.id, img.id!, { alt: editAlt, caption: editCaption }, token);
@@ -112,6 +113,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
     try {
       await deletePhotoImage(initial.id, img.id!, token);
       setExistingImages((prev) => prev.filter((i) => i.id !== img.id));
+      setImagesMutated(true);
     } catch (err) {
       setImageError(err instanceof Error ? err.message : 'Failed to delete image.');
     }
@@ -129,7 +131,6 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   // Edit-mode: upload new single image
   async function handleAddImage() {
     if (!initial || !newFile) return;
-    if (!newAlt.trim()) { setImageError('Alt text is required.'); return; }
     setImageError(null);
     setAddingImage(true);
     try {
@@ -139,6 +140,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
       if (newCaption.trim()) fd.append('caption', newCaption);
       const img = await addPhotoImage(initial.id, fd, token);
       setExistingImages((prev) => [...prev, img]);
+      setImagesMutated(true);
       setNewFile(null);
       if (newFilePreview) URL.revokeObjectURL(newFilePreview);
       setNewFilePreview(null);
@@ -163,8 +165,6 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
         await updatePhotoPost(initial.id, fd, token);
       } else {
         if (photos.length === 0) { setError('At least one image is required.'); setLoading(false); return; }
-        const missingAlt = photos.findIndex((p) => !p.alt.trim());
-        if (missingAlt !== -1) { setError(`Alt text is required for image ${missingAlt + 1}.`); setLoading(false); return; }
         photos.forEach((p) => {
           fd.append('images[]', p.file);
           fd.append('alt[]', p.alt);
@@ -212,7 +212,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
                   {editingId === img.id ? (
                     <>
                       <div className={f.field}>
-                        <label className={`${f.label} ${f.required}`}>Alt text</label>
+                        <label className={f.label}>Alt text</label>
                         <input
                           className={f.input}
                           value={editAlt}
@@ -279,7 +279,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
                     <p className={styles.fileName}>{newFile.name}</p>
                   </div>
                   <div className={f.field}>
-                    <label className={`${f.label} ${f.required}`}>Alt text</label>
+                    <label className={f.label}>Alt text</label>
                     <input className={f.input} value={newAlt} onChange={(e) => setNewAlt(e.target.value)} disabled={addingImage} />
                   </div>
                   <div className={f.field}>
@@ -351,7 +351,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
                 <p className={styles.fileName}>{p.file.name}</p>
               </div>
               <div className={f.field}>
-                <label className={`${f.label} ${f.required}`}>Alt text</label>
+                <label className={f.label}>Alt text</label>
                 <input className={f.input} value={p.alt} onChange={(e) => updateEntry(i, 'alt', e.target.value)} disabled={loading} />
               </div>
               <div className={f.field}>
@@ -378,7 +378,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
         <button className={f.submitBtn} type="submit" disabled={loading || success}>
           {loading ? 'Saving…' : initial ? 'Update post' : 'Publish photos'}
         </button>
-        <button className={f.cancelBtn} type="button" onClick={onCancel} disabled={loading}>Cancel</button>
+        <button className={f.cancelBtn} type="button" onClick={imagesMutated ? onSuccess : onCancel} disabled={loading}>Cancel</button>
       </div>
     </form>
   );
