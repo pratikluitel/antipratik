@@ -8,6 +8,7 @@ export default function DateMarker({ date }: Props) {
   const formatted = new Intl.DateTimeFormat('en', {
     month: 'short',
     year: 'numeric',
+    timeZone: 'UTC',
   }).format(new Date(date));
 
   return (

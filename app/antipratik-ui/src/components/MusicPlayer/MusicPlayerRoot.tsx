@@ -15,5 +15,5 @@ export default function MusicPlayerRoot() {
       onPause={pause}
       onStop={stop}
     />
-  ) : <div style={{ display: 'none' }} aria-hidden="true" />;
+  ) : null;
 }
