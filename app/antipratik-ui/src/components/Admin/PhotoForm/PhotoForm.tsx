@@ -35,6 +35,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
   const [existingImages, setExistingImages] = useState<PhotoImage[]>(initial?.images ?? []);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editCaption, setEditCaption] = useState('');
+  const [editAlt, setEditAlt] = useState('');
   const [imageError, setImageError] = useState<string | null>(null);
 
   // Edit-mode: add a single new image
@@ -82,23 +83,25 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
     });
   }
 
-  // Edit-mode: start editing caption for an existing image
+  // Edit-mode: start editing an existing image's alt + caption
   function startEdit(img: PhotoImage) {
     setEditingId(img.id!);
+    setEditAlt(img.alt);
     setEditCaption(img.caption ?? '');
     setImageError(null);
   }
 
-  // Edit-mode: save caption for an existing image
-  async function saveCaption(img: PhotoImage) {
+  // Edit-mode: save alt + caption for an existing image
+  async function saveImageMeta(img: PhotoImage) {
     if (!initial) return;
+    if (!editAlt.trim()) { setImageError('Alt text is required.'); return; }
     setImageError(null);
     try {
-      const updated = await updatePhotoImage(initial.id, img.id!, { caption: editCaption }, token);
-      setExistingImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: updated.caption } : i));
+      const updated = await updatePhotoImage(initial.id, img.id!, { alt: editAlt, caption: editCaption }, token);
+      setExistingImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: updated.alt, caption: updated.caption } : i));
       setEditingId(null);
     } catch (err) {
-      setImageError(err instanceof Error ? err.message : 'Failed to save caption.');
+      setImageError(err instanceof Error ? err.message : 'Failed to save.');
     }
   }
 
@@ -208,26 +211,38 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
                 <div className={styles.existingImageMeta}>
                   {editingId === img.id ? (
                     <>
-                      <input
-                        className={f.input}
-                        value={editCaption}
-                        onChange={(e) => setEditCaption(e.target.value)}
-                        placeholder="Caption (optional)"
-                        autoFocus
-                      />
+                      <div className={f.field}>
+                        <label className={`${f.label} ${f.required}`}>Alt text</label>
+                        <input
+                          className={f.input}
+                          value={editAlt}
+                          onChange={(e) => setEditAlt(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div className={f.field}>
+                        <label className={f.label}>Caption</label>
+                        <input
+                          className={f.input}
+                          value={editCaption}
+                          onChange={(e) => setEditCaption(e.target.value)}
+                          placeholder="Optional"
+                        />
+                      </div>
                       <div className={styles.imageRowActions}>
-                        <button type="button" className={f.submitBtn} onClick={() => saveCaption(img)}>Save</button>
+                        <button type="button" className={f.submitBtn} onClick={() => saveImageMeta(img)}>Save</button>
                         <button type="button" className={f.cancelBtn} onClick={() => setEditingId(null)}>Cancel</button>
                       </div>
                     </>
                   ) : (
                     <>
+                      <p className={styles.captionDisplay}><strong>Alt:</strong> {img.alt}</p>
                       {img.caption
-                        ? <p className={styles.captionDisplay}>{img.caption}</p>
+                        ? <p className={styles.captionEmpty}><strong>Caption:</strong> {img.caption}</p>
                         : <p className={styles.captionEmpty}>No caption</p>
                       }
                       <div className={styles.imageRowActions}>
-                        <button type="button" className={f.secondaryBtn} onClick={() => startEdit(img)}>Edit caption</button>
+                        <button type="button" className={f.cancelBtn} onClick={() => startEdit(img)}>Edit</button>
                         <button
                           type="button"
                           className={f.cancelBtn}
@@ -283,7 +298,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
               ) : (
                 <button
                   type="button"
-                  className={f.secondaryBtn}
+                  className={f.cancelBtn}
                   onClick={() => addFileInputRef.current?.click()}
                   disabled={addingImage}
                 >
@@ -309,7 +324,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
             />
             <button
               type="button"
-              className={f.secondaryBtn}
+              className={f.cancelBtn}
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
             >
