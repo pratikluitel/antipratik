@@ -555,9 +555,6 @@ func (s *PostService) AddPhotoImage(ctx context.Context, postID string, image mo
 	if err := requireNonEmpty("image url", image.URL); err != nil {
 		return nil, err
 	}
-	if err := requireNonEmpty("image alt", image.Alt); err != nil {
-		return nil, err
-	}
 	post, err := s.store.GetPostByID(ctx, postID)
 	if err != nil {
 		return nil, err
