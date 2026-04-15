@@ -4,6 +4,7 @@ services:
   nginx:
     image: ghcr.io/pratikluitel/antipratik-nginx:dev
     ports:
+      - "8443:443"
       - "8080:80"
     environment:
       - SERVER_NAME=${SERVER_NAME}
@@ -12,6 +13,9 @@ services:
       - ui
     networks:
       - antipratik-dev
+    volumes:
+      - /opt/antipratik-dev/certs/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
+      - /opt/antipratik-dev/certs/privkey.pem:/etc/ssl/private/privkey.pem:ro
     restart: unless-stopped
 
   api:
