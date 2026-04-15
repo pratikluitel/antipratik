@@ -175,7 +175,7 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		AlbumArt:        uploaded.AlbumArtURL,
 		AlbumArtTinyURL: albumArtTiny,
 		Duration:        duration,
-		Tags:            r.Form["tags"],
+		Tags:            formTags(r),
 	}
 	if album := r.FormValue("album"); album != "" {
 		input.Album = &album
@@ -199,14 +199,6 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 	input := models.UpdateMusicPost{Tags: formTags(r)}
 	if title := r.FormValue("title"); title != "" {
 		input.Title = &title
-	}
-	if durStr := r.FormValue("duration"); durStr != "" {
-		if d, err := strconv.Atoi(durStr); err == nil {
-			input.Duration = &d
-		} else {
-			writeError(w, http.StatusBadRequest, "duration must be an integer")
-			return
-		}
 	}
 	if albumStr := r.FormValue("album"); albumStr != "" {
 		input.Album = &albumStr
@@ -340,7 +332,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		ThumbnailURL:     thumbnailURL,
 		ThumbnailTinyURL: thumbnailTinyURL,
 		Duration:         duration,
-		Tags:             r.Form["tags"],
+		Tags:             formTags(r),
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl
@@ -415,7 +407,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		URL:              r.FormValue("url"),
 		ThumbnailURL:     thumbnailURL,
 		ThumbnailTinyURL: thumbnailTinyURL,
-		Tags:             r.Form["tags"],
+		Tags:             formTags(r),
 	}
 	if desc := r.FormValue("description"); desc != "" {
 		input.Description = &desc
