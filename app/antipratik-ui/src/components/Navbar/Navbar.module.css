@@ -107,6 +107,7 @@
   font-family: var(--font-sans);
   font-size: var(--nav-link-size);
   padding-bottom: 4px;
+  color: var(--color-text-muted-dark);
 }
 
 [data-theme='dark'] .navLink {
