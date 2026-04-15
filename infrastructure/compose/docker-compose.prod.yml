@@ -4,9 +4,13 @@ services:
   nginx:
     image: ghcr.io/pratikluitel/antipratik-nginx:prod
     ports:
+      - "9443:443"
       - "9080:80"
     environment:
       - SERVER_NAME=${SERVER_NAME}
+    volumes:
+      - /opt/antipratik-prod/certs/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
+      - /opt/antipratik-prod/certs/privkey.pem:/etc/ssl/private/privkey.pem:ro
     depends_on:
       - api
       - ui
