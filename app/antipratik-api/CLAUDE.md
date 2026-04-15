@@ -245,7 +245,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 9. **Never Use Panic** — Return errors instead of panicking in production code.
 10. **Never Trust Client-Side Validation** — Server must validate everything again.
 11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
-12. **Never add a separate upload endpoint** — File uploads belong inside the existing `POST/PUT /api/posts/<type>` handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes.
+12. **Never add a generic upload endpoint** — File uploads belong inside post handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes. _Exception:_ per-resource sub-collection endpoints such as `POST /api/posts/{id}/images` are acceptable when they manage images on an already-existing post (e.g. adding an image to an existing photo post).
 13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` in the top-level `routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
 14. **A photo post must always contain at least 1 image** — `DELETE /api/posts/{id}/images/{imageID}` returns a 400 ValidationError if the post has only one image remaining. This is enforced in the logic layer (`PostService.DeletePhotoImage`). Never bypass this check.
 
