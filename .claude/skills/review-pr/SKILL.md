@@ -105,8 +105,7 @@ One of:
 ### 6. Submit the formal review
 
 Map the verdict to a GitHub review event:
-- **Ready to merge** → `APPROVE`
-- **Minor notes** → `COMMENT`
+- **Minor notes or ready to merge** → `COMMENT`
 - **Needs changes** → `REQUEST_CHANGES`
 
 ```bash
