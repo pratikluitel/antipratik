@@ -53,11 +53,12 @@ export default function ArticleClient({ post }: Props) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const date = new Date(post.createdAt).toLocaleDateString('en-US', {
+  const date = new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(post.createdAt));
 
   const htmlBody = marked.parse(post.body, { breaks: true }) as string;
 

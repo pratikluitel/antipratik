@@ -32,11 +32,12 @@ export default function PhotoCard({ post, onOpen }: Props) {
   const mainImage = images[0];
   const [loaded, setLoaded] = useState(false);
 
-  const date = new Date(post.createdAt).toLocaleDateString('en-US', {
+  const date = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(post.createdAt));
 
   return (
     <article className={styles.card}>
