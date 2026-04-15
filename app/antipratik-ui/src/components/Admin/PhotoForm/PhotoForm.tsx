@@ -238,7 +238,7 @@ export default function PhotoForm({ token, initial, onSuccess, onCancel }: Photo
                     <>
                       <p className={styles.captionDisplay}><strong>Alt:</strong> {img.alt}</p>
                       {img.caption
-                        ? <p className={styles.captionEmpty}><strong>Caption:</strong> {img.caption}</p>
+                        ? <p className={styles.captionDisplay}><strong>Caption:</strong> {img.caption}</p>
                         : <p className={styles.captionEmpty}>No caption</p>
                       }
                       <div className={styles.imageRowActions}>
