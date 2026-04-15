@@ -62,11 +62,12 @@ function LinkThumbnail({ post }: { post: LinkPost }) {
 export default function LinkCard({ post }: Props) {
   const tagCls = tagClass(post.category);
   const label = tagLabel(post.category);
-  const date = new Date(post.createdAt).toLocaleDateString('en-US', {
+  const date = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(post.createdAt));
 
   return (
     <article className={cardAccentClass(post.category)}>

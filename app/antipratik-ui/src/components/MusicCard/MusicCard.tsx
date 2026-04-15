@@ -43,11 +43,12 @@ export default function MusicCard({ post }: Props) {
   const isThisTrackActive = activeTrack?.id === post.id;
   const isThisTrackPlaying = isThisTrackActive && isPlaying;
 
-  const date = new Date(post.createdAt).toLocaleDateString('en-US', {
+  const date = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(post.createdAt));
 
   return (
     <article
