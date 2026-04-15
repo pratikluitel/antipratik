@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/models"
@@ -545,6 +546,104 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 		Description: merged.Description, ThumbnailURL: merged.ThumbnailURL,
 		ThumbnailTinyURL: merged.ThumbnailTinyURL, Category: merged.Category,
 	}, nil
+}
+
+func (s *PostService) AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error) {
+	if err := requireNonEmpty("postID", postID); err != nil {
+		return nil, err
+	}
+	if err := requireNonEmpty("image url", image.URL); err != nil {
+		return nil, err
+	}
+	if err := requireNonEmpty("image alt", image.Alt); err != nil {
+		return nil, err
+	}
+	post, err := s.store.GetPostByID(ctx, postID)
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := post.(models.PhotoPost); !ok {
+		return nil, validationErr("post is not a photo post")
+	}
+	return s.store.AddPhotoImage(ctx, postID, image)
+}
+
+func (s *PostService) GetPhotoImage(ctx context.Context, postID string, imageIDStr string) (*models.PhotoImage, error) {
+	if err := requireNonEmpty("postID", postID); err != nil {
+		return nil, err
+	}
+	imageID, err := strconv.Atoi(imageIDStr)
+	if err != nil {
+		return nil, validationErr("imageID must be an integer")
+	}
+	// Returns nil, nil if not found — API layer maps this to 404.
+	return s.store.GetPhotoImage(ctx, postID, imageID)
+}
+
+func (s *PostService) UpdatePhotoImage(ctx context.Context, postID string, imageIDStr string, input models.UpdatePhotoImage) (*models.PhotoImage, error) {
+	if err := requireNonEmpty("postID", postID); err != nil {
+		return nil, err
+	}
+	imageID, err := strconv.Atoi(imageIDStr)
+	if err != nil {
+		return nil, validationErr("imageID must be an integer")
+	}
+	post, err := s.store.GetPostByID(ctx, postID)
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := post.(models.PhotoPost); !ok {
+		return nil, validationErr("post is not a photo post")
+	}
+	// Returns nil, nil if image not found — API layer maps this to 404.
+	return s.store.UpdatePhotoImage(ctx, postID, imageID, input)
+}
+
+func (s *PostService) DeletePhotoImage(ctx context.Context, postID string, imageIDStr string) (notFound bool, err error) {
+	if err := requireNonEmpty("postID", postID); err != nil {
+		return false, err
+	}
+	imageID, convErr := strconv.Atoi(imageIDStr)
+	if convErr != nil {
+		return false, validationErr("imageID must be an integer")
+	}
+	// Fetch the image first to collect file keys for cleanup.
+	img, err := s.store.GetPhotoImage(ctx, postID, imageID)
+	if err != nil {
+		return false, err
+	}
+	if img == nil {
+		return true, nil // not found
+	}
+	// Ensure the post has more than one image.
+	post, err := s.store.GetPostByID(ctx, postID)
+	if err != nil {
+		return false, err
+	}
+	photoPost, ok := post.(models.PhotoPost)
+	if !ok {
+		return false, validationErr("post is not a photo post")
+	}
+	if len(photoPost.Images) <= 1 {
+		return false, validationErr("cannot delete the only image in a photo post")
+	}
+	if err := s.store.DeletePhotoImage(ctx, postID, imageID); err != nil {
+		return false, err
+	}
+	// Clean up files in the background (same pattern as DeletePost).
+	keys := fileKeysForImage(img)
+	if len(keys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range keys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("DeletePhotoImage: failed to delete file", "key", key, "err", err)
+				}
+			}
+		}()
+	}
+	return false, nil
 }
 
 func (s *PostService) DeletePost(ctx context.Context, id string) error {

@@ -69,6 +69,7 @@ func (m MusicPost) postType() string { return "music" }
 
 // PhotoImage is a single image within a PhotoPost.
 type PhotoImage struct {
+	ID                int     `json:"id"`
 	URL               string  `json:"url"`
 	Alt               string  `json:"alt"`
 	Caption           *string `json:"caption,omitempty"`
@@ -76,6 +77,13 @@ type PhotoImage struct {
 	ThumbnailSmallURL *string `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string `json:"thumbnailLargeUrl,omitempty"`
+}
+
+// UpdatePhotoImage is a partial-update input for a single photo image.
+// Nil fields mean "leave unchanged".
+type UpdatePhotoImage struct {
+	Caption *string
+	Alt     *string
 }
 
 // PhotoPost contains one or more images and an optional location.

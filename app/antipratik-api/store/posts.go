@@ -262,6 +262,70 @@ func (s *SQLitePostStore) DeletePost(ctx context.Context, id string) error {
 	return err
 }
 
+func (s *SQLitePostStore) AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error) {
+	// Determine the next sort_order for this post.
+	var maxOrder int
+	row := s.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(sort_order), -1) FROM photo_images WHERE post_id=?`, postID)
+	if err := row.Scan(&maxOrder); err != nil {
+		return nil, fmt.Errorf("AddPhotoImage max sort_order: %w", err)
+	}
+	result, err := s.db.ExecContext(ctx,
+		`INSERT INTO photo_images (post_id, url, alt, caption, sort_order, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		postID, image.URL, image.Alt, image.Caption, maxOrder+1, image.ThumbnailTinyURL, image.ThumbnailSmallURL, image.ThumbnailMedURL, image.ThumbnailLargeURL,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("AddPhotoImage insert: %w", err)
+	}
+	newID, err := result.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("AddPhotoImage last insert id: %w", err)
+	}
+	image.ID = int(newID)
+	return &image, nil
+}
+
+func (s *SQLitePostStore) GetPhotoImage(ctx context.Context, postID string, imageID int) (*models.PhotoImage, error) {
+	var img models.PhotoImage
+	err := s.db.QueryRowContext(ctx,
+		`SELECT id, url, alt, caption, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE id=? AND post_id=?`,
+		imageID, postID,
+	).Scan(&img.ID, &img.URL, &img.Alt, &img.Caption, &img.ThumbnailTinyURL, &img.ThumbnailSmallURL, &img.ThumbnailMedURL, &img.ThumbnailLargeURL)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("GetPhotoImage: %w", err)
+	}
+	return &img, nil
+}
+
+func (s *SQLitePostStore) UpdatePhotoImage(ctx context.Context, postID string, imageID int, input models.UpdatePhotoImage) (*models.PhotoImage, error) {
+	// Build a dynamic SET clause for only the non-nil fields.
+	setClauses := []string{}
+	args := []any{}
+	if input.Caption != nil {
+		setClauses = append(setClauses, "caption=?")
+		args = append(args, *input.Caption)
+	}
+	if input.Alt != nil {
+		setClauses = append(setClauses, "alt=?")
+		args = append(args, *input.Alt)
+	}
+	if len(setClauses) > 0 {
+		q := "UPDATE photo_images SET " + strings.Join(setClauses, ", ") + " WHERE id=? AND post_id=?"
+		args = append(args, imageID, postID)
+		if _, err := s.db.ExecContext(ctx, q, args...); err != nil {
+			return nil, fmt.Errorf("UpdatePhotoImage: %w", err)
+		}
+	}
+	return s.GetPhotoImage(ctx, postID, imageID)
+}
+
+func (s *SQLitePostStore) DeletePhotoImage(ctx context.Context, postID string, imageID int) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM photo_images WHERE id=? AND post_id=?`, imageID, postID)
+	return err
+}
+
 // SQLitePostStore implements PostStore using a SQLite database.
 type SQLitePostStore struct {
 	db *sql.DB
@@ -561,7 +625,7 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, url, alt, caption, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
+	q := "SELECT id, post_id, url, alt, caption, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchPhotoImages: %w", err)
@@ -572,7 +636,7 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 	for rows.Next() {
 		var postID string
 		var img models.PhotoImage
-		if err := rows.Scan(&postID, &img.URL, &img.Alt, &img.Caption, &img.ThumbnailTinyURL, &img.ThumbnailSmallURL, &img.ThumbnailMedURL, &img.ThumbnailLargeURL); err != nil {
+		if err := rows.Scan(&img.ID, &postID, &img.URL, &img.Alt, &img.Caption, &img.ThumbnailTinyURL, &img.ThumbnailSmallURL, &img.ThumbnailMedURL, &img.ThumbnailLargeURL); err != nil {
 			return nil, fmt.Errorf("fetchPhotoImages scan: %w", err)
 		}
 		m[postID] = append(m[postID], img)

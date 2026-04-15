@@ -35,6 +35,12 @@ type PostStore interface {
 	UpdateVideo(ctx context.Context, id string, input models.VideoPostInput) error
 	UpdateLinkPost(ctx context.Context, id string, input models.LinkPostInput) error
 	DeletePost(ctx context.Context, id string) error
+
+	// Individual photo image operations
+	AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error)
+	GetPhotoImage(ctx context.Context, postID string, imageID int) (*models.PhotoImage, error)
+	UpdatePhotoImage(ctx context.Context, postID string, imageID int, input models.UpdatePhotoImage) (*models.PhotoImage, error)
+	DeletePhotoImage(ctx context.Context, postID string, imageID int) error
 }
 
 // LinkStore handles all external link database operations.
