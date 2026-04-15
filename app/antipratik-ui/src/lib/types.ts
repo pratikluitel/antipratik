@@ -45,6 +45,7 @@ export interface MusicPost extends BasePost {
 }
 
 export interface PhotoImage {
+  id?: number;                 // DB row id — present when returned from backend
   url: string;                // original — served via GET /files/{fileId}
   alt: string;
   caption?: string;

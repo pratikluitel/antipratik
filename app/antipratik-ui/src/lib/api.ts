@@ -7,7 +7,7 @@
  * Never call fetch() directly in a component or page.
  */
 
-import type { Post, MusicPost, PhotoPost, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState } from './types';
+import type { Post, MusicPost, PhotoPost, PhotoImage, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 // Server-side internal URL (not exposed to browser). Set SERVER_API_URL in the
@@ -307,6 +307,52 @@ export async function updatePhotoPost(id: string, formData: FormData, token: str
   });
   await throwOnError(response, 'updatePhotoPost');
   return response.json() as Promise<PhotoPost>;
+}
+
+function prefixPhotoImage(img: PhotoImage): PhotoImage {
+  return {
+    ...img,
+    url: prefixUrl(img.url),
+    thumbnailTinyUrl: prefixOptionalUrl(img.thumbnailTinyUrl),
+    thumbnailSmallUrl: prefixOptionalUrl(img.thumbnailSmallUrl),
+    thumbnailMediumUrl: prefixOptionalUrl(img.thumbnailMediumUrl),
+    thumbnailLargeUrl: prefixOptionalUrl(img.thumbnailLargeUrl),
+  };
+}
+
+export async function addPhotoImage(postID: string, formData: FormData, token: string): Promise<PhotoImage> {
+  const response = await fetch(`${API_URL}/api/posts/${postID}/images`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: formData,
+  });
+  await throwOnError(response, 'addPhotoImage');
+  const img = await response.json() as PhotoImage;
+  return prefixPhotoImage(img);
+}
+
+export async function updatePhotoImage(
+  postID: string,
+  imageID: number,
+  input: { caption?: string; alt?: string },
+  token: string,
+): Promise<PhotoImage> {
+  const response = await fetch(`${API_URL}/api/posts/${postID}/images/${imageID}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  await throwOnError(response, 'updatePhotoImage');
+  const img = await response.json() as PhotoImage;
+  return prefixPhotoImage(img);
+}
+
+export async function deletePhotoImage(postID: string, imageID: number, token: string): Promise<void> {
+  const response = await fetch(`${API_URL}/api/posts/${postID}/images/${imageID}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'deletePhotoImage');
 }
 
 // ─── VIDEO ────────────────────────────────────────────────────────────────────

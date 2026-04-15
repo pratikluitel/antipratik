@@ -190,7 +190,13 @@ export default function AdminDashboardPage() {
               <div key={post.id} className={styles.row}>
                 <div className={styles.rowInfo}>
                   <span className={styles.rowTitle}>
-                    {'title' in post ? post.title : post.type === 'short' ? (post as ShortPost).body.slice(0, 60) + '…' : post.id}
+                    {'title' in post
+                      ? post.title
+                      : post.type === 'short'
+                        ? (post as ShortPost).body.slice(0, 60) + '…'
+                        : post.type === 'photo'
+                          ? (post as PhotoPost).location ?? `${(post as PhotoPost).images.length} photo${(post as PhotoPost).images.length === 1 ? '' : 's'}`
+                          : (post as Post).id}
                   </span>
                   <span className={styles.rowMeta}>{new Date(post.createdAt).toLocaleDateString()}</span>
                 </div>

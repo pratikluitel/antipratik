@@ -34,6 +34,14 @@ type PostLogic interface {
 	UpdateVideo(ctx context.Context, id string, input models.UpdateVideoPost) (models.VideoPost, error)
 	UpdateLinkPost(ctx context.Context, id string, input models.UpdateLinkPost) (models.LinkPost, error)
 	DeletePost(ctx context.Context, id string) error
+
+	// Individual photo image operations
+	AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error)
+	GetPhotoImage(ctx context.Context, postID string, imageIDStr string) (*models.PhotoImage, error)
+	UpdatePhotoImage(ctx context.Context, postID string, imageIDStr string, input models.UpdatePhotoImage) (*models.PhotoImage, error)
+	// DeletePhotoImage returns nil, nil when the image is not found (API maps to 404).
+	// Returns a ValidationError if the post has only one image.
+	DeletePhotoImage(ctx context.Context, postID string, imageIDStr string) (notFound bool, err error)
 }
 
 // LinkLogic defines the business operations on external links.

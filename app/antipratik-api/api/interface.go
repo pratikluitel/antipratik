@@ -21,6 +21,10 @@ type PostHandler interface {
 	UpdateVideo(w http.ResponseWriter, r *http.Request)
 	UpdateLinkPost(w http.ResponseWriter, r *http.Request)
 	DeletePost(w http.ResponseWriter, r *http.Request)
+	AddPhotoImage(w http.ResponseWriter, r *http.Request)
+	GetPhotoImage(w http.ResponseWriter, r *http.Request)
+	UpdatePhotoImage(w http.ResponseWriter, r *http.Request)
+	DeletePhotoImage(w http.ResponseWriter, r *http.Request)
 }
 
 // LinkHandler handles HTTP requests for external link resources.

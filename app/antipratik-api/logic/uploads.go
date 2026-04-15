@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
@@ -58,9 +59,9 @@ type MusicFilesResult struct {
 
 // UploadLogic handles file storage and thumbnail generation for uploaded assets.
 type UploadLogic interface {
-	// UploadPhotoFiles stores multiple photo images (with 3 thumbnail variants each) for the
-	// given post. File IDs follow <postID>-<index>.<ext>; thumbnail IDs follow
-	// <postID>-<index>-<size>.<ext> where size is small/medium/large.
+	// UploadPhotoFiles stores multiple photo images (with 4 thumbnail variants each) for the
+	// given post. File IDs follow <postID>-<uuid>.<ext>; thumbnail IDs follow
+	// <postID>-<uuid>-<size>.<ext> where size is tiny/small/medium/large.
 	UploadPhotoFiles(ctx context.Context, postID string, files []models.FileInput) ([]PhotoImageResult, error)
 
 	// UploadMusicFiles stores audio and/or album art for the given post.
@@ -155,6 +156,7 @@ var thumbnailSizes = []struct {
 }
 
 // uploadOnePhoto encodes, resizes, and stores a single photo image and its thumbnails.
+// File IDs use a UUID to guarantee uniqueness: <postID>-<uuid>.<ext>.
 func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int, fi models.FileInput) (PhotoImageResult, error) {
 	ext := strings.ToLower(filepath.Ext(fi.Header.Filename))
 	if !allowedPhotoExts[ext] {
@@ -168,7 +170,8 @@ func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int
 
 	sExt := storageExt(ext)
 	ct := contentTypeForExt(sExt)
-	fileID := fmt.Sprintf("%s-%d%s", postID, i, sExt)
+	imgUUID := uuid.New().String()
+	fileID := fmt.Sprintf("%s-%s%s", postID, imgUUID, sExt)
 
 	origBuf, err := encodeImage(src, ext)
 	if err != nil {
@@ -185,7 +188,7 @@ func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int
 		if err != nil {
 			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles encode thumbnail[%d][%s]: %w", i, sz.name, err)
 		}
-		thumbID := fmt.Sprintf("%s-%d-%s%s", postID, i, sz.name, sExt)
+		thumbID := fmt.Sprintf("%s-%s-%s%s", postID, imgUUID, sz.name, sExt)
 		if err := s.files.Put(ctx, storePrefixThumbnails+thumbID, bytes.NewReader(buf), ct); err != nil {
 			return PhotoImageResult{}, fmt.Errorf("UploadPhotoFiles store thumbnail[%d][%s]: %w", i, sz.name, err)
 		}

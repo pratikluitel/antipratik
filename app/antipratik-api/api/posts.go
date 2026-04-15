@@ -461,3 +461,111 @@ func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// ── Individual photo image endpoints ─────────────────────────────────────────
+
+func (h *PostHandlerImpl) AddPhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		return
+	}
+
+	fhs := r.MultipartForm.File["image"]
+	if len(fhs) == 0 {
+		writeError(w, http.StatusBadRequest, "image file is required")
+		return
+	}
+	f, err := fhs[0].Open()
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "could not read uploaded image")
+		return
+	}
+	defer f.Close()
+
+	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, []models.FileInput{{File: f, Header: fhs[0]}})
+	if err != nil {
+		handleLogicError(w, h.log, "AddPhotoImage upload", err)
+		return
+	}
+	u := uploadResults[0]
+	tiny, small, med, large := u.ThumbnailTinyURL, u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
+	image := models.PhotoImage{
+		URL:               u.OriginalURL,
+		Alt:               r.FormValue("alt"),
+		ThumbnailTinyURL:  &tiny,
+		ThumbnailSmallURL: &small,
+		ThumbnailMedURL:   &med,
+		ThumbnailLargeURL: &large,
+	}
+	if c := r.FormValue("caption"); c != "" {
+		image.Caption = &c
+	}
+
+	result, err := h.logic.AddPhotoImage(r.Context(), postID, image)
+	if err != nil {
+		handleLogicError(w, h.log, "AddPhotoImage", err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, result)
+}
+
+func (h *PostHandlerImpl) GetPhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	img, err := h.logic.GetPhotoImage(r.Context(), postID, imageIDStr)
+	if err != nil {
+		handleLogicError(w, h.log, "GetPhotoImage", err)
+		return
+	}
+	if img == nil {
+		writeError(w, http.StatusNotFound, "image not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, img)
+}
+
+func (h *PostHandlerImpl) UpdatePhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	var body struct {
+		Caption *string `json:"caption"`
+		Alt     *string `json:"alt"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
+	img, err := h.logic.UpdatePhotoImage(r.Context(), postID, imageIDStr, models.UpdatePhotoImage{
+		Caption: body.Caption,
+		Alt:     body.Alt,
+	})
+	if err != nil {
+		handleLogicError(w, h.log, "UpdatePhotoImage", err)
+		return
+	}
+	if img == nil {
+		writeError(w, http.StatusNotFound, "image not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, img)
+}
+
+func (h *PostHandlerImpl) DeletePhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	notFound, err := h.logic.DeletePhotoImage(r.Context(), postID, imageIDStr)
+	if err != nil {
+		handleLogicError(w, h.log, "DeletePhotoImage", err)
+		return
+	}
+	if notFound {
+		writeError(w, http.StatusNotFound, "image not found")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
