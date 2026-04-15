@@ -34,6 +34,7 @@
   text-decoration: none;
   flex-shrink: 0;
   justify-self: start;
+  color: var(--color-text-primary-dark);
 }
 
 [data-theme='dark'] .logo {
@@ -107,6 +108,7 @@
   font-family: var(--font-sans);
   font-size: var(--nav-link-size);
   padding-bottom: 4px;
+  color: var(--color-text-muted-dark);
 }
 
 [data-theme='dark'] .navLink {

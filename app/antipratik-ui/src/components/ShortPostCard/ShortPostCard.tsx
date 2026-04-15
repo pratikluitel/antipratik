@@ -7,11 +7,12 @@ interface Props {
 }
 
 export default function ShortPostCard({ post, onTagClick }: Props) {
-  const date = new Date(post.createdAt).toLocaleDateString('en-US', {
+  const date = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+    timeZone: 'UTC',
+  }).format(new Date(post.createdAt));
 
   return (
     <article className={styles.card}>

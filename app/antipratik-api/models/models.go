@@ -4,6 +4,19 @@ package models
 
 import "mime/multipart"
 
+// PostType is the discriminator string stored in the posts table.
+type PostType = string
+
+// Named post type constants — use these instead of bare string literals.
+const (
+	PostTypeEssay PostType = "essay"
+	PostTypeShort PostType = "short"
+	PostTypeMusic PostType = "music"
+	PostTypePhoto PostType = "photo"
+	PostTypeVideo PostType = "video"
+	PostTypeLink  PostType = "link"
+)
+
 // Post is an interface satisfied by all content types.
 // The unexported method prevents external implementations.
 type Post interface {
@@ -56,6 +69,7 @@ func (m MusicPost) postType() string { return "music" }
 
 // PhotoImage is a single image within a PhotoPost.
 type PhotoImage struct {
+	ID                int     `json:"id"`
 	URL               string  `json:"url"`
 	Alt               string  `json:"alt"`
 	Caption           *string `json:"caption,omitempty"`
@@ -63,6 +77,13 @@ type PhotoImage struct {
 	ThumbnailSmallURL *string `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string `json:"thumbnailLargeUrl,omitempty"`
+}
+
+// UpdatePhotoImage is a partial-update input for a single photo image.
+// Nil fields mean "leave unchanged".
+type UpdatePhotoImage struct {
+	Caption *string
+	Alt     *string
 }
 
 // PhotoPost contains one or more images and an optional location.
@@ -134,7 +155,7 @@ type FilterState struct {
 
 // ── Create/Update input types ─────────────────────────────────────────────────
 
-type CreateEssayPost struct {
+type EssayPostInput struct {
 	Title              string   `json:"title"`
 	Slug               string   `json:"slug"`
 	Excerpt            string   `json:"excerpt"`
@@ -143,38 +164,41 @@ type CreateEssayPost struct {
 	Tags               []string `json:"tags"`
 }
 
-type CreateShortPost struct {
+type ShortPostInput struct {
 	Body string   `json:"body"`
 	Tags []string `json:"tags"`
 }
 
-type CreateMusicPost struct {
+type MusicPostInput struct {
 	Title           string   `json:"title"`
 	AlbumArt        string   `json:"albumArt"`
-	AlbumArtTinyURL string   `json:"albumArtTinyUrl,omitempty"`
+	AlbumArtTinyURL *string  `json:"albumArtTinyUrl,omitempty"`
 	AudioURL        string   `json:"audioURL"`
 	Duration        int      `json:"duration"`
 	Album           *string  `json:"album,omitempty"`
 	Tags            []string `json:"tags"`
 }
 
-type CreatePhotoPost struct {
+// PhotoPostInput is the input type for both creating and updating photo posts.
+// There is no separate Update type because all fields are optional on update
+// (images replace in full when provided; location and tags use nil = no-change semantics).
+type PhotoPostInput struct {
 	Images   []PhotoImage `json:"images"`
 	Location *string      `json:"location,omitempty"`
 	Tags     []string     `json:"tags"`
 }
 
-type CreateVideoPost struct {
+type VideoPostInput struct {
 	Title            string   `json:"title"`
 	ThumbnailURL     string   `json:"thumbnailURL"`
-	ThumbnailTinyURL string   `json:"thumbnailTinyUrl,omitempty"`
+	ThumbnailTinyURL *string  `json:"thumbnailTinyUrl,omitempty"`
 	VideoURL         string   `json:"videoURL"`
 	Duration         int      `json:"duration"`
 	Playlist         *string  `json:"playlist,omitempty"`
 	Tags             []string `json:"tags"`
 }
 
-type CreateLinkPost struct {
+type LinkPostInput struct {
 	Title            string   `json:"title"`
 	URL              string   `json:"url"`
 	Domain           string   `json:"-"`
@@ -217,16 +241,8 @@ type UpdateMusicPost struct {
 	AudioURL        *string
 	AlbumArt        *string
 	AlbumArtTinyURL *string
-	Duration        *int
 	Album           *string
 	Tags            []string
-}
-
-// UpdatePhotoPost is the partial-update input for photo posts (multipart/form-data).
-type UpdatePhotoPost struct {
-	Images   []PhotoImage
-	Location *string
-	Tags     []string
 }
 
 // UpdateVideoPost is the partial-update input for video posts (multipart/form-data).

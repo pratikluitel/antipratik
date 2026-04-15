@@ -75,6 +75,31 @@ func fileKeysForPost(post models.Post) []string {
 	return keys
 }
 
+// fileKeysForImage returns all storage keys for a single PhotoImage
+// (original file + all thumbnail variants), for use in async cleanup.
+func fileKeysForImage(img *models.PhotoImage) []string {
+	if img == nil {
+		return nil
+	}
+	var keys []string
+	if img.URL != "" {
+		keys = append(keys, urlToStorageKey(img.URL))
+	}
+	if img.ThumbnailTinyURL != nil {
+		keys = append(keys, urlToStorageKey(*img.ThumbnailTinyURL))
+	}
+	if img.ThumbnailSmallURL != nil {
+		keys = append(keys, urlToStorageKey(*img.ThumbnailSmallURL))
+	}
+	if img.ThumbnailMedURL != nil {
+		keys = append(keys, urlToStorageKey(*img.ThumbnailMedURL))
+	}
+	if img.ThumbnailLargeURL != nil {
+		keys = append(keys, urlToStorageKey(*img.ThumbnailLargeURL))
+	}
+	return keys
+}
+
 // urlToStorageKey converts a serving URL (/files/<id> or /thumbnails/<id>)
 // to a storage key (photos/<id>, music/<id>, or thumbnails/<id>).
 func urlToStorageKey(u string) string {

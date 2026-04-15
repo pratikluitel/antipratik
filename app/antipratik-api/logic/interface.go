@@ -21,19 +21,27 @@ type PostLogic interface {
 	// Music, Photo, Video, and LinkPost accept a preID: if non-empty it is used as the post ID
 	// (so the API layer can generate the ID before uploading files and keep them in sync);
 	// if empty, a new UUID is generated.
-	CreateEssay(ctx context.Context, input models.CreateEssayPost) (models.EssayPost, error)
-	CreateShort(ctx context.Context, input models.CreateShortPost) (models.ShortPost, error)
-	CreateMusic(ctx context.Context, preID string, input models.CreateMusicPost) (models.MusicPost, error)
-	CreatePhoto(ctx context.Context, preID string, input models.CreatePhotoPost) (models.PhotoPost, error)
-	CreateVideo(ctx context.Context, preID string, input models.CreateVideoPost) (models.VideoPost, error)
-	CreateLinkPost(ctx context.Context, preID string, input models.CreateLinkPost) (models.LinkPost, error)
+	CreateEssay(ctx context.Context, input models.EssayPostInput) (models.EssayPost, error)
+	CreateShort(ctx context.Context, input models.ShortPostInput) (models.ShortPost, error)
+	CreateMusic(ctx context.Context, preID string, input models.MusicPostInput) (models.MusicPost, error)
+	CreatePhoto(ctx context.Context, preID string, input models.PhotoPostInput) (models.PhotoPost, error)
+	CreateVideo(ctx context.Context, preID string, input models.VideoPostInput) (models.VideoPost, error)
+	CreateLinkPost(ctx context.Context, preID string, input models.LinkPostInput) (models.LinkPost, error)
 	UpdateEssay(ctx context.Context, id string, input models.UpdateEssayPost) (models.EssayPost, error)
 	UpdateShort(ctx context.Context, id string, input models.UpdateShortPost) (models.ShortPost, error)
 	UpdateMusic(ctx context.Context, id string, input models.UpdateMusicPost) (models.MusicPost, error)
-	UpdatePhoto(ctx context.Context, id string, input models.UpdatePhotoPost) (models.PhotoPost, error)
+	UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) (models.PhotoPost, error)
 	UpdateVideo(ctx context.Context, id string, input models.UpdateVideoPost) (models.VideoPost, error)
 	UpdateLinkPost(ctx context.Context, id string, input models.UpdateLinkPost) (models.LinkPost, error)
 	DeletePost(ctx context.Context, id string) error
+
+	// Individual photo image operations
+	AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error)
+	GetPhotoImage(ctx context.Context, postID string, imageIDStr string) (*models.PhotoImage, error)
+	UpdatePhotoImage(ctx context.Context, postID string, imageIDStr string, input models.UpdatePhotoImage) (*models.PhotoImage, error)
+	// DeletePhotoImage returns nil, nil when the image is not found (API maps to 404).
+	// Returns a ValidationError if the post has only one image.
+	DeletePhotoImage(ctx context.Context, postID string, imageIDStr string) (notFound bool, err error)
 }
 
 // LinkLogic defines the business operations on external links.
@@ -60,4 +68,14 @@ type NewsletterLogic interface {
 type AuthLogic interface {
 	Login(ctx context.Context, username, password string) (string, error)
 	ValidateToken(ctx context.Context, token string) error
+}
+
+// SetupLogic defines application bootstrapping operations that run at startup.
+// It ensures main.go never calls the store layer directly.
+type SetupLogic interface {
+	// UpsertAdminUser creates or updates the admin user with the given password.
+	UpsertAdminUser(ctx context.Context, password string) error
+	// GetOrCreateJWTSecret returns the persisted JWT signing secret,
+	// generating and storing a new one if none exists yet.
+	GetOrCreateJWTSecret(ctx context.Context) (string, error)
 }

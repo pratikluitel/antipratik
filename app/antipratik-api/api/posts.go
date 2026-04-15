@@ -62,7 +62,7 @@ func (h *PostHandlerImpl) GetPost(w http.ResponseWriter, r *http.Request) {
 // ── JSON-body write handlers (essay, short) ───────────────────────────────────
 
 func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
-	var input models.CreateEssayPost
+	var input models.EssayPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -76,7 +76,7 @@ func (h *PostHandlerImpl) CreateEssay(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PostHandlerImpl) CreateShort(w http.ResponseWriter, r *http.Request) {
-	var input models.CreateShortPost
+	var input models.ShortPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -165,13 +165,17 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := models.CreateMusicPost{
+	var albumArtTiny *string
+	if uploaded.AlbumArtTinyURL != "" {
+		albumArtTiny = &uploaded.AlbumArtTinyURL
+	}
+	input := models.MusicPostInput{
 		Title:           r.FormValue("title"),
 		AudioURL:        uploaded.AudioURL,
 		AlbumArt:        uploaded.AlbumArtURL,
-		AlbumArtTinyURL: uploaded.AlbumArtTinyURL,
+		AlbumArtTinyURL: albumArtTiny,
 		Duration:        duration,
-		Tags:            r.Form["tags"],
+		Tags:            formTags(r),
 	}
 	if album := r.FormValue("album"); album != "" {
 		input.Album = &album
@@ -195,14 +199,6 @@ func (h *PostHandlerImpl) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 	input := models.UpdateMusicPost{Tags: formTags(r)}
 	if title := r.FormValue("title"); title != "" {
 		input.Title = &title
-	}
-	if durStr := r.FormValue("duration"); durStr != "" {
-		if d, err := strconv.Atoi(durStr); err == nil {
-			input.Duration = &d
-		} else {
-			writeError(w, http.StatusBadRequest, "duration must be an integer")
-			return
-		}
 	}
 	if albumStr := r.FormValue("album"); albumStr != "" {
 		input.Album = &albumStr
@@ -270,7 +266,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	input := models.CreatePhotoPost{Images: images, Tags: r.Form["tags[]"]}
+	input := models.PhotoPostInput{Images: images, Tags: r.Form["tags[]"]}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
@@ -290,7 +286,7 @@ func (h *PostHandlerImpl) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := models.UpdatePhotoPost{Tags: formTags(r)}
+	input := models.PhotoPostInput{Tags: formTags(r)}
 	if loc := r.FormValue("location"); loc != "" {
 		input.Location = &loc
 	}
@@ -311,7 +307,8 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	postID := uuid.New().String()
 
-	var thumbnailURL, thumbnailTinyURL string
+	var thumbnailURL string
+	var thumbnailTinyURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer thumbFile.Close()
 		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
@@ -321,7 +318,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		thumbnailURL = result.URL
-		thumbnailTinyURL = result.TinyURL
+		thumbnailTinyURL = &result.TinyURL
 	}
 
 	duration, err := strconv.Atoi(r.FormValue("duration"))
@@ -329,13 +326,13 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "duration must be an integer")
 		return
 	}
-	input := models.CreateVideoPost{
+	input := models.VideoPostInput{
 		Title:            r.FormValue("title"),
 		VideoURL:         r.FormValue("videoURL"),
 		ThumbnailURL:     thumbnailURL,
 		ThumbnailTinyURL: thumbnailTinyURL,
 		Duration:         duration,
-		Tags:             r.Form["tags"],
+		Tags:             formTags(r),
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl
@@ -405,12 +402,12 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		thumbnailTinyURL = &result.TinyURL
 	}
 
-	input := models.CreateLinkPost{
+	input := models.LinkPostInput{
 		Title:            r.FormValue("title"),
 		URL:              r.FormValue("url"),
 		ThumbnailURL:     thumbnailURL,
 		ThumbnailTinyURL: thumbnailTinyURL,
-		Tags:             r.Form["tags"],
+		Tags:             formTags(r),
 	}
 	if desc := r.FormValue("description"); desc != "" {
 		input.Description = &desc
@@ -460,6 +457,114 @@ func (h *PostHandlerImpl) DeletePost(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeletePost(r.Context(), id); err != nil {
 		handleLogicError(w, h.log, "DeletePost", err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ── Individual photo image endpoints ─────────────────────────────────────────
+
+func (h *PostHandlerImpl) AddPhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		return
+	}
+
+	fhs := r.MultipartForm.File["image"]
+	if len(fhs) == 0 {
+		writeError(w, http.StatusBadRequest, "image file is required")
+		return
+	}
+	f, err := fhs[0].Open()
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "could not read uploaded image")
+		return
+	}
+	defer f.Close()
+
+	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, []models.FileInput{{File: f, Header: fhs[0]}})
+	if err != nil {
+		handleLogicError(w, h.log, "AddPhotoImage upload", err)
+		return
+	}
+	u := uploadResults[0]
+	tiny, small, med, large := u.ThumbnailTinyURL, u.ThumbnailSmallURL, u.ThumbnailMedURL, u.ThumbnailLargeURL
+	image := models.PhotoImage{
+		URL:               u.OriginalURL,
+		Alt:               r.FormValue("alt"),
+		ThumbnailTinyURL:  &tiny,
+		ThumbnailSmallURL: &small,
+		ThumbnailMedURL:   &med,
+		ThumbnailLargeURL: &large,
+	}
+	if c := r.FormValue("caption"); c != "" {
+		image.Caption = &c
+	}
+
+	result, err := h.logic.AddPhotoImage(r.Context(), postID, image)
+	if err != nil {
+		handleLogicError(w, h.log, "AddPhotoImage", err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, result)
+}
+
+func (h *PostHandlerImpl) GetPhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	img, err := h.logic.GetPhotoImage(r.Context(), postID, imageIDStr)
+	if err != nil {
+		handleLogicError(w, h.log, "GetPhotoImage", err)
+		return
+	}
+	if img == nil {
+		writeError(w, http.StatusNotFound, "image not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, img)
+}
+
+func (h *PostHandlerImpl) UpdatePhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	var body struct {
+		Caption *string `json:"caption"`
+		Alt     *string `json:"alt"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
+	img, err := h.logic.UpdatePhotoImage(r.Context(), postID, imageIDStr, models.UpdatePhotoImage{
+		Caption: body.Caption,
+		Alt:     body.Alt,
+	})
+	if err != nil {
+		handleLogicError(w, h.log, "UpdatePhotoImage", err)
+		return
+	}
+	if img == nil {
+		writeError(w, http.StatusNotFound, "image not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, img)
+}
+
+func (h *PostHandlerImpl) DeletePhotoImage(w http.ResponseWriter, r *http.Request) {
+	postID := r.PathValue("id")
+	imageIDStr := r.PathValue("imageID")
+
+	notFound, err := h.logic.DeletePhotoImage(r.Context(), postID, imageIDStr)
+	if err != nil {
+		handleLogicError(w, h.log, "DeletePhotoImage", err)
+		return
+	}
+	if notFound {
+		writeError(w, http.StatusNotFound, "image not found")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

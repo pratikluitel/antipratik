@@ -36,6 +36,18 @@ jobs:
             printf 'ANTIPRATIK_R2_SECRET_ACCESS_KEY=%s\n' '${{ secrets.ANTIPRATIK_R2_SECRET_ACCESS_KEY }}' >> /opt/antipratik-${{ env.TAG }}/.env
             chmod 600 /opt/antipratik-${{ env.TAG }}/.env
 
+      - name: Write TLS certs to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p /opt/antipratik-${{ env.TAG }}/certs
+            printf '%s' '${{ secrets.TLS_CERT_BASE64 }}' | base64 --decode > /opt/antipratik-${{ env.TAG }}/certs/fullchain.pem
+            printf '%s' '${{ secrets.TLS_KEY_BASE64 }}'  | base64 --decode > /opt/antipratik-${{ env.TAG }}/certs/privkey.pem
+            chmod 600 /opt/antipratik-${{ env.TAG }}/certs/*.pem
+
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
