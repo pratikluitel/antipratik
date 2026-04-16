@@ -435,6 +435,17 @@ SQLite database with foreign key constraints and cascading deletes.
 5. **Test Endpoints:** Use OpenAPI spec and Swagger UI
 6. **Migrate Schema:** Add SQL migrations for schema changes
 
+## Code Quality — Required Before Every Change
+
+After every code change, run all three checks and fix any errors before considering the work done:
+
+```bash
+CGO_ENABLED=0 go vet ./...
+CGO_ENABLED=0 golangci-lint run
+```
+
+Both commands must produce **zero errors**. Warnings from `golangci-lint` that are false positives may be suppressed with a targeted `//nolint:<linter>` comment with a brief explanation, but errors must be fixed.
+
 ---
 
 ## Deployment Considerations

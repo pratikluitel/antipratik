@@ -57,7 +57,7 @@ jobs:
           source: >-
             infrastructure/config/config.${{ env.TAG }}.yaml,
             infrastructure/compose/docker-compose.${{ env.TAG }}.yml,
-            .github/scripts/deploy.sh
+            infrastructure/deploy.sh
           target: /tmp/
           strip_components: 2
 

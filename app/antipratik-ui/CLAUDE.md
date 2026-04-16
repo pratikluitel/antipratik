@@ -379,3 +379,16 @@ ThemeProvider
 14. **Link essays to `/post/${slug}`** — correct path is `/${slug}`. Next.js catch-all handles it.
 15. **Use `--accent-*` colors on UI chrome elements** — accent tokens are for content only.
 16. **Set text color tokens below minimum contrast** — all text tokens must achieve ≥ 4.5:1 (WCAG AA normal text) or ≥ 3:1 (large/bold text) against their expected background. "Subtle" is for de-emphasis, not invisibility. Verify contrast before changing any `--color-text-*`, `--link-*-color`, or `--nl-*-color` token.
+
+---
+
+## Code Quality — Required Before Every Change
+
+After every code change, run all three checks and fix any errors before considering the work done:
+
+```bash
+npm run lint
+npm run typecheck
+```
+
+Both commands must produce **zero errors**. ESLint warnings for intentionally unused `_`-prefixed variables or unavoidable false positives (e.g. `@next/next/no-img-element` for external API images) may be suppressed with a targeted `// eslint-disable-next-line` comment with a brief explanation, but errors must be fixed.
