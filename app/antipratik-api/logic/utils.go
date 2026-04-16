@@ -15,7 +15,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pratikluitel/antipratik/models"
-	"github.com/strukturag/libheif/go/heif"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/webp"
 )
@@ -131,22 +130,7 @@ func decodeImage(r multipart.File, ext string) (image.Image, error) {
 	case ".webp":
 		img, err = webp.Decode(bytes.NewReader(data))
 	case ".heic", ".heif":
-		hctx, hErr := heif.NewContext()
-		if hErr != nil {
-			return nil, fmt.Errorf("creating heif context: %w", hErr)
-		}
-		if hErr = hctx.ReadFromMemory(data); hErr != nil {
-			return nil, fmt.Errorf("reading heif data: %w", hErr)
-		}
-		handle, hErr := hctx.GetPrimaryImageHandle()
-		if hErr != nil {
-			return nil, fmt.Errorf("getting heif primary image: %w", hErr)
-		}
-		decoded, hErr := handle.DecodeImage(heif.ColorspaceUndefined, heif.ChromaUndefined, nil)
-		if hErr != nil {
-			return nil, fmt.Errorf("decoding heif image: %w", hErr)
-		}
-		img, err = decoded.GetImage()
+		img, err = decodeHEIF(data)
 	default:
 		img, _, err = image.Decode(bytes.NewReader(data))
 	}
