@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getPosts } from '../../lib/api';
+import { getPosts, getTags } from '../../lib/api';
 import FeedPageClient from '../../components/FeedPageClient/FeedPageClient';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   title: 'Feed — antipratik',
 };
 
-export default async function FeedPage() {
-  const posts = await getPosts();
-  return <FeedPageClient posts={posts} />;
+interface Props {
+  searchParams: Promise<{ tag?: string }>;
+}
+
+export default async function FeedPage({ searchParams }: Props) {
+  const { tag } = await searchParams;
+  const [posts, allTags] = await Promise.all([getPosts(), getTags()]);
+  return <FeedPageClient posts={posts} allTags={allTags} initialTag={tag} />;
 }

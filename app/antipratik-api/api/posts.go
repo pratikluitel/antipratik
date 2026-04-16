@@ -42,6 +42,16 @@ func (h *PostHandlerImpl) GetPosts(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, posts)
 }
 
+// GetTags handles GET /api/tags — returns all tag names sorted alphabetically.
+func (h *PostHandlerImpl) GetTags(w http.ResponseWriter, r *http.Request) {
+	tags, err := h.logic.GetTags(r.Context())
+	if err != nil {
+		handleLogicError(w, h.log, "GetTags", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, tags)
+}
+
 // GetPost handles GET /api/posts/{slug}
 func (h *PostHandlerImpl) GetPost(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")

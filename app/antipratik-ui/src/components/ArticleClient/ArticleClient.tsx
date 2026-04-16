@@ -95,6 +95,19 @@ export default function ArticleClient({ post }: Props) {
             <span className={styles.dot}>·</span>
             <span>{post.readingTimeMinutes} min read</span>
           </div>
+          {post.tags.length > 0 && (
+            <div className={styles.tags}>
+              {post.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/feed?tag=${encodeURIComponent(tag)}`}
+                  className={styles.tagLink}
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </header>
 
         <div

@@ -13,6 +13,9 @@ type PostLogic interface {
 	// GetPosts returns posts matching the given filter, newest first.
 	GetPosts(ctx context.Context, filter models.FilterState) ([]models.Post, error)
 
+	// GetTags returns all tag names sorted alphabetically.
+	GetTags(ctx context.Context) ([]string, error)
+
 	// GetPost returns the essay with the given slug, or nil if not found.
 	GetPost(ctx context.Context, slug string) (*models.EssayPost, error)
 
