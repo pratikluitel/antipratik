@@ -20,15 +20,18 @@ gh issue view $ARGUMENTS --repo pratikluitel/antipratik \
 
 Extract: title, body, labels, and comments. Identify affected areas and any specific tokens, components, layers, or files mentioned.
 
-### 2. Determine scope: FE, BE, or both
+### 2. Determine scope: FE, BE, Infra, or combination
 
 **Check labels first** (authoritative):
-- Labels containing `frontend`, `fe`, `ui` → **FE only**
-- Labels containing `backend`, `be`, `api` → **BE only**
-- Both present, or no matching labels → scan title + body for keywords:
+- Labels containing `frontend`, `fe`, `ui` → **FE**
+- Labels containing `backend`, `be`, `api` → **BE**
+- Labels containing `infrastructure`, `ops` → **Infra**
+- Multiple matching labels → combine scopes
+- No matching labels → scan title + body for keywords:
   - FE signals: component, style, token, CSS, page, layout, UI, design, frontend validation
   - BE signals: endpoint, route, store, migration, database, SQL, Go, API, auth, api/backend validation
-- If signals are mixed or absent → treat as **both**
+  - Infra signals: docker, compose, nginx, deploy, workflow, CI, pipeline, SSL, cert, server, port
+- If signals are mixed or absent → treat as **FE + BE**
 
 Record the scope decision — it controls every subsequent step.
 
@@ -36,14 +39,18 @@ Record the scope decision — it controls every subsequent step.
 
 **Always read the relevant CLAUDE.md(s) first — they contain inviolable rules.**
 
-**If FE (or both):**
+**If FE (or includes FE):**
 - Read `app/antipratik-ui/CLAUDE.md`
 - Read `app/antipratik-ui/src/styles/tokens.css` if the issue touches styling or tokens
 - Read the relevant component `.module.css` and `.tsx` files under `app/antipratik-ui/src/`
 
-**If BE (or both):**
+**If BE (or includes BE):**
 - Read `app/antipratik-api/CLAUDE.md`
 - Read the relevant files under `app/antipratik-api/` — `api/`, `logic/`, `store/`, `models/`
+
+**If Infra (or includes Infra):**
+- Read `infrastructure/CLAUDE.md` — covers the full GitOps flow, compose structure, nginx, SSL, and CI/CD rules
+- Read the relevant files under `infrastructure/` and `.github/workflows/`
 
 ### 4. Plan before coding (use Plan mode)
 
@@ -73,6 +80,14 @@ Make the changes. Apply **only the rules relevant to the scope**:
 - Pass `context.Context` through all layers
 - Log errors with operation context; never log passwords or tokens
 - New error types belong in the `errors.go` of the owning package
+
+**Infra rules (from `infrastructure/CLAUDE.md`):**
+- Never hardcode secrets — all secrets live in GitHub Secrets and land on the server via `printf` into `.env`
+- SSL certs are bind-mounted from the server; never bake them into a Docker image
+- Build jobs must stay parallel and path-filtered — do not collapse or remove filters
+- New files copied to the server must extend the existing SCP step (`strip_components: 2`; sources exactly 2 path components deep)
+- `deploy-app` condition must not be changed without understanding GitHub Actions skipped-vs-failed semantics
+- `ui`'s `SERVER_API_URL` must use the internal Docker network address (`http://api:8080`)
 
 ### 6. Update CLAUDE.md if needed
 
