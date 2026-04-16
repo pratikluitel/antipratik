@@ -40,6 +40,8 @@ export function filterReducer(state: FilterState, action: FilterAction): FilterS
       return { ...state, sortOrder: action.order };
     case 'CLEAR_ALL':
       return { activeTypes: [], activeTags: [], sortOrder: 'newest' };
+    case 'CLEAR_TAGS':
+      return { ...state, activeTags: [] };
   }
 }
 
