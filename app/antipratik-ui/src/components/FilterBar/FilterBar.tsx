@@ -22,7 +22,11 @@ const CONTENT_TYPES: { type: ContentType; label: string; pillClass: string }[] =
 const SCROLL_STEP = 80;
 
 export default function FilterBar({ state, allTags, dispatch }: Props) {
-  const barRef = useRef<HTMLDivElement>(null);
+  // 'dark' is the SSR-safe default — useLayoutEffect syncs to data-theme before
+  // the browser paints, so light-mode users never see a flash. Driving data-mode
+  // from React state (rather than direct setAttribute) means React re-renders
+  // can never reset the attribute back to the hardcoded JSX value.
+  const [mode, setMode] = useState<'dark' | 'light'>('dark');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownElRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -31,6 +35,18 @@ export default function FilterBar({ state, allTags, dispatch }: Props) {
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+
+  // Sync mode with data-theme on <html> (Rule 5). Using setMode keeps
+  // data-mode React-controlled so re-renders never reset it to "dark".
+  useLayoutEffect(() => {
+    function sync() {
+      setMode((document.documentElement.getAttribute('data-theme') as 'dark' | 'light') ?? 'dark');
+    }
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
 
   const ANIMATION_DURATION = 200;
 
@@ -41,18 +57,6 @@ export default function FilterBar({ state, allTags, dispatch }: Props) {
       setIsClosing(false);
     }, ANIMATION_DURATION);
   }
-
-  // Mirror data-theme on <html> to data-mode on this element (Rule 5)
-  useLayoutEffect(() => {
-    function sync() {
-      const theme = document.documentElement.getAttribute('data-theme') ?? 'dark';
-      barRef.current?.setAttribute('data-mode', theme);
-    }
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => observer.disconnect();
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -119,7 +123,7 @@ export default function FilterBar({ state, allTags, dispatch }: Props) {
   }
 
   return (
-    <div ref={barRef} className={styles.bar} data-mode="dark">
+    <div className={styles.bar} data-mode={mode}>
       <div className={styles.pillsRow}>
         <button
           className={`${styles.pill} ${styles.pillAll}${state.activeTypes.length === 0 ? ` ${styles.selected}` : ''}`}
