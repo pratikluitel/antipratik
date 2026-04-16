@@ -21,6 +21,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: master
           filters: |
             api:
               - 'app/antipratik-api/**'
@@ -44,7 +45,7 @@ jobs:
           CGO_ENABLED: "0"
         run: go vet ./...
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           working-directory: app/antipratik-api
           version: v2.4.0
