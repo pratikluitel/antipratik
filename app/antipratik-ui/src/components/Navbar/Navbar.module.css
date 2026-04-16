@@ -47,7 +47,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .logo {
-    transition: color var(--motion-default);
+    transition: color var(--motion-theme);
   }
 }
 
@@ -67,7 +67,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .articleTitle {
-    transition: opacity var(--motion-default);
+    transition: opacity var(--motion-default), color var(--motion-theme);
   }
 }
 
@@ -121,7 +121,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .navLink {
-    transition: color var(--motion-default);
+    transition: color var(--motion-theme);
   }
 }
 

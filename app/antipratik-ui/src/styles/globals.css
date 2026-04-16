@@ -34,6 +34,17 @@ body {
   color: var(--text-primary);
 }
 
+/* Smooth theme transitions — low-specificity catch-all so component rules override */
+@media (prefers-reduced-motion: no-preference) {
+  *, *::before, *::after {
+    transition: background-color var(--motion-theme), color var(--motion-theme), border-color var(--motion-theme);
+  }
+
+  body {
+    transition: background-color var(--motion-theme), color var(--motion-theme);
+  }
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
