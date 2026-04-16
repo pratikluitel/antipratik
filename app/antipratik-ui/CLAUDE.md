@@ -384,7 +384,7 @@ ThemeProvider
 
 ## Code Quality — Required Before Every Change
 
-After every code change, run all three checks and fix any errors before considering the work done:
+After every code change, run both checks and fix any errors before considering the work done:
 
 ```bash
 npm run lint
