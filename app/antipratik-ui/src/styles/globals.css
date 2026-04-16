@@ -37,9 +37,7 @@ body {
 /* Smooth theme transitions — low-specificity catch-all so component rules override */
 @media (prefers-reduced-motion: no-preference) {
   *, *::before, *::after {
-    transition-property: background-color, color, border-color;
-    transition-duration: 500ms;
-    transition-timing-function: ease-in-out;
+    transition: background-color var(--motion-theme), color var(--motion-theme), border-color var(--motion-theme);
   }
 
   body {

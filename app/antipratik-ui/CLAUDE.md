@@ -205,6 +205,7 @@ These tokens were added or modified during implementation (not in the original d
 | `--icon-lg` | `40px` | Large icon button (lightbox nav) |
 | `--icon-xl` | `44px` | Extra-large play/action button (video card) |
 | `--breakpoint-small` | `640px` | Small breakpoint for narrow mobile layouts |
+| `--motion-theme` | `500ms ease-in-out` | Theme-switching transition speed — used on the globals.css color/bg/border catch-all and individual component theme transitions |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 

@@ -134,8 +134,8 @@
 /* ── Play button ──────────────────────────────────────────── */
 
 .playButton {
-  width: 40px;
-  height: 40px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   border-radius: 50%;
   background: var(--color-text-primary-dark);
   border: none;
