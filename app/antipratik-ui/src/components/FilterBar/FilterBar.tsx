@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { FilterState, FilterAction, ContentType } from '../../lib/types';
 import styles from './FilterBar.module.css';
 
@@ -23,7 +23,8 @@ export default function FilterBar({ state, allTags: _allTags, dispatch }: Props)
   const barRef = useRef<HTMLDivElement>(null);
 
   // Mirror data-theme on <html> to data-mode on this element (Rule 5)
-  useEffect(() => {
+  // useLayoutEffect fires before paint — prevents dark flash on page navigation
+  useLayoutEffect(() => {
     function sync() {
       const theme = document.documentElement.getAttribute('data-theme') ?? 'dark';
       barRef.current?.setAttribute('data-mode', theme);

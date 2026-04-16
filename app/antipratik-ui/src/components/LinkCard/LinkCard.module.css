@@ -121,10 +121,11 @@
 
 .arrow {
   font-size: 14px;
-  color: var(--color-text-subtle-dark);
+  color: var(--color-text-muted-dark);
   flex-shrink: 0;
   align-self: center;
   opacity: var(--link-arrow-opacity-rest);
+  margin-right: 4px;
 
   @media (prefers-reduced-motion: no-preference) {
     transition:
@@ -136,4 +137,8 @@
 .card:hover .arrow {
   opacity: var(--link-arrow-opacity-hover);
   transform: var(--link-arrow-shift-hover);
+}
+
+[data-theme="light"] .arrow {
+  color: var(--color-text-muted-light);
 }

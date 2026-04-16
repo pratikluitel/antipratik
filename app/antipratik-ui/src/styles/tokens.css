@@ -177,6 +177,7 @@
 --motion-default:                    400ms ease-in-out;
 --motion-slow:                       500ms ease-in-out;
 --motion-breathe:                    600ms ease-in-out;
+--motion-theme:                      500ms ease-in-out;
 
 /* ═══════════════════════════════════════════════
    NAVBAR

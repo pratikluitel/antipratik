@@ -134,8 +134,8 @@
 /* ── Play button ──────────────────────────────────────────── */
 
 .playButton {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-text-primary-dark);
   border: none;
@@ -144,6 +144,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-right: 6px;
 
   @media (prefers-reduced-motion: no-preference) {
     transition: transform var(--motion-fast), background var(--motion-fast);
@@ -166,10 +167,11 @@
 .playIcon {
   width: 0;
   height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-left: 10px solid var(--color-bg-dark);
-  margin-left: 2px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid var(--color-bg-dark);
+  margin-left: 3px;
+  transition: none;
 }
 
 [data-theme="light"] .playIcon {
@@ -186,6 +188,7 @@
     transparent 2px 6px,
     var(--color-bg-dark) 6px
   );
+  transition: none;
 }
 
 [data-theme="light"] .pauseIcon {
