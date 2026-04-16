@@ -235,7 +235,7 @@
 /* ═══════════════════════════════════════════════
    CARDS — shared base
 ═══════════════════════════════════════════════ */
---card-radius:                       14px;
+--card-radius:                       16px;
 --card-excerpt-meta-gap:             12px;
 
 /* Essay card */

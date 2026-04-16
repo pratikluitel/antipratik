@@ -5,8 +5,9 @@
 
 .card {
   background: var(--color-surface-dark);
-  border: 0.5px solid var(--color-border-dark);
-  border-radius: 16px;
+  border: var(--border-hairline) solid var(--color-border-dark);
+  border-left-width: 3px;
+  border-radius: var(--card-radius);
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -25,14 +26,6 @@
       background-color var(--motion-theme);
   }
   .card:hover { transform: translateY(-2px); }
-}
-
-.card:hover {
-  border-color: var(--color-elevated-dark);
-}
-
-[data-theme="light"] .card:hover {
-  border-color: var(--color-border-light);
 }
 
 /* ── Shared tag styles ──────────────────────────────────── */
@@ -63,80 +56,38 @@
 
 /* ── Per-type card accents ──────────────────────────────── */
 
-/* Left accent bar — ::after overlays content so no gap with full-bleed images */
-.cardEssay::after,
-.cardShort::after,
-.cardMusic::after,
-.cardPhoto::after,
-.cardVideo::after,
-.cardLink::after  {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  opacity: 1;
-}
+/* Left border acts as the accent bar — follows card curves with no gap */
+.cardEssay,
+[data-theme="light"] .cardEssay { border-left-color: var(--accent-essays); }
+.cardShort,
+[data-theme="light"] .cardShort  { border-left-color: var(--accent-short); }
+.cardMusic,
+[data-theme="light"] .cardMusic  { border-left-color: var(--accent-music); }
+.cardPhoto,
+[data-theme="light"] .cardPhoto  { border-left-color: var(--accent-photos); }
+.cardVideo,
+[data-theme="light"] .cardVideo  { border-left-color: var(--accent-videos); }
+.cardLink,
+[data-theme="light"] .cardLink   { border-left-color: var(--accent-links); }
 
-@media (prefers-reduced-motion: no-preference) {
-  .cardEssay::after,
-  .cardShort::after,
-  .cardMusic::after,
-  .cardPhoto::after,
-  .cardVideo::after,
-  .cardLink::after  { transition: opacity var(--motion-default); }
-}
+/* Hover: accent-tinted border, external-link style background */
+.cardEssay:hover { border-color: color-mix(in srgb, var(--accent-essays) 50%, transparent); }
+.cardShort:hover  { border-color: color-mix(in srgb, var(--accent-short)  50%, transparent); }
+.cardMusic:hover  { border-color: color-mix(in srgb, var(--accent-music)  50%, transparent); }
+.cardPhoto:hover  { border-color: color-mix(in srgb, var(--accent-photos) 50%, transparent); }
+.cardVideo:hover  { border-color: color-mix(in srgb, var(--accent-videos) 50%, transparent); }
+.cardLink:hover   { border-color: color-mix(in srgb, var(--accent-links)  50%, transparent); }
 
-.cardEssay:hover::after,
-.cardShort:hover::after,
-.cardMusic:hover::after,
-.cardPhoto:hover::after,
-.cardVideo:hover::after,
-.cardLink:hover::after  { opacity: 0; }
+.cardEssay:hover,
+.cardShort:hover,
+.cardMusic:hover,
+.cardPhoto:hover,
+.cardVideo:hover,
+.cardLink:hover  { background: var(--link-row-hover-bg-dark); }
 
-.cardEssay::after { background: var(--accent-essays); }
-.cardShort::after { background: var(--accent-short); }
-.cardMusic::after { background: var(--accent-music); }
-.cardPhoto::after { background: var(--accent-photos); }
-.cardVideo::after { background: var(--accent-videos); }
-.cardLink::after  { background: var(--accent-links); }
-
-/* Hover tint overlay */
-.cardEssay::before,
-.cardShort::before,
-.cardMusic::before,
-.cardPhoto::before,
-.cardVideo::before,
-.cardLink::before  {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-.cardEssay::before { background: var(--accent-essays); }
-.cardShort::before { background: var(--accent-short); }
-.cardMusic::before { background: var(--accent-music); }
-.cardPhoto::before { background: var(--accent-photos); }
-.cardVideo::before { background: var(--accent-videos); }
-.cardLink::before  { background: var(--accent-links); }
-
-@media (prefers-reduced-motion: no-preference) {
-  .cardEssay::before,
-  .cardShort::before,
-  .cardMusic::before,
-  .cardPhoto::before,
-  .cardVideo::before,
-  .cardLink::before  { transition: opacity var(--motion-default); }
-}
-
-.cardEssay:hover::before,
-.cardShort:hover::before,
-.cardMusic:hover::before,
-.cardPhoto:hover::before,
-.cardVideo:hover::before,
-.cardLink:hover::before  { opacity: 0.06; }
-
+[data-theme="light"] .cardEssay:hover,
+[data-theme="light"] .cardShort:hover,
+[data-theme="light"] .cardMusic:hover,
+[data-theme="light"] .cardPhoto:hover,
+[data-theme="light"] .cardVideo:hover,
+[data-theme="light"] .cardLink:hover  { background: var(--link-row-hover-bg-light); }
