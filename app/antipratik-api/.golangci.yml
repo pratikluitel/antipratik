@@ -12,4 +12,4 @@ linters:
       enable-all: true
 
 issues:
-  max-same-issues: 5
+  max-same-issues: 4
