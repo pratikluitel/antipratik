@@ -37,7 +37,7 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (str
 	if user == nil {
 		return "", errors.New("invalid credentials")
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		return "", errors.New("invalid credentials")
 	}
 
@@ -51,7 +51,7 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (str
 		return "", fmt.Errorf("auth service sign token: %w", err)
 	}
 
-	if err := s.users.UpsertToken(ctx, username, tokenStr, expiresAt); err != nil {
+	if err = s.users.UpsertToken(ctx, username, tokenStr, expiresAt); err != nil {
 		return "", fmt.Errorf("auth service store token: %w", err)
 	}
 	return tokenStr, nil

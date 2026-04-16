@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { MusicPost } from '../../lib/types';
 import { formatTime } from '../../lib/utils';
-import Waveform from './Waveform';
 import styles from './MusicPlayer.module.css';
 
 interface Props {
@@ -59,6 +58,13 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
   }, []);
 
   // Step 2 — Load a new track when track.audioUrl changes (src only; play is Step 3's job)
+  const [prevAudioUrl, setPrevAudioUrl] = useState(track.audioUrl);
+  if (prevAudioUrl !== track.audioUrl) {
+    setPrevAudioUrl(track.audioUrl);
+    setCurrentTime(0);
+    setDuration(track.duration); // DB value as placeholder until loadedmetadata fires
+  }
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -68,9 +74,7 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
     } else {
       audio.src = track.audioUrl; // browser auto-loads on src change; no audio.load() needed
     }
-    setCurrentTime(0);
-    setDuration(track.duration); // reset to dummy until loadedmetadata fires
-  }, [track.audioUrl, track.duration]);
+  }, [track.audioUrl]);
 
   // Step 3 — Sync isPlaying prop → audio element
   // Watches track.audioUrl too so it re-fires on track switch even when isPlaying stays true
@@ -110,6 +114,7 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
         <div className={styles.trackInfo}>
           <div className={styles.albumArt}>
             {track.albumArt
+              // eslint-disable-next-line @next/next/no-img-element
               ? <img src={track.albumArt} alt={track.title} />
               : <span>♪</span>}
           </div>

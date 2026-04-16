@@ -11,7 +11,7 @@ import (
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadSeekCloser, ct string) {
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 	w.Header().Set("Content-Type", ct)
 	http.ServeContent(w, r, "", time.Time{}, body)
 }

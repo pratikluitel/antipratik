@@ -77,7 +77,7 @@ func (s *SQLiteLinkStore) queryLinks(ctx context.Context, query string, args ...
 	if err != nil {
 		return nil, fmt.Errorf("queryLinks: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var result []models.ExternalLink
 	for rows.Next() {

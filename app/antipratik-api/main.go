@@ -29,9 +29,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
-	defer sqlDB.Close()
+	defer func() {
+		if err = sqlDB.Close(); err != nil {
+			log.Printf("error closing db: %v", err)
+		}
+	}()
 
-	if err := db.RunMigrations(sqlDB); err != nil {
+	if err = db.RunMigrations(sqlDB); err != nil {
 		log.Fatalf("run migrations: %v", err)
 	}
 
@@ -51,7 +55,7 @@ func main() {
 	ctx := context.Background()
 
 	if cfg.AdminPassword != "" {
-		if err := setupSvc.UpsertAdminUser(ctx, cfg.AdminPassword); err != nil {
+		if err = setupSvc.UpsertAdminUser(ctx, cfg.AdminPassword); err != nil {
 			log.Fatalf("upsert admin user: %v", err)
 		}
 	}

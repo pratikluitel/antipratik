@@ -17,11 +17,11 @@ type SQLiteUserStore struct {
 
 // User represents an authenticated user.
 type User struct {
+	CurrentToken   *string
+	TokenExpiresAt *time.Time
 	ID             string
 	Username       string
 	PasswordHash   string
-	CurrentToken   *string
-	TokenExpiresAt *time.Time
 }
 
 // NewUserStore creates a new SQLiteUserStore backed by db.
@@ -58,7 +58,8 @@ func (s *SQLiteUserStore) UpsertAdminUser(ctx context.Context, password string) 
 	}
 
 	if err == sql.ErrNoRows {
-		newHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		var newHash []byte
+		newHash, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			return fmt.Errorf("hash admin password: %w", err)
 		}
