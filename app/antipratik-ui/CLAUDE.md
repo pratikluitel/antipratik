@@ -380,6 +380,9 @@ ThemeProvider
 14. **Link essays to `/post/${slug}`** — correct path is `/${slug}`. Next.js catch-all handles it.
 15. **Use `--accent-*` colors on UI chrome elements** — accent tokens are for content only.
 16. **Set text color tokens below minimum contrast** — all text tokens must achieve ≥ 4.5:1 (WCAG AA normal text) or ≥ 3:1 (large/bold text) against their expected background. "Subtle" is for de-emphasis, not invisibility. Verify contrast before changing any `--color-text-*`, `--link-*-color`, or `--nl-*-color` token.
+17. **Manipulate theme-sensitive DOM attributes directly in effects** — use React state instead. `barRef.current.setAttribute('data-mode', …)` is overwritten on the next React re-render. Drive `data-mode` (and similar) via `useState` + `useLayoutEffect` → `setMode(…)` so the value survives re-renders.
+18. **Write critical CSS (e.g. navbar background) only under `[data-theme]` selectors** — if `data-theme` is ever absent, the element is unstyled. Always put the dark-mode default directly on the base selector; light mode overrides with `[data-theme='light']`.
+19. **Define a component-level `transition` that omits properties transitioned by the global `*` catch-all** — if a component declares its own `transition`, it overrides the globals.css catch-all entirely. Any property not listed (e.g. `border-color`) will snap instantly on theme switch. Always include every property that needs to animate.
 
 ---
 

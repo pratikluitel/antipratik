@@ -33,6 +33,7 @@ func RegisterRoutes(
 	// Public read routes
 	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
 	mux.HandleFunc("GET /api/posts", postH.GetPosts)
+	mux.HandleFunc("GET /api/tags", postH.GetTags)
 	mux.HandleFunc("GET /api/links/featured", linkH.GetFeaturedLinks)
 	mux.HandleFunc("GET /api/links", linkH.GetLinks)
 

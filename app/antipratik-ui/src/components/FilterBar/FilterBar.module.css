@@ -133,6 +133,204 @@
   color: var(--color-snow) !important;
 }
 
+/* ─── Tag dropdown ────────────────────────────── */
+
+.tagDropdownWrap {
+  position: relative;
+}
+
+.tagDropdownBtn {
+  border-radius: 6px;
+  background: var(--color-border-dark);
+  color: var(--color-snow) !important;
+  border-color: transparent;
+  gap: 6px;
+}
+
+.tagDropdownBtn:hover {
+  background: var(--color-text-muted-dark) !important;
+}
+
+.tagDropdownBtnActive {
+  background: var(--color-text-muted-dark) !important;
+  color: var(--color-snow) !important;
+}
+
+.bar[data-mode="light"] .tagDropdownBtn {
+  background: var(--color-border-light);
+  color: var(--color-ink-light) !important;
+}
+
+.bar[data-mode="light"] .tagDropdownBtn:hover {
+  background: var(--color-text-muted-light) !important;
+  color: var(--color-snow) !important;
+}
+
+.bar[data-mode="light"] .tagDropdownBtnActive {
+  background: var(--color-text-muted-light) !important;
+  color: var(--color-snow) !important;
+}
+
+.tagDropdownArrow {
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+@keyframes tagDropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tagDropdownOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+
+.tagDropdown {
+  /* position: fixed so top/left come from JS getBoundingClientRect —
+     dropdown is always within the viewport, never clips or scrolls the page */
+  position: fixed;
+  z-index: 200;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-dark);
+  border: var(--filter-bar-border-dark);
+  border-radius: 8px;
+  min-width: 140px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: tagDropdownIn 200ms ease-out forwards;
+}
+
+.tagDropdownClosing {
+  animation: tagDropdownOut 200ms ease-in forwards;
+}
+
+.bar[data-mode="light"] .tagDropdown {
+  background: var(--color-canvas-light);
+  border: var(--filter-bar-border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.tagDropdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  /* smooth momentum scroll on iOS */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  /* hide native scrollbar everywhere — replaced by arrow buttons */
+  scrollbar-width: none;
+}
+
+.tagDropdownList::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scroll arrow buttons — shown when list content overflows in that direction.
+   Rendered as a translucent gradient fade so they blend into the dropdown bg. */
+.mobileScrollArrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 28px;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  line-height: 1;
+  /* Transparent bg with gradient so it feels like a fade, not a hard button */
+  background: transparent;
+  color: var(--color-text-muted-dark);
+  flex-shrink: 0;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: color var(--motion-fast);
+  }
+}
+
+.mobileScrollArrow:hover,
+.mobileScrollArrow:active {
+  color: var(--color-snow);
+}
+
+.bar[data-mode="light"] .mobileScrollArrow {
+  color: var(--color-text-muted-light);
+}
+
+.bar[data-mode="light"] .mobileScrollArrow:hover,
+.bar[data-mode="light"] .mobileScrollArrow:active {
+  color: var(--color-ink-light);
+}
+
+/* Gradient fade — translucent so tags are faintly visible behind the arrow.
+   rgba() used because custom properties can't carry an alpha channel here.
+   Source tokens: --color-surface-dark (#181D28), --color-canvas-light (#EDEAE2) */
+.mobileScrollArrowUp {
+  background: linear-gradient(to bottom, rgba(24, 29, 40, 0.9), rgba(24, 29, 40, 0));
+}
+
+.mobileScrollArrowDown {
+  background: linear-gradient(to top, rgba(24, 29, 40, 0.9), rgba(24, 29, 40, 0));
+}
+
+.bar[data-mode="light"] .mobileScrollArrowUp {
+  background: linear-gradient(to bottom, rgba(237, 234, 226, 0.9), rgba(237, 234, 226, 0));
+}
+
+.bar[data-mode="light"] .mobileScrollArrowDown {
+  background: linear-gradient(to top, rgba(237, 234, 226, 0.9), rgba(237, 234, 226, 0));
+}
+
+.tagOption {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  text-align: left;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  color: var(--color-text-muted-dark);
+  white-space: nowrap;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background var(--motion-fast), color var(--motion-fast);
+  }
+}
+
+.tagOption:hover {
+  background: var(--pill-hover-bg-dark);
+  color: var(--color-text-body-dark);
+}
+
+.bar[data-mode="light"] .tagOption {
+  color: var(--color-text-muted-light);
+}
+
+.bar[data-mode="light"] .tagOption:hover {
+  background: var(--pill-hover-bg-light);
+  color: var(--color-text-body-light);
+}
+
+.tagOptionSelected {
+  color: var(--color-snow) !important;
+  background: var(--color-elevated-dark);
+}
+
+.bar[data-mode="light"] .tagOptionSelected {
+  background: var(--color-border-light);
+  color: var(--color-text-body-light) !important;
+}
+
 /* ─── Active tags row ─────────────────────────── */
 
 .tagsRow {
@@ -140,6 +338,7 @@
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  padding: 4px 0;
 }
 
 .chip {
@@ -175,17 +374,34 @@
   color: var(--color-text-muted-light);
 }
 
-.clearTags {
-  background: none;
-  border: none;
-  cursor: pointer;
+.clearTagsDropdown {
   font-family: var(--font-sans);
   font-size: var(--text-meta);
+  text-align: left;
+  padding: 5px 10px;
+  border: none;
+  border-top: 0.5px solid var(--color-border-dark);
+  border-radius: 0;
+  cursor: pointer;
+  background: none;
   color: var(--color-text-muted-dark);
-  padding: 0;
-  margin-left: auto;
+  margin-top: 4px;
+  width: 100%;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: color var(--motion-fast);
+  }
 }
 
-.bar[data-mode="light"] .clearTags {
+.clearTagsDropdown:hover {
+  color: var(--color-snow);
+}
+
+.bar[data-mode="light"] .clearTagsDropdown {
+  border-top-color: var(--color-border-light);
   color: var(--color-text-muted-light);
+}
+
+.bar[data-mode="light"] .clearTagsDropdown:hover {
+  color: var(--color-ink-light);
 }

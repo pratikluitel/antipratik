@@ -18,8 +18,15 @@ func (s *SQLitePostStore) CreatePost(ctx context.Context, postType string, id st
 
 func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string, tags []string) error {
 	for _, tag := range tags {
-		_, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id, tag) VALUES (?, ?)`, id, tag)
-		if err != nil {
+		// Upsert tag into the normalized tags table.
+		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO tags (name) VALUES (?)`, tag); err != nil {
+			return err
+		}
+		var tagID int64
+		if err := tx.QueryRowContext(ctx, `SELECT id FROM tags WHERE name = ?`, tag).Scan(&tagID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)`, id, tagID); err != nil {
 			return err
 		}
 	}
@@ -438,11 +445,8 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 	var args []any
 
 	if len(tags) > 0 {
-		sb.WriteString("SELECT DISTINCT p.id, p.type, p.created_at FROM posts p JOIN post_tags pt ON p.id = pt.post_id")
+		sb.WriteString("SELECT DISTINCT p.id, p.type, p.created_at FROM posts p JOIN post_tags pt ON p.id = pt.post_id JOIN tags t ON t.id = pt.tag_id")
 	} else {
-		sb.WriteString("SELECT id, p_alias.type, p_alias.created_at FROM posts p_alias")
-		// rewrite to avoid aliasing issue — use plain
-		sb.Reset()
 		sb.WriteString("SELECT id, type, created_at FROM posts")
 	}
 
@@ -458,7 +462,7 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 		}
 	}
 	if len(tags) > 0 {
-		conditions = append(conditions, "pt.tag IN ("+placeholders(len(tags))+")")
+		conditions = append(conditions, "t.name IN ("+placeholders(len(tags))+")")
 		for _, t := range tags {
 			args = append(args, t)
 		}
@@ -492,7 +496,7 @@ func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[s
 	if len(ids) == 0 {
 		return map[string][]string{}, nil
 	}
-	q := "SELECT post_id, tag FROM post_tags WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id"
+	q := "SELECT pt.post_id, t.name FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id IN (" + placeholders(len(ids)) + ") ORDER BY pt.post_id"
 	args := stringsToAny(ids)
 	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
@@ -507,6 +511,28 @@ func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[s
 			return nil, fmt.Errorf("fetchTagsMap scan: %w", err)
 		}
 		result[postID] = append(result[postID], tag)
+	}
+	return result, rows.Err()
+}
+
+// GetAllTags returns all tag names sorted alphabetically.
+func (s *SQLitePostStore) GetAllTags(ctx context.Context) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT name FROM tags ORDER BY name`)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllTags: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	var result []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("GetAllTags scan: %w", err)
+		}
+		result = append(result, name)
+	}
+	if result == nil {
+		result = []string{}
 	}
 	return result, rows.Err()
 }

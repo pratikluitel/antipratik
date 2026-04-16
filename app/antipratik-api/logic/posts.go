@@ -47,6 +47,11 @@ func (s *PostService) GetPosts(ctx context.Context, filter models.FilterState) (
 	return posts, nil
 }
 
+// GetTags returns all tag names sorted alphabetically.
+func (s *PostService) GetTags(ctx context.Context) ([]string, error) {
+	return s.store.GetAllTags(ctx)
+}
+
 // GetPost validates the slug and delegates to the store.
 // Returns nil if the post does not exist.
 func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPost, error) {

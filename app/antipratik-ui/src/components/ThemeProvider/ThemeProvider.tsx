@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Theme } from '../../lib/types';
 
 interface ThemeContextType {
@@ -17,6 +17,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof document === 'undefined') return 'dark';
     return (document.documentElement.dataset.theme as Theme) || 'dark';
   });
+
+  // Re-assert data-theme after hydration. The inline script in layout.tsx
+  // sets it before first paint, but React's reconciliation can briefly
+  // remove unknown attributes from <html> in some Next.js versions.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   const toggle = () => {
     setTheme((prev) => {

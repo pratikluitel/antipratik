@@ -140,4 +140,5 @@ export type FilterAction =
   | { type: 'TOGGLE_TYPE'; contentType: ContentType }
   | { type: 'TOGGLE_TAG'; tag: string }
   | { type: 'SET_SORT'; order: FilterState['sortOrder'] }
-  | { type: 'CLEAR_ALL' };
+  | { type: 'CLEAR_ALL' }
+  | { type: 'CLEAR_TAGS' };
