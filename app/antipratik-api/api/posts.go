@@ -144,11 +144,11 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "audioFile is required")
 		return
 	}
-	defer audioFile.Close()
+	defer func() { _ = audioFile.Close() }()
 
 	var albumArtInput *models.FileInput
-	if artFile, artHeader, err := r.FormFile("albumArtFile"); err == nil {
-		defer artFile.Close()
+	if artFile, artHeader, artErr := r.FormFile("albumArtFile"); artErr == nil {
+		defer func() { _ = artFile.Close() }()
 		albumArtInput = &models.FileInput{File: artFile, Header: artHeader}
 	}
 
@@ -233,7 +233,7 @@ func (h *PostHandlerImpl) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "could not read uploaded image")
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		fileInputs = append(fileInputs, models.FileInput{File: f, Header: fh})
 	}
 
@@ -310,11 +310,11 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	var thumbnailURL string
 	var thumbnailTinyURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
-		defer thumbFile.Close()
-		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+		defer func() { _ = thumbFile.Close() }()
+		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			models.FileInput{File: thumbFile, Header: thumbHeader})
-		if err != nil {
-			handleLogicError(w, h.log, "CreateVideo thumbnail upload", err)
+		if uploadErr != nil {
+			handleLogicError(w, h.log, "CreateVideo thumbnail upload", uploadErr)
 			return
 		}
 		thumbnailURL = result.URL
@@ -391,11 +391,11 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 
 	var thumbnailURL, thumbnailTinyURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
-		defer thumbFile.Close()
-		result, err := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+		defer func() { _ = thumbFile.Close() }()
+		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			models.FileInput{File: thumbFile, Header: thumbHeader})
-		if err != nil {
-			handleLogicError(w, h.log, "CreateLinkPost thumbnail upload", err)
+		if uploadErr != nil {
+			handleLogicError(w, h.log, "CreateLinkPost thumbnail upload", uploadErr)
 			return
 		}
 		thumbnailURL = &result.URL
@@ -481,7 +481,7 @@ func (h *PostHandlerImpl) AddPhotoImage(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusBadRequest, "could not read uploaded image")
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	uploadResults, err := h.uploads.UploadPhotoFiles(r.Context(), postID, []models.FileInput{{File: f, Header: fhs[0]}})
 	if err != nil {

@@ -20,7 +20,7 @@ func OpenAPIHandler(path string) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/yaml")
-		w.Write(data)
+		_, _ = w.Write(data)
 	}
 }
 
@@ -33,7 +33,7 @@ func SwaggerHandler(path string) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		w.Write(data)
+		_, _ = w.Write(data)
 	}
 }
 

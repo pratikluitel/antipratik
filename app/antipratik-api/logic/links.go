@@ -98,7 +98,7 @@ func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.Up
 		merged.Category = *input.Category
 	}
 
-	if err := validateExternalLink(merged); err != nil {
+	if err = validateExternalLink(merged); err != nil {
 		return models.ExternalLink{}, err
 	}
 	domain, err := extractDomain(merged.URL)
@@ -107,7 +107,7 @@ func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.Up
 	}
 	merged.Domain = domain
 
-	if err := s.store.UpdateLink(ctx, id, merged); err != nil {
+	if err = s.store.UpdateLink(ctx, id, merged); err != nil {
 		return models.ExternalLink{}, fmt.Errorf("LinkService.UpdateLink: %w", err)
 	}
 	return models.ExternalLink{

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { Theme } from '../../lib/types';
 
 interface ThemeContextType {
@@ -11,22 +11,12 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState(false);
-
-  // On mount, read localStorage and set document attribute
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('ap-theme') as Theme | null;
-      const initial = stored || 'dark';
-      setTheme(initial);
-      document.documentElement.dataset.theme = initial;
-    } catch {
-      // localStorage unavailable
-      document.documentElement.dataset.theme = 'dark';
-    }
-    setMounted(true);
-  }, []);
+  // Read the data-theme attribute already set by the inline script in layout.tsx,
+  // so we never need to call setTheme inside an effect.
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === 'undefined') return 'dark';
+    return (document.documentElement.dataset.theme as Theme) || 'dark';
+  });
 
   const toggle = () => {
     setTheme((prev) => {

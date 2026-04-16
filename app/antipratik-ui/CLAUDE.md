@@ -272,13 +272,10 @@ Rules:
 src/lib/
   types.ts         ← all TypeScript interfaces (single source of truth)
   api.ts           ← repository pattern: dummy data or API depending on env var
-  dummy-data/
-    posts.ts       ← Post[] sorted newest-first
-    links.ts       ← ExternalLink[]
 ```
 
 **The contract:**
-1. Components import from `src/lib/api.ts` only — never from `dummy-data/` directly
+1. Components import from `src/lib/api.ts` only
 2. `api.ts` checks `process.env.NEXT_PUBLIC_API_URL`:
    - Set → fetch from Go backend at `${API_URL}/endpoint`
    - Not set → return from dummy data

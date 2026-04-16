@@ -33,17 +33,23 @@ type localFileStore struct{ baseDir string }
 
 func newLocalFileStore(dir string) *localFileStore { return &localFileStore{baseDir: dir} }
 
-func (s *localFileStore) Put(_ context.Context, key string, r io.Reader, _ string) error {
+func (s *localFileStore) Put(_ context.Context, key string, r io.Reader, _ string) (err error) {
 	dest := filepath.Join(s.baseDir, filepath.FromSlash(key))
-	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
+	if err = os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
 		return fmt.Errorf("localFileStore.Put mkdir: %w", err)
 	}
 	f, err := os.Create(dest)
 	if err != nil {
 		return fmt.Errorf("localFileStore.Put create: %w", err)
 	}
-	defer f.Close()
-	if _, err := io.Copy(f, r); err != nil {
+	// Close errors on a writable file indicate un-flushed data; surface them
+	// only when no prior error is already being returned.
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("localFileStore.Put close: %w", cerr)
+		}
+	}()
+	if _, err = io.Copy(f, r); err != nil {
 		return fmt.Errorf("localFileStore.Put copy: %w", err)
 	}
 	return nil
@@ -135,7 +141,7 @@ func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadSeekCloser, s
 		}
 		return nil, "", fmt.Errorf("r2FileStore.Get: %w", err)
 	}
-	defer out.Body.Close()
+	defer func() { _ = out.Body.Close() }()
 	ct := contentTypeFromKey(key)
 	if out.ContentType != nil && *out.ContentType != "" {
 		ct = *out.ContentType
