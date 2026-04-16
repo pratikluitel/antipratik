@@ -36,7 +36,8 @@ gh pr diff $ARGUMENTS --repo pratikluitel/antipratik -- path/to/file
 Inspect the list of changed files — this is the authoritative scope signal:
 - Any path under `app/antipratik-ui/` → **FE**
 - Any path under `app/antipratik-api/` → **BE**
-- Both present → **FE + BE**
+- Any path under `infrastructure/`, `docker/`, `.github/workflows/`, `.github/scripts/` → **Infra**
+- Multiple categories present → combine (e.g. **FE + Infra**)
 
 Record the scope — it determines which CLAUDE.md(s) to read and which rules to enforce.
 
@@ -51,6 +52,10 @@ Record the scope — it determines which CLAUDE.md(s) to read and which rules to
 **If BE (or both):**
 - Read `app/antipratik-api/CLAUDE.md`
 - Read local copies of changed files under `app/antipratik-api/` for full context
+
+**If Infra:**
+- Read `infrastructure/CLAUDE.md`
+- Read the changed files directly (compose, nginx, workflow YAML, deploy script)
 
 ### 4. Review against these criteria
 
@@ -86,6 +91,15 @@ Record the scope — it determines which CLAUDE.md(s) to read and which rules to
 - New error types defined in `errors.go` of the owning package (Rule 8)
 - No `panic` — errors returned instead (Guardrail 9)
 - No ignored errors (Guardrail 7)
+
+**Infra CLAUDE.md compliance** *(check only if scope includes Infra):*
+- No secrets hardcoded in workflow files, compose files, config files, or scripts
+- Build jobs are path-filtered; do not remove or skip path filters
+- Build jobs are parallel — do not collapse into a single sequential job
+- New files SCP'd in the same combined step (`strip_components: 2`); sources must be exactly 2 path components deep
+- SSL certs are bind-mounted from the server — never baked into a Docker image
+- `deploy-app` condition (`always() && !failure && !cancelled`) must not be changed without understanding skipped-vs-failed
+- `ui`'s `SERVER_API_URL` must use the internal Docker network address, not an external URL
 
 ---
 
