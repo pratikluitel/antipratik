@@ -81,6 +81,23 @@ function prefixPost(post: Post): Post {
 // Pages will render with empty collections, and actual data loading requires
 // NEXT_PUBLIC_API_URL to be configured at runtime.
 
+// ─── TAGS ────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/tags
+ * Returns all tag names sorted alphabetically.
+ */
+export async function getTags(): Promise<string[]> {
+  if (IS_API_DISABLED) {
+    return [];
+  }
+  const response = await fetch(`${getFetchBase()}/api/tags`, { cache: 'no-store' });
+  if (!response.ok) {
+    return [];
+  }
+  return response.json();
+}
+
 // ─── POSTS ───────────────────────────────────────────────────────────────────
 
 /**

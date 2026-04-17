@@ -11,12 +11,12 @@ import (
 
 // Config holds all runtime configuration for the server.
 type Config struct {
-	Server        ServerConfig  `yaml:"server"`
-	DB            DBConfig      `yaml:"db"`
-	AdminPassword string        `yaml:"admin_password"`
-	Static        StaticConfig  `yaml:"static"`
 	Storage       StorageConfig `yaml:"storage"`
+	DB            DBConfig      `yaml:"db"`
+	Static        StaticConfig  `yaml:"static"`
 	Logging       LoggingConfig `yaml:"logging"`
+	AdminPassword string        `yaml:"admin_password"`
+	Server        ServerConfig  `yaml:"server"`
 }
 
 // LoggingConfig controls log verbosity. Level accepts "debug", "info", "warn", or "error".
@@ -63,7 +63,7 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open config %q: %w", path, err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var cfg Config
 	if err := yaml.NewDecoder(f).Decode(&cfg); err != nil {

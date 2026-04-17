@@ -45,7 +45,7 @@ export default function PhotoCard({ post, onOpen }: Props) {
         className={styles.imageWrapper}
         onClick={() => onOpen(images, 0)}
       >
-        {mainImage.thumbnailTinyUrl && !loaded && (
+        {mainImage.thumbnailTinyUrl && (
           <div
             className={styles.imagePlaceholder}
             style={{ backgroundImage: `url(${mainImage.thumbnailTinyUrl})` }}

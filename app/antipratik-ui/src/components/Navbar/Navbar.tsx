@@ -61,6 +61,14 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Derived state: close menu when route changes (during render, not in a useEffect).
+  // This is the React-recommended way to reset state when a tracked value changes.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (menuOpen) setMenuOpen(false);
+  }
+
   // Close menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return;
@@ -73,10 +81,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [menuOpen]);
 
-  // Close menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
+
 
   const showArticleTitle = !!articleTitle && showTitle;
 

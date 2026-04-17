@@ -47,7 +47,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .logo {
-    transition: color var(--motion-default);
+    transition: color var(--motion-theme);
   }
 }
 
@@ -67,7 +67,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .articleTitle {
-    transition: opacity var(--motion-default);
+    transition: opacity var(--motion-default), color var(--motion-theme);
   }
 }
 
@@ -121,7 +121,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .navLink {
-    transition: color var(--motion-default);
+    transition: color var(--motion-theme), border-color var(--motion-theme);
   }
 }
 
@@ -257,18 +257,17 @@
   color: var(--color-text-muted-light);
 }
 
-/* Dark mode — Himalayan Dusk */
-[data-theme='dark'] .navbar {
+/* Dark mode is the default — keeps navbar opaque even if data-theme is
+   momentarily absent during hydration. Light mode overrides below. */
+.navbar {
   background: var(--nav-bg-dark-blur);
   border-bottom: 0.5px solid var(--color-border-dark);
   backdrop-filter: blur(12px);
 }
 
-/* Light mode — Parchment */
 [data-theme='light'] .navbar {
   background: var(--nav-bg-light-blur);
   border-bottom: 0.5px solid var(--color-border-light);
-  backdrop-filter: blur(12px);
 }
 
 /* ─── Hamburger button ───────────────────────── */

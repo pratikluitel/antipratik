@@ -205,6 +205,7 @@ These tokens were added or modified during implementation (not in the original d
 | `--icon-lg` | `40px` | Large icon button (lightbox nav) |
 | `--icon-xl` | `44px` | Extra-large play/action button (video card) |
 | `--breakpoint-small` | `640px` | Small breakpoint for narrow mobile layouts |
+| `--motion-theme` | `500ms ease-in-out` | Theme-switching transition speed — used on the globals.css color/bg/border catch-all and individual component theme transitions |
 
 These contrast fixes are global — every component using these tokens benefits automatically.
 
@@ -272,13 +273,10 @@ Rules:
 src/lib/
   types.ts         ← all TypeScript interfaces (single source of truth)
   api.ts           ← repository pattern: dummy data or API depending on env var
-  dummy-data/
-    posts.ts       ← Post[] sorted newest-first
-    links.ts       ← ExternalLink[]
 ```
 
 **The contract:**
-1. Components import from `src/lib/api.ts` only — never from `dummy-data/` directly
+1. Components import from `src/lib/api.ts` only
 2. `api.ts` checks `process.env.NEXT_PUBLIC_API_URL`:
    - Set → fetch from Go backend at `${API_URL}/endpoint`
    - Not set → return from dummy data
@@ -382,3 +380,19 @@ ThemeProvider
 14. **Link essays to `/post/${slug}`** — correct path is `/${slug}`. Next.js catch-all handles it.
 15. **Use `--accent-*` colors on UI chrome elements** — accent tokens are for content only.
 16. **Set text color tokens below minimum contrast** — all text tokens must achieve ≥ 4.5:1 (WCAG AA normal text) or ≥ 3:1 (large/bold text) against their expected background. "Subtle" is for de-emphasis, not invisibility. Verify contrast before changing any `--color-text-*`, `--link-*-color`, or `--nl-*-color` token.
+17. **Manipulate theme-sensitive DOM attributes directly in effects** — use React state instead. `barRef.current.setAttribute('data-mode', …)` is overwritten on the next React re-render. Drive `data-mode` (and similar) via `useState` + `useLayoutEffect` → `setMode(…)` so the value survives re-renders.
+18. **Write critical CSS (e.g. navbar background) only under `[data-theme]` selectors** — if `data-theme` is ever absent, the element is unstyled. Always put the dark-mode default directly on the base selector; light mode overrides with `[data-theme='light']`.
+19. **Define a component-level `transition` that omits properties transitioned by the global `*` catch-all** — if a component declares its own `transition`, it overrides the globals.css catch-all entirely. Any property not listed (e.g. `border-color`) will snap instantly on theme switch. Always include every property that needs to animate.
+
+---
+
+## Code Quality — Required Before Every Change
+
+After every code change, run both checks and fix any errors before considering the work done:
+
+```bash
+npm run lint
+npm run typecheck
+```
+
+Both commands must produce **zero errors**. ESLint warnings for intentionally unused `_`-prefixed variables or unavoidable false positives (e.g. `@next/next/no-img-element` for external API images) may be suppressed with a targeted `// eslint-disable-next-line` comment with a brief explanation, but errors must be fixed.

@@ -8,6 +8,7 @@ import "net/http"
 type PostHandler interface {
 	GetPosts(w http.ResponseWriter, r *http.Request)
 	GetPost(w http.ResponseWriter, r *http.Request)
+	GetTags(w http.ResponseWriter, r *http.Request)
 	CreateEssay(w http.ResponseWriter, r *http.Request)
 	CreateShort(w http.ResponseWriter, r *http.Request)
 	CreateMusic(w http.ResponseWriter, r *http.Request)

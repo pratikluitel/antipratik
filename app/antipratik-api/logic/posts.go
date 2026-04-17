@@ -47,6 +47,11 @@ func (s *PostService) GetPosts(ctx context.Context, filter models.FilterState) (
 	return posts, nil
 }
 
+// GetTags returns all tag names sorted alphabetically.
+func (s *PostService) GetTags(ctx context.Context) ([]string, error) {
+	return s.store.GetAllTags(ctx)
+}
+
 // GetPost validates the slug and delegates to the store.
 // Returns nil if the post does not exist.
 func (s *PostService) GetPost(ctx context.Context, slug string) (*models.EssayPost, error) {
@@ -520,10 +525,10 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 		merged.Tags = input.Tags
 	}
 
-	if err := requireNonEmpty("title", merged.Title); err != nil {
+	if err = requireNonEmpty("title", merged.Title); err != nil {
 		return models.LinkPost{}, err
 	}
-	if err := requireNonEmpty("url", merged.URL); err != nil {
+	if err = requireNonEmpty("url", merged.URL); err != nil {
 		return models.LinkPost{}, err
 	}
 	domain, err := extractDomain(merged.URL)
@@ -532,7 +537,7 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 	}
 	merged.Domain = domain
 
-	if err := s.store.UpdateLinkPost(ctx, id, merged); err != nil {
+	if err = s.store.UpdateLinkPost(ctx, id, merged); err != nil {
 		return models.LinkPost{}, fmt.Errorf("PostService.UpdateLinkPost: %w", err)
 	}
 	tags := merged.Tags
@@ -597,7 +602,7 @@ func (s *PostService) UpdatePhotoImage(ctx context.Context, postID string, image
 }
 
 func (s *PostService) DeletePhotoImage(ctx context.Context, postID string, imageIDStr string) (notFound bool, err error) {
-	if err := requireNonEmpty("postID", postID); err != nil {
+	if err = requireNonEmpty("postID", postID); err != nil {
 		return false, err
 	}
 	imageID, convErr := strconv.Atoi(imageIDStr)
@@ -624,7 +629,7 @@ func (s *PostService) DeletePhotoImage(ctx context.Context, postID string, image
 	if len(photoPost.Images) <= 1 {
 		return false, validationErr("cannot delete the only image in a photo post")
 	}
-	if err := s.store.DeletePhotoImage(ctx, postID, imageID); err != nil {
+	if err = s.store.DeletePhotoImage(ctx, postID, imageID); err != nil {
 		return false, err
 	}
 	// Clean up files in the background (same pattern as DeletePost).

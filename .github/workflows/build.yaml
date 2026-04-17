@@ -21,6 +21,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: master
           filters: |
             api:
               - 'app/antipratik-api/**'
@@ -29,9 +30,53 @@ jobs:
               - 'app/antipratik-ui/**'
               - 'docker/Dockerfile.ui'
 
-  build-api-image:
+  lint-api:
     needs: [changes]
     if: needs.changes.outputs.api == 'true' || github.ref_name == 'master' || github.ref_name == 'prod'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: app/antipratik-api/go.mod
+      - name: Go vet
+        working-directory: app/antipratik-api
+        env:
+          CGO_ENABLED: "0"
+        run: go vet ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          working-directory: app/antipratik-api
+          version: v2.4.0
+        env:
+          CGO_ENABLED: "0"
+
+  lint-ui:
+    needs: [changes]
+    if: needs.changes.outputs.ui == 'true' || github.ref_name == 'master' || github.ref_name == 'prod'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/antipratik-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/antipratik-ui/package-lock.json
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: TypeScript type check
+        run: npm run typecheck
+
+  build-api-image:
+    needs: [changes, lint-api]
+    if: |
+      (needs.changes.outputs.api == 'true' || github.ref_name == 'master' || github.ref_name == 'prod') &&
+      !failure() && !cancelled()
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -53,8 +98,10 @@ jobs:
           tags: ${{ env.API_IMAGE }}:${{ env.TAG }}
 
   build-ui-image:
-    needs: [changes]
-    if: needs.changes.outputs.ui == 'true' || github.ref_name == 'master' || github.ref_name == 'prod'
+    needs: [changes, lint-ui]
+    if: |
+      (needs.changes.outputs.ui == 'true' || github.ref_name == 'master' || github.ref_name == 'prod') &&
+      !failure() && !cancelled()
     runs-on: ubuntu-latest
     permissions:
       packages: write

@@ -242,10 +242,15 @@
 
 .arrow {
   font-size: 14px;
-  color: var(--color-text-subtle-dark);
+  color: var(--color-text-muted-dark);
   flex-shrink: 0;
   align-self: center;
   opacity: var(--link-arrow-opacity-rest);
+  margin-right: 4px;
+}
+
+[data-theme="light"] .arrow {
+  color: var(--color-text-muted-light);
 }
 
 @media (prefers-reduced-motion: no-preference) {

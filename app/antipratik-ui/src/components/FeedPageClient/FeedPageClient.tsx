@@ -16,20 +16,17 @@ import styles from './FeedPageClient.module.css';
 
 interface Props {
   posts: Post[];
+  allTags: string[];
+  initialTag?: string;
 }
 
-export default function FeedPageClient({ posts }: Props) {
-  const [state, dispatch] = useReducer(filterReducer, initialFilterState);
-
-  const allTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    for (const post of posts) {
-      for (const tag of post.tags) {
-        tagSet.add(tag);
-      }
-    }
-    return Array.from(tagSet).sort();
-  }, [posts]);
+export default function FeedPageClient({ posts, allTags, initialTag }: Props) {
+  const [state, dispatch] = useReducer(
+    filterReducer,
+    initialTag
+      ? { ...initialFilterState, activeTags: [initialTag] }
+      : initialFilterState,
+  );
 
   const filteredPosts = useMemo(
     () => applyFilters(posts, state),

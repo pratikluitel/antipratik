@@ -36,6 +36,9 @@ type PostStore interface {
 	UpdateLinkPost(ctx context.Context, id string, input models.LinkPostInput) error
 	DeletePost(ctx context.Context, id string) error
 
+	// GetAllTags returns all tag names sorted alphabetically.
+	GetAllTags(ctx context.Context) ([]string, error)
+
 	// Individual photo image operations
 	AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error)
 	GetPhotoImage(ctx context.Context, postID string, imageID int) (*models.PhotoImage, error)

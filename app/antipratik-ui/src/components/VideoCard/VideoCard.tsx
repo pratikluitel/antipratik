@@ -33,7 +33,7 @@ export default function VideoCard({ post }: Props) {
         className={styles.link}
       >
         <div className={styles.thumbnail}>
-          {post.thumbnailUrl && post.thumbnailTinyUrl && !loaded && (
+          {post.thumbnailUrl && post.thumbnailTinyUrl && (
             <div
               className={styles.imagePlaceholder}
               style={{ backgroundImage: `url(${post.thumbnailTinyUrl})` }}

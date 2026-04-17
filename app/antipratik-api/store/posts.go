@@ -18,8 +18,15 @@ func (s *SQLitePostStore) CreatePost(ctx context.Context, postType string, id st
 
 func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string, tags []string) error {
 	for _, tag := range tags {
-		_, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id, tag) VALUES (?, ?)`, id, tag)
-		if err != nil {
+		// Upsert tag into the normalized tags table.
+		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO tags (name) VALUES (?)`, tag); err != nil {
+			return err
+		}
+		var tagID int64
+		if err := tx.QueryRowContext(ctx, `SELECT id FROM tags WHERE name = ?`, tag).Scan(&tagID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)`, id, tagID); err != nil {
 			return err
 		}
 	}
@@ -31,7 +38,7 @@ func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO essay_posts (post_id, title, slug, excerpt, body, reading_time_minutes) VALUES (?, ?, ?, ?, ?, ?)`,
 		id, input.Title, input.Slug, input.Excerpt, input.Body, input.ReadingTimeMinutes)
 	if err != nil {
@@ -48,7 +55,7 @@ func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO short_posts (post_id, body) VALUES (?, ?)`, id, input.Body)
 	if err != nil {
 		return err
@@ -64,7 +71,7 @@ func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO music_posts (post_id, title, album_art, album_art_tiny, audio_url, duration, album) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		id, input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album)
 	if err != nil {
@@ -81,7 +88,7 @@ func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO photo_posts (post_id, location) VALUES (?, ?)`, id, input.Location)
 	if err != nil {
 		return err
@@ -105,7 +112,7 @@ func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, thumbnail_tiny_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		id, input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist)
 	if err != nil {
@@ -122,7 +129,7 @@ func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, inp
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `INSERT INTO link_posts (post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		id, input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.Category)
 	if err != nil {
@@ -139,7 +146,7 @@ func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input mode
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = tx.ExecContext(ctx, `UPDATE essay_posts SET title=?, slug=?, excerpt=?, body=?, reading_time_minutes=? WHERE post_id=?`,
 		input.Title, input.Slug, input.Excerpt, input.Body, input.ReadingTimeMinutes, id)
 	if err != nil {
@@ -159,7 +166,7 @@ func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input mode
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	if _, err = tx.ExecContext(ctx, `UPDATE short_posts SET body=? WHERE post_id=?`, input.Body, id); err != nil {
 		return err
 	}
@@ -177,7 +184,7 @@ func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input mode
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	if _, err = tx.ExecContext(ctx, `UPDATE music_posts SET title=?, album_art=?, album_art_tiny=?, audio_url=?, duration=?, album=? WHERE post_id=?`,
 		input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album, id); err != nil {
 		return err
@@ -196,7 +203,7 @@ func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input mode
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	if _, err = tx.ExecContext(ctx, `UPDATE photo_posts SET location=? WHERE post_id=?`, input.Location, id); err != nil {
 		return err
 	}
@@ -224,7 +231,7 @@ func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input mode
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, thumbnail_tiny_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
 		input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
 		return err
@@ -243,7 +250,7 @@ func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input m
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	if _, err = tx.ExecContext(ctx, `UPDATE link_posts SET title=?, url=?, domain=?, description=?, thumbnail_url=?, thumbnail_tiny_url=?, category=? WHERE post_id=?`,
 		input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.Category, id); err != nil {
 		return err
@@ -438,11 +445,8 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 	var args []any
 
 	if len(tags) > 0 {
-		sb.WriteString("SELECT DISTINCT p.id, p.type, p.created_at FROM posts p JOIN post_tags pt ON p.id = pt.post_id")
+		sb.WriteString("SELECT DISTINCT p.id, p.type, p.created_at FROM posts p JOIN post_tags pt ON p.id = pt.post_id JOIN tags t ON t.id = pt.tag_id")
 	} else {
-		sb.WriteString("SELECT id, p_alias.type, p_alias.created_at FROM posts p_alias")
-		// rewrite to avoid aliasing issue — use plain
-		sb.Reset()
 		sb.WriteString("SELECT id, type, created_at FROM posts")
 	}
 
@@ -458,7 +462,7 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 		}
 	}
 	if len(tags) > 0 {
-		conditions = append(conditions, "pt.tag IN ("+placeholders(len(tags))+")")
+		conditions = append(conditions, "t.name IN ("+placeholders(len(tags))+")")
 		for _, t := range tags {
 			args = append(args, t)
 		}
@@ -474,7 +478,7 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 	if err != nil {
 		return nil, fmt.Errorf("queryBaseRows: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var result []baseRow
 	for rows.Next() {
@@ -492,13 +496,13 @@ func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[s
 	if len(ids) == 0 {
 		return map[string][]string{}, nil
 	}
-	q := "SELECT post_id, tag FROM post_tags WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id"
+	q := "SELECT pt.post_id, t.name FROM post_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.post_id IN (" + placeholders(len(ids)) + ") ORDER BY pt.post_id"
 	args := stringsToAny(ids)
 	rows, err := s.db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchTagsMap: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	result := make(map[string][]string)
 	for rows.Next() {
@@ -507,6 +511,28 @@ func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[s
 			return nil, fmt.Errorf("fetchTagsMap scan: %w", err)
 		}
 		result[postID] = append(result[postID], tag)
+	}
+	return result, rows.Err()
+}
+
+// GetAllTags returns all tag names sorted alphabetically.
+func (s *SQLitePostStore) GetAllTags(ctx context.Context) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT name FROM tags ORDER BY name`)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllTags: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	var result []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("GetAllTags scan: %w", err)
+		}
+		result = append(result, name)
+	}
+	if result == nil {
+		result = []string{}
 	}
 	return result, rows.Err()
 }
@@ -527,7 +553,7 @@ func (s *SQLitePostStore) fetchEssayData(ctx context.Context, ids []string) (map
 	if err != nil {
 		return nil, fmt.Errorf("fetchEssayData: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]essayData)
 	for rows.Next() {
@@ -552,7 +578,7 @@ func (s *SQLitePostStore) fetchShortData(ctx context.Context, ids []string) (map
 	if err != nil {
 		return nil, fmt.Errorf("fetchShortData: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]shortData)
 	for rows.Next() {
@@ -567,10 +593,12 @@ func (s *SQLitePostStore) fetchShortData(ctx context.Context, ids []string) (map
 }
 
 type musicData struct {
-	title, albumArt, audioURL string
-	albumArtTiny              *string
-	duration                  int
-	album                     *string
+	albumArtTiny *string
+	album        *string
+	title        string
+	albumArt     string
+	audioURL     string
+	duration     int
 }
 
 func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map[string]musicData, error) {
@@ -582,7 +610,7 @@ func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map
 	if err != nil {
 		return nil, fmt.Errorf("fetchMusicData: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]musicData)
 	for rows.Next() {
@@ -607,7 +635,7 @@ func (s *SQLitePostStore) fetchPhotoMeta(ctx context.Context, ids []string) (map
 	if err != nil {
 		return nil, fmt.Errorf("fetchPhotoMeta: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]photoMeta)
 	for rows.Next() {
@@ -630,7 +658,7 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 	if err != nil {
 		return nil, fmt.Errorf("fetchPhotoImages: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string][]models.PhotoImage)
 	for rows.Next() {
@@ -645,10 +673,12 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 }
 
 type videoData struct {
-	title, thumbnailURL, videoURL string
-	thumbnailTinyURL              *string
-	duration                      int
-	playlist                      *string
+	thumbnailTinyURL *string
+	playlist         *string
+	title            string
+	thumbnailURL     string
+	videoURL         string
+	duration         int
 }
 
 func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map[string]videoData, error) {
@@ -660,7 +690,7 @@ func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map
 	if err != nil {
 		return nil, fmt.Errorf("fetchVideoData: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]videoData)
 	for rows.Next() {
@@ -675,11 +705,13 @@ func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map
 }
 
 type linkPostData struct {
-	title, url, domain string
-	description        *string
-	thumbnailURL       *string
-	thumbnailTinyURL   *string
-	category           *string
+	description      *string
+	thumbnailURL     *string
+	thumbnailTinyURL *string
+	category         *string
+	title            string
+	url              string
+	domain           string
 }
 
 func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (map[string]linkPostData, error) {
@@ -691,7 +723,7 @@ func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (
 	if err != nil {
 		return nil, fmt.Errorf("fetchLinkPostData: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	m := make(map[string]linkPostData)
 	for rows.Next() {

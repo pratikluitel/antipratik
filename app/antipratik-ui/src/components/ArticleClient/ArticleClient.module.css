@@ -177,6 +177,38 @@
   opacity: 0.5;
 }
 
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-2);
+}
+
+.tagLink {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  text-decoration: none;
+  opacity: 0.8;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: color var(--motion-fast), opacity var(--motion-fast);
+  }
+}
+
+.tagLink:hover {
+  color: var(--pill-text-essays-dark);
+  opacity: 1;
+}
+
+[data-theme='light'] .tagLink {
+  color: var(--color-text-muted-light);
+}
+
+[data-theme='light'] .tagLink:hover {
+  color: var(--pill-text-essays-light);
+}
+
 /* ── Article body (markdown prose) ─────────────────────────────────────── */
 
 .body {

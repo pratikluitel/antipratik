@@ -98,9 +98,9 @@ func storageExt(ext string) string {
 
 // photoImageWork is the result (or error) for a single image in a concurrent upload batch.
 type photoImageWork struct {
-	index  int
-	result PhotoImageResult
 	err    error
+	result PhotoImageResult
+	index  int
 }
 
 // UploadPhotoFiles implements UploadLogic.
@@ -221,7 +221,7 @@ func (s *UploadService) storeImageWithTiny(ctx context.Context, fileID string, f
 	if err != nil {
 		return "", "", fmt.Errorf("storeImageWithTiny encode %s: %w", fileID, err)
 	}
-	if err := s.files.Put(ctx, storePrefixPhotos+storeID, bytes.NewReader(buf), ct); err != nil {
+	if err = s.files.Put(ctx, storePrefixPhotos+storeID, bytes.NewReader(buf), ct); err != nil {
 		return "", "", fmt.Errorf("storeImageWithTiny store %s: %w", fileID, err)
 	}
 
