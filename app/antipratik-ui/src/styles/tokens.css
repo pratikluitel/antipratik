@@ -317,16 +317,17 @@
 --blockquote-color-light:            #2A5A8A;
 --blockquote-margin:                 24px 0;
 
-/* Floating progress indicator */
---progress-float-width:              3px;
---progress-float-height:             120px;
---progress-float-right:              16px;
---progress-float-track-dark:         #1E2535;
---progress-float-track-light:        #D8D2C4;
---progress-float-fill:               #E03E35;
---progress-appear-threshold:         200px;
---progress-disappear-threshold:      100px;  /* px from article end */
---progress-transition:               opacity 400ms ease-in-out;
+/* Ruler-style progress indicator */
+--progress-ruler-width:              2px;
+--progress-ruler-height:             160px;
+--progress-ruler-right:              16px;
+--progress-ruler-track-dark:         #1E2535;
+--progress-ruler-track-light:        #D8D2C4;
+--progress-tick-width:               6px;
+--progress-tick-long-width:          10px;
+--progress-indicator-size:           8px;
+--progress-fill:                     #3A6080;  /* muted essays blue — accent-essays desaturated */
+--progress-transition:               top 120ms linear;
 
 /* ═══════════════════════════════════════════════
    NEWSLETTER BLOCK

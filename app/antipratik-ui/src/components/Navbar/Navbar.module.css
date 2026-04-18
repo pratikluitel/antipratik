@@ -414,10 +414,12 @@
     left: auto;
     opacity: 1;
     pointer-events: auto;
-    justify-self: center;
-    text-align: center;
+    /* fill the 1fr column so overflow/truncation is bounded by it */
+    width: 100%;
     min-width: 0;
     max-width: none;
+    padding: 0 var(--space-1);
+    text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
