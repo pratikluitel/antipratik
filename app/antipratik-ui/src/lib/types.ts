@@ -38,7 +38,10 @@ export interface MusicPost extends BasePost {
   type: 'music';
   title: string;
   albumArt: string; // URL
-  albumArtTinyUrl?: string; // 20px wide — LQIP blur placeholder
+  albumArtTinyUrl?: string;   // 20px wide — LQIP blur placeholder
+  albumArtSmallUrl?: string;  // 300px wide
+  albumArtMediumUrl?: string; // 600px wide
+  albumArtLargeUrl?: string;  // 1200px wide
   audioUrl: string;
   duration: number; // seconds
   album?: string;
@@ -65,7 +68,10 @@ export interface VideoPost extends BasePost {
   type: 'video';
   title: string;
   thumbnailUrl: string;
-  thumbnailTinyUrl?: string; // 20px wide — LQIP blur placeholder
+  thumbnailTinyUrl?: string;   // 20px wide — LQIP blur placeholder
+  thumbnailSmallUrl?: string;  // 300px wide
+  thumbnailMediumUrl?: string; // 600px wide
+  thumbnailLargeUrl?: string;  // 1200px wide
   videoUrl: string;
   duration: number; // seconds
   playlist?: string;
@@ -78,7 +84,10 @@ export interface LinkPost extends BasePost {
   domain: string;
   description?: string;
   thumbnailUrl?: string;
-  thumbnailTinyUrl?: string; // 20px wide — LQIP blur placeholder
+  thumbnailTinyUrl?: string;   // 20px wide — LQIP blur placeholder
+  thumbnailSmallUrl?: string;  // 300px wide
+  thumbnailMediumUrl?: string; // 600px wide
+  thumbnailLargeUrl?: string;  // 1200px wide
   category?: 'music' | 'writing' | 'video' | 'social';
 }
 

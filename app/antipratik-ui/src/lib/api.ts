@@ -48,7 +48,7 @@ function prefixPost(post: Post): Post {
   switch (post.type) {
     case 'music': {
       const p = post as MusicPost;
-      return { ...p, albumArt: prefixUrl(p.albumArt), albumArtTinyUrl: prefixOptionalUrl(p.albumArtTinyUrl), audioUrl: prefixUrl(p.audioUrl) };
+      return { ...p, albumArt: prefixUrl(p.albumArt), albumArtTinyUrl: prefixOptionalUrl(p.albumArtTinyUrl), albumArtSmallUrl: prefixOptionalUrl(p.albumArtSmallUrl), albumArtMediumUrl: prefixOptionalUrl(p.albumArtMediumUrl), albumArtLargeUrl: prefixOptionalUrl(p.albumArtLargeUrl), audioUrl: prefixUrl(p.audioUrl) };
     }
     case 'photo': {
       const p = post as PhotoPost;
@@ -66,11 +66,11 @@ function prefixPost(post: Post): Post {
     }
     case 'video': {
       const p = post as VideoPost;
-      return { ...p, thumbnailUrl: prefixUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl) };
+      return { ...p, thumbnailUrl: prefixUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl), thumbnailSmallUrl: prefixOptionalUrl(p.thumbnailSmallUrl), thumbnailMediumUrl: prefixOptionalUrl(p.thumbnailMediumUrl), thumbnailLargeUrl: prefixOptionalUrl(p.thumbnailLargeUrl) };
     }
     case 'link': {
       const p = post as LinkPost;
-      return { ...p, thumbnailUrl: prefixOptionalUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl) };
+      return { ...p, thumbnailUrl: prefixOptionalUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl), thumbnailSmallUrl: prefixOptionalUrl(p.thumbnailSmallUrl), thumbnailMediumUrl: prefixOptionalUrl(p.thumbnailMediumUrl), thumbnailLargeUrl: prefixOptionalUrl(p.thumbnailLargeUrl) };
     }
     default:
       return post;

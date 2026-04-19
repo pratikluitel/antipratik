@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+
 	"github.com/pratikluitel/antipratik/models"
 	"github.com/pratikluitel/antipratik/store"
 )
@@ -44,17 +45,23 @@ type PhotoImageResult struct {
 	ThumbnailLargeURL string
 }
 
-// ThumbnailResult holds the URL and tiny-placeholder URL for an uploaded thumbnail.
+// ThumbnailResult holds the URL fields for an uploaded thumbnail (all 4 sizes).
 type ThumbnailResult struct {
-	URL     string
-	TinyURL string
+	URL      string
+	TinyURL  string
+	SmallURL string
+	MedURL   string
+	LargeURL string
 }
 
 // MusicFilesResult holds the URL fields from a music post file upload.
 type MusicFilesResult struct {
-	AudioURL        string
-	AlbumArtURL     string // empty string if no album art was uploaded
-	AlbumArtTinyURL string // empty string if no album art was uploaded
+	AudioURL         string
+	AlbumArtURL      string
+	AlbumArtTinyURL  string
+	AlbumArtSmallURL string
+	AlbumArtMedURL   string
+	AlbumArtLargeURL string
 }
 
 // UploadLogic handles file storage and thumbnail generation for uploaded assets.
@@ -204,38 +211,59 @@ func (s *UploadService) uploadOnePhoto(ctx context.Context, postID string, i int
 	}, nil
 }
 
-// storeImageWithTiny decodes, encodes, and stores an image at photos/<fileID>
-// and a 20px-wide tiny variant at thumbnails/<fileID>-tiny<ext>.
-// It returns the /files/ and /thumbnails/ URLs for both.
-func (s *UploadService) storeImageWithTiny(ctx context.Context, fileID string, file models.FileInput, ext string) (photoURL, tinyURL string, err error) {
+// allSizesResult holds the original URL and all 4 thumbnail URLs for a stored image.
+type allSizesResult struct {
+	OriginalURL string
+	TinyURL     string
+	SmallURL    string
+	MedURL      string
+	LargeURL    string
+}
+
+// storeImageAllSizes decodes, encodes, and stores an image at photos/<fileID> plus
+// all 4 thumbnail variants (tiny/small/medium/large) at thumbnails/<fileID>-<size><ext>.
+func (s *UploadService) storeImageAllSizes(ctx context.Context, fileID string, file models.FileInput, ext string) (allSizesResult, error) {
 	sExt := storageExt(ext)
 	ct := contentTypeForExt(sExt)
 	storeID := fileID + sExt
 
 	src, err := decodeImage(file.File, ext)
 	if err != nil {
-		return "", "", validationErr(fmt.Sprintf("%s: could not decode image: %v", fileID, err))
+		return allSizesResult{}, validationErr(fmt.Sprintf("%s: could not decode image: %v", fileID, err))
 	}
 
 	buf, err := encodeImage(src, ext)
 	if err != nil {
-		return "", "", fmt.Errorf("storeImageWithTiny encode %s: %w", fileID, err)
+		return allSizesResult{}, fmt.Errorf("storeImageAllSizes encode %s: %w", fileID, err)
 	}
 	if err = s.files.Put(ctx, storePrefixPhotos+storeID, bytes.NewReader(buf), ct); err != nil {
-		return "", "", fmt.Errorf("storeImageWithTiny store %s: %w", fileID, err)
+		return allSizesResult{}, fmt.Errorf("storeImageAllSizes store %s: %w", fileID, err)
 	}
 
-	tiny := resizeImage(src, thumbWidthTiny)
-	tinyBuf, err := encodeImage(tiny, ext)
-	if err != nil {
-		return "", "", fmt.Errorf("storeImageWithTiny encode tiny %s: %w", fileID, err)
+	result := allSizesResult{OriginalURL: urlPrefixFiles + storeID}
+	for _, sz := range thumbnailSizes {
+		thumb := resizeImage(src, sz.maxWidth)
+		thumbBuf, err := encodeImage(thumb, ext)
+		if err != nil {
+			return allSizesResult{}, fmt.Errorf("storeImageAllSizes encode %s-%s: %w", fileID, sz.name, err)
+		}
+		thumbStoreID := fileID + "-" + sz.name + sExt
+		if err := s.files.Put(ctx, storePrefixThumbnails+thumbStoreID, bytes.NewReader(thumbBuf), ct); err != nil {
+			return allSizesResult{}, fmt.Errorf("storeImageAllSizes store %s-%s: %w", fileID, sz.name, err)
+		}
+		thumbURL := urlPrefixThumbnails + thumbStoreID
+		switch sz.name {
+		case "tiny":
+			result.TinyURL = thumbURL
+		case "small":
+			result.SmallURL = thumbURL
+		case "medium":
+			result.MedURL = thumbURL
+		case "large":
+			result.LargeURL = thumbURL
+		}
 	}
-	tinyStoreID := fileID + "-tiny" + sExt
-	if err := s.files.Put(ctx, storePrefixThumbnails+tinyStoreID, bytes.NewReader(tinyBuf), ct); err != nil {
-		return "", "", fmt.Errorf("storeImageWithTiny store tiny %s: %w", fileID, err)
-	}
-
-	return urlPrefixFiles + storeID, urlPrefixThumbnails + tinyStoreID, nil
+	return result, nil
 }
 
 // UploadMusicFiles implements UploadLogic.
@@ -265,12 +293,15 @@ func (s *UploadService) UploadMusicFiles(ctx context.Context, postID string, aud
 		if !allowedPhotoExts[artExt] {
 			return MusicFilesResult{}, validationErr(fmt.Sprintf("albumArtFile must be one of jpg, jpeg, png, webp, heic, heif — got %q", artExt))
 		}
-		artURL, artTinyURL, err := s.storeImageWithTiny(ctx, postID+"-albumart", *albumArtFile, artExt)
+		art, err := s.storeImageAllSizes(ctx, postID+"-albumart", *albumArtFile, artExt)
 		if err != nil {
 			return MusicFilesResult{}, err
 		}
-		result.AlbumArtURL = artURL
-		result.AlbumArtTinyURL = artTinyURL
+		result.AlbumArtURL = art.OriginalURL
+		result.AlbumArtTinyURL = art.TinyURL
+		result.AlbumArtSmallURL = art.SmallURL
+		result.AlbumArtMedURL = art.MedURL
+		result.AlbumArtLargeURL = art.LargeURL
 	}
 
 	return result, nil
@@ -285,9 +316,9 @@ func (s *UploadService) UploadThumbnail(ctx context.Context, postID string, suff
 	if !allowedPhotoExts[ext] {
 		return ThumbnailResult{}, validationErr(fmt.Sprintf("thumbnailFile must be one of jpg, jpeg, png, webp — got %q", ext))
 	}
-	photoURL, tinyURL, err := s.storeImageWithTiny(ctx, postID+"-"+suffix, file, ext)
+	r, err := s.storeImageAllSizes(ctx, postID+"-"+suffix, file, ext)
 	if err != nil {
 		return ThumbnailResult{}, err
 	}
-	return ThumbnailResult{URL: photoURL, TinyURL: tinyURL}, nil
+	return ThumbnailResult{URL: r.OriginalURL, TinyURL: r.TinyURL, SmallURL: r.SmallURL, MedURL: r.MedURL, LargeURL: r.LargeURL}, nil
 }

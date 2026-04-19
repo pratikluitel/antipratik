@@ -48,7 +48,7 @@ function LinkThumbnail({ post }: { post: LinkPost }) {
         />
       )}
       <Image
-        src={post.thumbnailUrl!}
+        src={post.thumbnailSmallUrl ?? post.thumbnailUrl!}
         alt={post.title}
         width={52}
         height={52}

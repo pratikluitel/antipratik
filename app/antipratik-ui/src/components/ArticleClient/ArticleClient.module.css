@@ -387,13 +387,19 @@
   border-left-color: var(--color-border-light);
 }
 
+.tocItemTop {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
 .tocItem {
   margin-bottom: 6px;
+  padding-left: var(--space-2);
 }
 
 .tocItemSub {
   margin-bottom: 6px;
-  padding-left: var(--space-2);
+  padding-left: var(--space-4);
 }
 
 .tocLink {

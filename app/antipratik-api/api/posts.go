@@ -175,17 +175,29 @@ func (h *PostHandlerImpl) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var albumArtTiny *string
+	var albumArtTiny, albumArtSmall, albumArtMed, albumArtLarge *string
 	if uploaded.AlbumArtTinyURL != "" {
 		albumArtTiny = &uploaded.AlbumArtTinyURL
 	}
+	if uploaded.AlbumArtSmallURL != "" {
+		albumArtSmall = &uploaded.AlbumArtSmallURL
+	}
+	if uploaded.AlbumArtMedURL != "" {
+		albumArtMed = &uploaded.AlbumArtMedURL
+	}
+	if uploaded.AlbumArtLargeURL != "" {
+		albumArtLarge = &uploaded.AlbumArtLargeURL
+	}
 	input := models.MusicPostInput{
-		Title:           r.FormValue("title"),
-		AudioURL:        uploaded.AudioURL,
-		AlbumArt:        uploaded.AlbumArtURL,
-		AlbumArtTinyURL: albumArtTiny,
-		Duration:        duration,
-		Tags:            formTags(r),
+		Title:            r.FormValue("title"),
+		AudioURL:         uploaded.AudioURL,
+		AlbumArt:         uploaded.AlbumArtURL,
+		AlbumArtTinyURL:  albumArtTiny,
+		AlbumArtSmallURL: albumArtSmall,
+		AlbumArtMedURL:   albumArtMed,
+		AlbumArtLargeURL: albumArtLarge,
+		Duration:         duration,
+		Tags:             formTags(r),
 	}
 	if album := r.FormValue("album"); album != "" {
 		input.Album = &album
@@ -318,7 +330,7 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	postID := uuid.New().String()
 
 	var thumbnailURL string
-	var thumbnailTinyURL *string
+	var thumbnailTinyURL, thumbnailSmallURL, thumbnailMedURL, thumbnailLargeURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer func() { _ = thumbFile.Close() }()
 		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
@@ -329,6 +341,9 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		}
 		thumbnailURL = result.URL
 		thumbnailTinyURL = &result.TinyURL
+		thumbnailSmallURL = &result.SmallURL
+		thumbnailMedURL = &result.MedURL
+		thumbnailLargeURL = &result.LargeURL
 	}
 
 	duration, err := strconv.Atoi(r.FormValue("duration"))
@@ -337,12 +352,15 @@ func (h *PostHandlerImpl) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input := models.VideoPostInput{
-		Title:            r.FormValue("title"),
-		VideoURL:         r.FormValue("videoURL"),
-		ThumbnailURL:     thumbnailURL,
-		ThumbnailTinyURL: thumbnailTinyURL,
-		Duration:         duration,
-		Tags:             formTags(r),
+		Title:             r.FormValue("title"),
+		VideoURL:          r.FormValue("videoURL"),
+		ThumbnailURL:      thumbnailURL,
+		ThumbnailTinyURL:  thumbnailTinyURL,
+		ThumbnailSmallURL: thumbnailSmallURL,
+		ThumbnailMedURL:   thumbnailMedURL,
+		ThumbnailLargeURL: thumbnailLargeURL,
+		Duration:          duration,
+		Tags:              formTags(r),
 	}
 	if pl := r.FormValue("playlist"); pl != "" {
 		input.Playlist = &pl
@@ -399,7 +417,7 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 
 	postID := uuid.New().String()
 
-	var thumbnailURL, thumbnailTinyURL *string
+	var thumbnailURL, thumbnailTinyURL, thumbnailSmallURL, thumbnailMedURL, thumbnailLargeURL *string
 	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
 		defer func() { _ = thumbFile.Close() }()
 		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
@@ -410,13 +428,19 @@ func (h *PostHandlerImpl) CreateLinkPost(w http.ResponseWriter, r *http.Request)
 		}
 		thumbnailURL = &result.URL
 		thumbnailTinyURL = &result.TinyURL
+		thumbnailSmallURL = &result.SmallURL
+		thumbnailMedURL = &result.MedURL
+		thumbnailLargeURL = &result.LargeURL
 	}
 
 	input := models.LinkPostInput{
-		Title:            r.FormValue("title"),
-		URL:              r.FormValue("url"),
-		ThumbnailURL:     thumbnailURL,
-		ThumbnailTinyURL: thumbnailTinyURL,
+		Title:             r.FormValue("title"),
+		URL:               r.FormValue("url"),
+		ThumbnailURL:      thumbnailURL,
+		ThumbnailTinyURL:  thumbnailTinyURL,
+		ThumbnailSmallURL: thumbnailSmallURL,
+		ThumbnailMedURL:   thumbnailMedURL,
+		ThumbnailLargeURL: thumbnailLargeURL,
 		Tags:             formTags(r),
 	}
 	if desc := r.FormValue("description"); desc != "" {
