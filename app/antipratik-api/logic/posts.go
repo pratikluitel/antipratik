@@ -352,7 +352,9 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 
 	merged := models.MusicPostInput{
 		Title: cur.Title, AudioURL: cur.AudioURL, AlbumArt: cur.AlbumArt,
-		AlbumArtTinyURL: cur.AlbumArtTinyURL, Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
+		AlbumArtTinyURL: cur.AlbumArtTinyURL, AlbumArtSmallURL: cur.AlbumArtSmallURL,
+		AlbumArtMedURL: cur.AlbumArtMedURL, AlbumArtLargeURL: cur.AlbumArtLargeURL,
+		Duration: cur.Duration, Album: cur.Album, Tags: cur.Tags,
 	}
 
 	if input.Title != nil {
@@ -392,6 +394,8 @@ func (s *PostService) UpdateMusic(ctx context.Context, id string, input models.U
 	return models.MusicPost{
 		ID: id, Type: models.PostTypeMusic, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, AlbumArt: merged.AlbumArt, AlbumArtTinyURL: merged.AlbumArtTinyURL,
+		AlbumArtSmallURL: merged.AlbumArtSmallURL, AlbumArtMedURL: merged.AlbumArtMedURL,
+		AlbumArtLargeURL: merged.AlbumArtLargeURL,
 		AudioURL: merged.AudioURL, Duration: merged.Duration, Album: merged.Album,
 	}, nil
 }
@@ -447,6 +451,8 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 
 	merged := models.VideoPostInput{
 		Title: cur.Title, ThumbnailURL: cur.ThumbnailURL, ThumbnailTinyURL: cur.ThumbnailTinyURL,
+		ThumbnailSmallURL: cur.ThumbnailSmallURL, ThumbnailMedURL: cur.ThumbnailMedURL,
+		ThumbnailLargeURL: cur.ThumbnailLargeURL,
 		VideoURL: cur.VideoURL, Duration: cur.Duration, Playlist: cur.Playlist, Tags: cur.Tags,
 	}
 	if input.Title != nil {
@@ -486,6 +492,8 @@ func (s *PostService) UpdateVideo(ctx context.Context, id string, input models.U
 	return models.VideoPost{
 		ID: id, Type: models.PostTypeVideo, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: merged.ThumbnailTinyURL,
+		ThumbnailSmallURL: merged.ThumbnailSmallURL, ThumbnailMedURL: merged.ThumbnailMedURL,
+		ThumbnailLargeURL: merged.ThumbnailLargeURL,
 		VideoURL: merged.VideoURL, Duration: merged.Duration, Playlist: merged.Playlist,
 	}, nil
 }
@@ -506,8 +514,9 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 	merged := models.LinkPostInput{
 		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
 		Description: cur.Description, ThumbnailURL: cur.ThumbnailURL,
-		ThumbnailTinyURL: cur.ThumbnailTinyURL,
-		Category:         cur.Category, Tags: cur.Tags,
+		ThumbnailTinyURL: cur.ThumbnailTinyURL, ThumbnailSmallURL: cur.ThumbnailSmallURL,
+		ThumbnailMedURL: cur.ThumbnailMedURL, ThumbnailLargeURL: cur.ThumbnailLargeURL,
+		Category: cur.Category, Tags: cur.Tags,
 	}
 	if input.Title != nil {
 		merged.Title = *input.Title
@@ -549,7 +558,9 @@ func (s *PostService) UpdateLinkPost(ctx context.Context, id string, input model
 		ID: id, Type: models.PostTypeLink, CreatedAt: cur.CreatedAt, Tags: tags,
 		Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
 		Description: merged.Description, ThumbnailURL: merged.ThumbnailURL,
-		ThumbnailTinyURL: merged.ThumbnailTinyURL, Category: merged.Category,
+		ThumbnailTinyURL: merged.ThumbnailTinyURL, ThumbnailSmallURL: merged.ThumbnailSmallURL,
+		ThumbnailMedURL: merged.ThumbnailMedURL, ThumbnailLargeURL: merged.ThumbnailLargeURL,
+		Category: merged.Category,
 	}, nil
 }
 
