@@ -72,8 +72,8 @@ func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input 
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	_, err = tx.ExecContext(ctx, `INSERT INTO music_posts (post_id, title, album_art, album_art_tiny, audio_url, duration, album) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album)
+	_, err = tx.ExecContext(ctx, `INSERT INTO music_posts (post_id, title, album_art, album_art_tiny, album_art_small, album_art_medium, album_art_large, audio_url, duration, album) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AlbumArtSmallURL, input.AlbumArtMedURL, input.AlbumArtLargeURL, input.AudioURL, input.Duration, input.Album)
 	if err != nil {
 		return err
 	}
@@ -113,8 +113,8 @@ func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input 
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, thumbnail_tiny_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist)
+	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.VideoURL, input.Duration, input.Playlist)
 	if err != nil {
 		return err
 	}
@@ -130,8 +130,8 @@ func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, inp
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	_, err = tx.ExecContext(ctx, `INSERT INTO link_posts (post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.Category)
+	_, err = tx.ExecContext(ctx, `INSERT INTO link_posts (post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.Category)
 	if err != nil {
 		return err
 	}
@@ -185,8 +185,8 @@ func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input mode
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err = tx.ExecContext(ctx, `UPDATE music_posts SET title=?, album_art=?, album_art_tiny=?, audio_url=?, duration=?, album=? WHERE post_id=?`,
-		input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AudioURL, input.Duration, input.Album, id); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE music_posts SET title=?, album_art=?, album_art_tiny=?, album_art_small=?, album_art_medium=?, album_art_large=?, audio_url=?, duration=?, album=? WHERE post_id=?`,
+		input.Title, input.AlbumArt, input.AlbumArtTinyURL, input.AlbumArtSmallURL, input.AlbumArtMedURL, input.AlbumArtLargeURL, input.AudioURL, input.Duration, input.Album, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
@@ -232,8 +232,8 @@ func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input mode
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, thumbnail_tiny_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
-		input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, thumbnail_tiny_url=?, thumbnail_small_url=?, thumbnail_medium_url=?, thumbnail_large_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
+		input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
@@ -251,8 +251,8 @@ func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input m
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err = tx.ExecContext(ctx, `UPDATE link_posts SET title=?, url=?, domain=?, description=?, thumbnail_url=?, thumbnail_tiny_url=?, category=? WHERE post_id=?`,
-		input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.Category, id); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE link_posts SET title=?, url=?, domain=?, description=?, thumbnail_url=?, thumbnail_tiny_url=?, thumbnail_small_url=?, thumbnail_medium_url=?, thumbnail_large_url=?, category=? WHERE post_id=?`,
+		input.Title, input.URL, input.Domain, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.Category, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {
@@ -593,19 +593,22 @@ func (s *SQLitePostStore) fetchShortData(ctx context.Context, ids []string) (map
 }
 
 type musicData struct {
-	albumArtTiny *string
-	album        *string
-	title        string
-	albumArt     string
-	audioURL     string
-	duration     int
+	albumArtTiny  *string
+	albumArtSmall *string
+	albumArtMed   *string
+	albumArtLarge *string
+	album         *string
+	title         string
+	albumArt      string
+	audioURL      string
+	duration      int
 }
 
 func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map[string]musicData, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, title, album_art, album_art_tiny, audio_url, duration, album FROM music_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	q := "SELECT post_id, title, album_art, album_art_tiny, album_art_small, album_art_medium, album_art_large, audio_url, duration, album FROM music_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchMusicData: %w", err)
@@ -616,7 +619,7 @@ func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map
 	for rows.Next() {
 		var id string
 		var d musicData
-		if err := rows.Scan(&id, &d.title, &d.albumArt, &d.albumArtTiny, &d.audioURL, &d.duration, &d.album); err != nil {
+		if err := rows.Scan(&id, &d.title, &d.albumArt, &d.albumArtTiny, &d.albumArtSmall, &d.albumArtMed, &d.albumArtLarge, &d.audioURL, &d.duration, &d.album); err != nil {
 			return nil, fmt.Errorf("fetchMusicData scan: %w", err)
 		}
 		m[id] = d
@@ -673,19 +676,22 @@ func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 }
 
 type videoData struct {
-	thumbnailTinyURL *string
-	playlist         *string
-	title            string
-	thumbnailURL     string
-	videoURL         string
-	duration         int
+	thumbnailTinyURL  *string
+	thumbnailSmallURL *string
+	thumbnailMedURL   *string
+	thumbnailLargeURL *string
+	playlist          *string
+	title             string
+	thumbnailURL      string
+	videoURL          string
+	duration          int
 }
 
 func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map[string]videoData, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, title, thumbnail_url, thumbnail_tiny_url, video_url, duration, playlist FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	q := "SELECT post_id, title, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url, duration, playlist FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchVideoData: %w", err)
@@ -696,7 +702,7 @@ func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map
 	for rows.Next() {
 		var id string
 		var d videoData
-		if err := rows.Scan(&id, &d.title, &d.thumbnailURL, &d.thumbnailTinyURL, &d.videoURL, &d.duration, &d.playlist); err != nil {
+		if err := rows.Scan(&id, &d.title, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.videoURL, &d.duration, &d.playlist); err != nil {
 			return nil, fmt.Errorf("fetchVideoData scan: %w", err)
 		}
 		m[id] = d
@@ -705,20 +711,23 @@ func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map
 }
 
 type linkPostData struct {
-	description      *string
-	thumbnailURL     *string
-	thumbnailTinyURL *string
-	category         *string
-	title            string
-	url              string
-	domain           string
+	description       *string
+	thumbnailURL      *string
+	thumbnailTinyURL  *string
+	thumbnailSmallURL *string
+	thumbnailMedURL   *string
+	thumbnailLargeURL *string
+	category          *string
+	title             string
+	url               string
+	domain            string
 }
 
 func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (map[string]linkPostData, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, category FROM link_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	q := "SELECT post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, category FROM link_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchLinkPostData: %w", err)
@@ -729,7 +738,7 @@ func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (
 	for rows.Next() {
 		var id string
 		var d linkPostData
-		if err := rows.Scan(&id, &d.title, &d.url, &d.domain, &d.description, &d.thumbnailURL, &d.thumbnailTinyURL, &d.category); err != nil {
+		if err := rows.Scan(&id, &d.title, &d.url, &d.domain, &d.description, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.category); err != nil {
 			return nil, fmt.Errorf("fetchLinkPostData scan: %w", err)
 		}
 		m[id] = d
@@ -798,6 +807,8 @@ func (s *SQLitePostStore) assembleAll(
 			post = models.MusicPost{
 				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
 				Title: d.title, AlbumArt: d.albumArt, AlbumArtTinyURL: d.albumArtTiny,
+				AlbumArtSmallURL: d.albumArtSmall, AlbumArtMedURL: d.albumArtMed,
+				AlbumArtLargeURL: d.albumArtLarge,
 				AudioURL: d.audioURL, Duration: d.duration, Album: d.album,
 			}
 		case "photo":
@@ -815,6 +826,8 @@ func (s *SQLitePostStore) assembleAll(
 			post = models.VideoPost{
 				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
 				Title: d.title, ThumbnailURL: d.thumbnailURL, ThumbnailTinyURL: d.thumbnailTinyURL,
+				ThumbnailSmallURL: d.thumbnailSmallURL, ThumbnailMedURL: d.thumbnailMedURL,
+				ThumbnailLargeURL: d.thumbnailLargeURL,
 				VideoURL: d.videoURL, Duration: d.duration, Playlist: d.playlist,
 			}
 		case "link":
@@ -823,7 +836,9 @@ func (s *SQLitePostStore) assembleAll(
 				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
 				Title: d.title, URL: d.url, Domain: d.domain,
 				Description: d.description, ThumbnailURL: d.thumbnailURL,
-				ThumbnailTinyURL: d.thumbnailTinyURL, Category: d.category,
+				ThumbnailTinyURL: d.thumbnailTinyURL, ThumbnailSmallURL: d.thumbnailSmallURL,
+				ThumbnailMedURL: d.thumbnailMedURL, ThumbnailLargeURL: d.thumbnailLargeURL,
+				Category: d.category,
 			}
 		default:
 			continue

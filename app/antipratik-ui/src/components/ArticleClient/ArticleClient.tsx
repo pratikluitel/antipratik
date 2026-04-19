@@ -76,7 +76,7 @@ export default function ArticleClient({ post }: Props) {
     const collected: Heading[] = [];
     const renderer = new marked.Renderer();
     renderer.heading = ({ text, depth }: { text: string; depth: number }) => {
-      if (depth === 2 || depth === 3) {
+      if (depth === 1 || depth === 2 || depth === 3) {
         const id = slugify(text);
         collected.push({ id, text, level: depth });
         return `<h${depth} id="${id}">${text}</h${depth}>`;
@@ -137,7 +137,7 @@ export default function ArticleClient({ post }: Props) {
               {headings.map((h) => (
                 <li
                   key={h.id}
-                  className={h.level === 3 ? styles.tocItemSub : styles.tocItem}
+                  className={h.level === 1 ? styles.tocItemTop : h.level === 3 ? styles.tocItemSub : styles.tocItem}
                 >
                   <a href={`#${h.id}`} className={styles.tocLink}>
                     {h.text}

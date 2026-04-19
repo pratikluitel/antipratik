@@ -56,10 +56,10 @@ export default function Lightbox({ images, startIndex, onClose }: Props) {
       )}
 
       <div className={styles.imageContainer} onClick={e => e.stopPropagation()}>
-        {images[currentIndex].thumbnailTinyUrl && (
+        {(images[currentIndex].thumbnailLargeUrl ?? images[currentIndex].thumbnailTinyUrl) && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={images[currentIndex].thumbnailTinyUrl}
+            src={images[currentIndex].thumbnailLargeUrl ?? images[currentIndex].thumbnailTinyUrl}
             alt=""
             aria-hidden="true"
             className={`${styles.image} ${styles.imagePlaceholder} ${loaded ? styles.imagePlaceholderLoaded : ''}`}
