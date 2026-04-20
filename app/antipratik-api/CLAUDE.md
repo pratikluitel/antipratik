@@ -46,37 +46,46 @@ Read this file at the start of every session before writing any code.
 
 ## Major Architecture Pattern: 3-Layer Factory Pattern
 
-The API follows a **3-Layer Clean Architecture** with dependency injection:
+The API follows a **3-Layer Clean Architecture** with dependency injection, organised into **components**:
 
 ```
-┌─────────────────┐
-│   API Layer     │  ← HTTP handlers, JSON serialization, data type validation
-│   (api/*.go)    │
-└─────────────────┘
-         ↓
-┌─────────────────┐
-│  Logic Layer    │  ← Business logic, validation, coordination
-│ (logic/*.go)    │
-└─────────────────┘
-         ↓
-┌─────────────────┐
-│  Store Layer    │  ← Data persistence, SQL queries
-│ (store/*.go)    │
-└─────────────────┘
+components/posts/               ← post and link CRUD
+  api/ → logic/ → store/        (3-layer pattern)
+
+components/auth/                ← authentication, JWT, bootstrap
+  api/ → logic/ → store/        (3-layer pattern)
+
+components/files/               ← file storage, upload processing, serving
+  api/ → logic/ → store/        (3-layer pattern)
+  services/                     ← StorageService + UploaderService for cross-component injection
+
+components/broadcaster/         ← newsletter subscription
+  api/ → logic/ → store/        (3-layer pattern)
+  services/                     ← SubscriberService for cross-component injection
+
+handlers/                       ← route registration, CORS, rate-limit middleware
+  routes.go                     ← RegisterRoutes; wires all component handlers onto the mux
+  middleware.go                 ← CORSMiddleware, RateLimitMiddleware
 
 ┌─────────────────┐
 │   DB Package    │  ← SQLite connection + schema migrations (infrastructure only)
-│   (db/*.go)     │     Called from main.go; not a business-logic store
+│ (common/db/)    │     Called from main.go; not a business-logic store
 └─────────────────┘
+
+migrations/                     ← top-level SQL migration files (embedded in main.go)
 ```
+
+**Services layer:** When one component needs to call another's logic, it imports the
+`services/` interface (e.g. `components/broadcaster/services.SubscriberService`) rather
+than importing the concrete logic package directly. Services are injected via `main.go`.
 
 Each layer has an **interface** and a **concrete implementation** created via factory functions. Dependencies flow downward through constructor injection.
 
 **Wiring Example:**
 ```go
-postStore := store.NewPostStore(db)
-postLogic := logic.NewPostService(postStore)
-postH     := api.NewPostHandler(postLogic)
+postStore := postsstore.NewPostStore(db)
+postLogic := postslogic.NewPostService(postStore, storageSvc, logger)
+postH     := postsapi.NewPostHandler(postLogic, uploaderSvc, logger)
 ```
 
 **Benefits:**
@@ -111,8 +120,8 @@ These rules are inviolable. Check them before writing any code.
 
 ### Rule 4 — JWT Middleware on Protected Routes
 **All write operations require JWT authentication.**
-- Use `JWTAuthMiddleware` wrapper for POST/PUT/DELETE endpoints
-- Validate tokens before processing any request
+- Use `JWTAuthMiddleware` from `components/auth/api/middleware.go` for POST/PUT/DELETE endpoints
+- Applied in `handlers/routes.go` via `protect := authapi.JWTAuthMiddleware(authSvc)`
 - Return `401 Unauthorized` for invalid/missing tokens
 
 ### Rule 5 — No Direct Database Access in API Layer
@@ -142,11 +151,12 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Not found (404) and unauthorized (401) — expected, silent.
 - Passwords, tokens, or any personal data.
 
-### Rule 8 — errors.go Per Package
-**Each package defines its own `errors.go` for error types specific to that layer.**
-- `logic/errors.go` — `ValidationError` and helpers (`requireNonEmpty`, `requirePositive`). Use `logic.IsValidationError` in the API layer to distinguish 400 from 500 responses.
-- `api/errors.go` — `handleLogicError` helper that maps `ValidationError` → 400, anything else → 500.
-- Add new error types to the `errors.go` of the layer that owns them. Never scatter error definitions across business logic files.
+### Rule 8 — Shared and Component-Specific Error Definitions
+**Validation errors live in `common/errors`; component-specific sentinel errors stay in their own package.**
+- `common/errors` — `ValidationError` type, `New(msg)`, `Is(err)`, `RequireNonEmpty`, `RequirePositive`. All logic packages call these directly; no local copies.
+- `api/errors.go` — `handleLogicError` helper that maps `commonerrors.Is(err)` → 400, anything else → 500.
+- Component-specific sentinels (e.g. `files/store.ErrFileNotFound`, `broadcaster/store.ErrDuplicate`) stay in the package that owns them.
+- Never redefine `ValidationError` locally in a component. Never scatter error type definitions across business logic files.
 
 ### Rule 9 — Consistent JSON Response Format
 **All responses follow the same structure.**
@@ -163,8 +173,8 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 
 ### Rule 11 — Migration-Based Schema Evolution
 **Database schema changes via SQL migrations.**
-- Versioned migration files in `db/migrations/`
-- Run migrations on startup with `db.RunMigrations()`
+- Versioned migration files in `migrations/` (top-level, embedded in `main.go`)
+- Run migrations on startup with `db.RunMigrations(sqlDB, migrationsFS)`
 - Ensures consistent schema across environments
 
 ### Rule 12 — Store Is Never Called Directly from `main`
@@ -178,7 +188,17 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 
 ## Layers of the Architecture
 
-### API Layer (`api/*.go`)
+### Handlers Layer (`handlers/`)
+**Purpose:** Route registration and cross-cutting HTTP middleware that isn't domain-specific.
+
+**Key Components:**
+- `RegisterRoutes` in `handlers/routes.go` — wires all component handlers onto the mux
+- `CORSMiddleware` in `handlers/middleware.go` — permissive CORS headers
+- `RateLimitMiddleware` in `handlers/middleware.go` — per-IP token-bucket rate limiting
+
+**Never Does:** Business logic, database queries, auth validation.
+
+### API Layer (`components/*/api/*.go`)
 **Purpose:** HTTP request/response handling, JSON serialization, routing.
 
 **Responsibilities:**
@@ -189,14 +209,14 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle HTTP status codes and headers
 
 **Key Components:**
-- `PostHandler`, `LinkHandler`, `AuthHandler`, `UploadHandler` interfaces
-- `CORSMiddleware` for cross-origin requests
-- `JWTAuthMiddleware` and `RateLimitMiddleware` in `api/middleware.go`
-- Route registration in top-level `routes.go` (package main) — **not** inside `api/`
+- `PostHandler`, `LinkHandler` interfaces in `components/posts/api/`
+- `AuthHandlerImpl` in `components/auth/api/`; `JWTAuthMiddleware` in `components/auth/api/middleware.go`
+- `FileServingHandler` in `components/files/api/`
+- `NewsletterHandlerImpl` in `components/broadcaster/api/`
 
 **Never Does:** Business logic, database queries, complex validation.
 
-### Logic Layer (`logic/*.go`)
+### Logic Layer (`components/*/logic/*.go`)
 **Purpose:** Business rules, input validation, coordination between operations.
 
 **Responsibilities:**
@@ -206,27 +226,39 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle business logic errors
 
 **Key Components:**
-- `PostLogic`, `LinkLogic`, `AuthLogic`, `UploadLogic`, `SetupLogic` interfaces
-- `PostService`, `LinkService`, `AuthService`, `UploadService`, `SetupService` implementations
+- `PostLogic`, `LinkLogic` interfaces in `components/posts/logic/`
+- `AuthLogic`, `SetupLogic` interfaces in `components/auth/logic/`
+- `UploadLogic` interface in `components/files/logic/`
+- `NewsletterLogic` interface in `components/broadcaster/logic/`
 - Input validation and sanitization
 
 **Never Does:** HTTP concerns, direct database access.
 
-### Store Layer (`store/*.go`)
+### Store Layer (`components/*/store/*.go`)
 **Purpose:** Data persistence and retrieval.
 
 **Responsibilities:**
 - Execute SQL queries
 - Map database rows to Go structs
 - Handle database transactions
-- Manage connections and migrations
 
 **Key Components:**
-- `PostStore`, `LinkStore`, `UserStore`, `SettingsStore` interfaces
-- `FileStore` interface with `LocalFileStore` and `R2FileStore` implementations
+- `PostStore`, `LinkStore` interfaces in `components/posts/store/`
+- `UserStore`, `SettingsStore` interfaces in `components/auth/store/`
+- `FileStore` interface in `components/files/store/` with `LocalFileStore` and `R2FileStore` implementations
+- `NewsletterStore` interface in `components/broadcaster/store/`
 - SQLite implementations with prepared statements
 
 **Never Does:** Business logic, HTTP responses.
+
+### Services Layer (`components/*/services/`)
+**Purpose:** Expose a component's logic capabilities as an injectable interface for other components.
+
+**Key Components:**
+- `StorageService`, `UploaderService` in `components/files/services/` — file access for the posts component
+- `SubscriberService` in `components/broadcaster/services/` — newsletter subscription for future cross-component use
+
+**Never Does:** Handle HTTP requests, access the database directly.
 
 ---
 
@@ -246,7 +278,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 10. **Never Trust Client-Side Validation** — Server must validate everything again.
 11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
 12. **Never add a generic upload endpoint** — File uploads belong inside post handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes. _Exception:_ per-resource sub-collection endpoints such as `POST /api/posts/{id}/images` are acceptable when they manage images on an already-existing post (e.g. adding an image to an existing photo post).
-13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` in the top-level `routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
+13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` (from `handlers/middleware.go`) in `handlers/routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
 14. **A photo post must always contain at least 1 image** — `DELETE /api/posts/{id}/images/{imageID}` returns a 400 ValidationError if the post has only one image remaining. This is enforced in the logic layer (`PostService.DeletePhotoImage`). Never bypass this check.
 
 ---
@@ -273,7 +305,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 ### Network Security
 - **CORS Configuration:** Permissive in dev, locked down in production
 - **HTTPS Enforcement:** Required for production deployments
-- **Rate Limiting:** Per-IP rate limiting via `RateLimitMiddleware` (`api/middleware.go`) — required on all public POST endpoints that write to the database
+- **Rate Limiting:** Per-IP rate limiting via `RateLimitMiddleware` (`handlers/middleware.go`) — required on all public POST endpoints that write to the database
 
 ---
 
@@ -334,7 +366,7 @@ File uploads are embedded in the existing post create endpoints as `multipart/fo
   - `nil` — key was absent in a non-multipart request → preserve existing tags (UPDATE only)
   - `[]string{}` — key was absent in a multipart request, or present but empty → **clear all tags**
   - `[]string{…}` — the parsed tag values
-  Never read `r.Form["tags"]` or `r.Form["tags[]"]` directly in handlers; always call `formTags(r)`.
+  Never read `r.Form["tags"]` or `r.Form["tags[]"]` directly in handlers; always call `formTags(r)` (defined in `components/posts/api/helpers.go`).
 
 ### Post Types Supported
 - **essay:** Long-form writing with title, slug, excerpt, body, reading time
@@ -381,13 +413,13 @@ Every handler must return the appropriate status using these rules. Do not devia
 | `200 OK` | Success with body | GET, successful POST that returns data |
 | `201 Created` | Resource created | POST that creates a new resource (returns `{"id": "…"}`) |
 | `204 No Content` | Success, no body | DELETE |
-| `400 Bad Request` | Client error | `logic.ValidationError` — bad input, failed validation, duplicate entry |
+| `400 Bad Request` | Client error | `commonerrors.ValidationError` — bad input, failed validation, duplicate entry |
 | `401 Unauthorized` | Auth failure | Missing/invalid JWT token |
 | `404 Not Found` | Missing resource | Resource with given ID/slug does not exist |
 | `429 Too Many Requests` | Rate limited | IP exceeded the per-endpoint rate limit |
 | `500 Internal Server Error` | Server error | Any non-ValidationError from the logic or store layer |
 
-The `handleLogicError` helper in `api/errors.go` maps `ValidationError → 400` and everything else `→ 500`. Use it for all logic layer errors. Never manually write a 500 — let the helper do it so the log entry is consistent.
+The `handleLogicError` helper in `api/errors.go` maps `commonerrors.Is(err) → 400` and everything else `→ 500`. Use it for all logic layer errors. Never manually write a 500 — let the helper do it so the log entry is consistent.
 
 ---
 
