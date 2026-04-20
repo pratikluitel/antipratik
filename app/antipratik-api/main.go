@@ -103,7 +103,7 @@ func main() {
 	newsletterH := broadcasterapi.NewNewsletterHandler(nlLogic, logger)
 
 	mux := http.NewServeMux()
-	handlers.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "api/openapi.yaml", "api/swagger.html")
+	handlers.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "swagger/openapi.yaml", "swagger/swagger.html")
 
 	handler := handlers.CORSMiddleware(mux)
 
