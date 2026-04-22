@@ -7,7 +7,7 @@
  * Never call fetch() directly in a component or page.
  */
 
-import type { Post, MusicPost, PhotoPost, PhotoImage, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState } from './types';
+import type { Post, MusicPost, PhotoPost, PhotoImage, VideoPost, LinkPost, EssayPost, ShortPost, ExternalLink, FilterState, SubscriberSummary, BroadcastSummary, BroadcastPreview, CreateBroadcastInput, UpdateBroadcastInput, BroadcastSendDetail } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 // Server-side internal URL (not exposed to browser). Set SERVER_API_URL in the
@@ -498,4 +498,59 @@ export async function unsubscribeNewsletter(token: string): Promise<void> {
     const body = await res.json().catch(() => ({}));
     throw new Error((body as { error?: string }).error ?? 'unsubscribe failed');
   }
+}
+
+// ─── BROADCASTER ADMIN ────────────────────────────────────────────────────────
+
+export async function getSubscribers(type: string, token: string): Promise<SubscriberSummary[]> {
+  const response = await fetch(`${API_URL}/api/subscribers?type=${encodeURIComponent(type)}`, {
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'getSubscribers');
+  return response.json() as Promise<SubscriberSummary[]>;
+}
+
+export async function getBroadcasts(type: string, token: string): Promise<BroadcastSummary[]> {
+  const response = await fetch(`${API_URL}/api/broadcasts?type=${encodeURIComponent(type)}`, {
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'getBroadcasts');
+  return response.json() as Promise<BroadcastSummary[]>;
+}
+
+export async function createBroadcast(data: CreateBroadcastInput, token: string): Promise<BroadcastPreview> {
+  const response = await fetch(`${API_URL}/api/broadcasts`, {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'createBroadcast');
+  return response.json() as Promise<BroadcastPreview>;
+}
+
+export async function updateBroadcast(id: number, data: UpdateBroadcastInput, token: string): Promise<BroadcastPreview> {
+  const response = await fetch(`${API_URL}/api/broadcasts/${id}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  await throwOnError(response, 'updateBroadcast');
+  return response.json() as Promise<BroadcastPreview>;
+}
+
+export async function getBroadcastSendDetails(id: number, token: string): Promise<BroadcastSendDetail[]> {
+  const response = await fetch(`${API_URL}/api/broadcasts/${id}/sends`, {
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'getBroadcastSendDetails');
+  return response.json() as Promise<BroadcastSendDetail[]>;
+}
+
+export async function dispatchBroadcast(id: number, token: string): Promise<{ buffered_count: number }> {
+  const response = await fetch(`${API_URL}/api/broadcasts/${id}/dispatch`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'dispatchBroadcast');
+  return response.json() as Promise<{ buffered_count: number }>;
 }

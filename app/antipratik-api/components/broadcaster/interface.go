@@ -24,6 +24,9 @@ type BroadcasterLogic interface {
 	// Emails are delivered asynchronously in a background goroutine.
 	DispatchBroadcast(ctx context.Context, id int64) (int, error)
 
+	// GetBroadcastSends returns per-subscriber send details for a broadcast.
+	GetBroadcastSends(ctx context.Context, id int64) ([]BroadcastSendDetail, error)
+
 	// Contact form
 	SendContactMessage(ctx context.Context, input ContactInput) error
 }
@@ -51,6 +54,7 @@ type BroadcasterStore interface {
 	GetRemainingBuffered(ctx context.Context, broadcastID int64) (int, error)
 	UpdateSendStatus(ctx context.Context, sendID int64, status, message string, sentAt *time.Time) error
 	GetBroadcastSendSummary(ctx context.Context, broadcastID int64) (BroadcastSendSummary, error)
+	GetAllBroadcastSends(ctx context.Context, broadcastID int64) ([]BroadcastSend, error)
 
 	// Contact messages
 	SaveContactMessage(ctx context.Context, name, email, message string) error
@@ -67,6 +71,7 @@ type BroadcasterAPI interface {
 	UpdateBroadcast(w http.ResponseWriter, r *http.Request)
 	GetBroadcasts(w http.ResponseWriter, r *http.Request)
 	DispatchBroadcast(w http.ResponseWriter, r *http.Request)
+	GetBroadcastSendDetails(w http.ResponseWriter, r *http.Request)
 	Contact(w http.ResponseWriter, r *http.Request)
 }
 

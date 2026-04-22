@@ -1558,6 +1558,46 @@ paths:
         "200":
           description: Broadcast updated
 
+  /broadcasts/{id}/sends:
+    get:
+      tags: [Broadcaster]
+      summary: List per-subscriber send details for a broadcast
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Per-subscriber send records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      description: Subscriber email address
+                    status:
+                      type: string
+                      enum: [BUFFERED, SUCCESS, FAILED]
+                    message:
+                      type: string
+                      description: Error message if status is FAILED
+                    scheduledAt:
+                      type: string
+                      format: date-time
+                    sentAt:
+                      type: string
+                      format: date-time
+        "404":
+          description: Broadcast not found
+
   /broadcasts/{id}/dispatch:
     post:
       tags: [Broadcaster]
