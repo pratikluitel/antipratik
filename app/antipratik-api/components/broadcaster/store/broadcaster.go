@@ -329,6 +329,40 @@ func (s *sqliteBroadcasterStore) UpdateSendStatus(ctx context.Context, sendID in
 	return err
 }
 
+// GetAllBroadcastSends returns every send row for a broadcast with subscriber address, ordered by status then address.
+func (s *sqliteBroadcasterStore) GetAllBroadcastSends(ctx context.Context, broadcastID int64) ([]broadcaster.BroadcastSend, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT bs.id, bs.broadcast_id, bs.subscriber_id,
+		       sub.address, sub.token,
+		       bs.status, COALESCE(bs.message, ''), bs.scheduled_at, bs.sent_at
+		FROM broadcast_sends bs
+		JOIN subscribers sub ON sub.id = bs.subscriber_id
+		WHERE bs.broadcast_id = ?
+		ORDER BY bs.status, sub.address`, broadcastID)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllBroadcastSends: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	var out []broadcaster.BroadcastSend
+	for rows.Next() {
+		var send broadcaster.BroadcastSend
+		var sentAt sql.NullTime
+		if err := rows.Scan(
+			&send.ID, &send.BroadcastID, &send.SubscriberID,
+			&send.SubscriberAddress, &send.SubscriberToken,
+			&send.Status, &send.Message, &send.ScheduledAt, &sentAt,
+		); err != nil {
+			return nil, fmt.Errorf("GetAllBroadcastSends scan: %w", err)
+		}
+		if sentAt.Valid {
+			send.SentAt = &sentAt.Time
+		}
+		out = append(out, send)
+	}
+	return out, rows.Err()
+}
+
 // GetBroadcastSendSummary returns aggregate counts grouped by status for a broadcast.
 func (s *sqliteBroadcasterStore) GetBroadcastSendSummary(ctx context.Context, broadcastID int64) (broadcaster.BroadcastSendSummary, error) {
 	rows, err := s.db.QueryContext(ctx,

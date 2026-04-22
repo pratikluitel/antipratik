@@ -700,6 +700,38 @@ func (svc *broadcasterLogic) sendWithRetry(ctx context.Context, to, subject, htm
 	return lastErr
 }
 
+// GetBroadcastSends returns per-subscriber send details for a broadcast.
+func (svc *broadcasterLogic) GetBroadcastSends(ctx context.Context, id int64) ([]broadcaster.BroadcastSendDetail, error) {
+	_, err := svc.store.GetBroadcast(ctx, id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			return nil, store.ErrNotFound
+		}
+		return nil, fmt.Errorf("broadcasterLogic.GetBroadcastSends: %w", err)
+	}
+
+	sends, err := svc.store.GetAllBroadcastSends(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("broadcasterLogic.GetBroadcastSends: %w", err)
+	}
+
+	out := make([]broadcaster.BroadcastSendDetail, 0, len(sends))
+	for _, s := range sends {
+		detail := broadcaster.BroadcastSendDetail{
+			Address:     s.SubscriberAddress,
+			Status:      s.Status,
+			Message:     s.Message,
+			ScheduledAt: s.ScheduledAt.Format(time.RFC3339),
+		}
+		if s.SentAt != nil {
+			ts := s.SentAt.Format(time.RFC3339)
+			detail.SentAt = &ts
+		}
+		out = append(out, detail)
+	}
+	return out, nil
+}
+
 // ResumePendingDispatches queries all email broadcasts and restarts background loops for any with BUFFERED sends.
 func (svc *broadcasterLogic) ResumePendingDispatches(ctx context.Context) {
 	broadcasts, err := svc.GetBroadcasts(ctx, "email")

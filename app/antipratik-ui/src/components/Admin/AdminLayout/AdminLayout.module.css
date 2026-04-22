@@ -18,10 +18,43 @@
   z-index: 10;
 }
 
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .brand {
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   color: var(--color-text-muted-dark);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.navLink {
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  color: var(--color-text-muted-dark);
+  text-decoration: none;
+  padding: 4px var(--space-2);
+  border-radius: var(--admin-input-radius);
+  border: 1px solid transparent;
+  transition: color var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast);
+}
+
+.navLink:hover {
+  color: var(--color-text-primary-dark);
+}
+
+.navLinkActive {
+  color: var(--color-text-primary-dark);
+  border-color: var(--color-border-dark);
+  background: var(--color-elevated-dark);
 }
 
 .logoutBtn {

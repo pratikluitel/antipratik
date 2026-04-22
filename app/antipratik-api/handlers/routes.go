@@ -83,6 +83,7 @@ func RegisterRoutes(
 	mux.Handle("PUT /api/broadcasts/{id}", protect(http.HandlerFunc(broadcasterH.UpdateBroadcast)))
 	mux.Handle("GET /api/broadcasts", protect(http.HandlerFunc(broadcasterH.GetBroadcasts)))
 	mux.Handle("POST /api/broadcasts/{id}/dispatch", protect(http.HandlerFunc(broadcasterH.DispatchBroadcast)))
+	mux.Handle("GET /api/broadcasts/{id}/sends", protect(http.HandlerFunc(broadcasterH.GetBroadcastSendDetails)))
 	mux.Handle("POST /api/subscribers/resend-confirmation", protect(http.HandlerFunc(broadcasterH.ResendConfirmation)))
 	mux.Handle("GET /api/subscribers", protect(http.HandlerFunc(broadcasterH.GetSubscribers)))
 }

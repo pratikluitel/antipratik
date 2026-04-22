@@ -38,15 +38,15 @@ type SubscriberSummary struct {
 
 // BroadcastSummary is a broadcast row with send counts and parsed data.
 type BroadcastSummary struct {
-	Type      string
-	Title     string
-	Caption   string
-	EmailBody string
-	PostIDs   []string
-	ID        int64
-	Buffered  int
-	Success   int
-	Failed    int
+	Type      string   `json:"type"`
+	Title     string   `json:"title"`
+	Caption   string   `json:"caption"`
+	EmailBody string   `json:"emailBody"`
+	PostIDs   []string `json:"postIDs"`
+	ID        int64    `json:"id"`
+	Buffered  int      `json:"buffered"`
+	Success   int      `json:"success"`
+	Failed    int      `json:"failed"`
 }
 
 // ContactInput is the input for the contact form.
@@ -118,4 +118,15 @@ type BroadcastSendSummary struct {
 	Buffered int
 	Success  int
 	Failed   int
+}
+
+// BroadcastSendDetail is a single send row returned by the admin sends endpoint.
+//
+//nolint:govet // 4 strings (16 B each) + 1 *string (8 B) = 72 B; cannot be reduced without changing semantics
+type BroadcastSendDetail struct {
+	Address     string  `json:"address"`
+	Status      string  `json:"status"`
+	Message     string  `json:"message,omitempty"`
+	ScheduledAt string  `json:"scheduledAt"`
+	SentAt      *string `json:"sentAt,omitempty"`
 }

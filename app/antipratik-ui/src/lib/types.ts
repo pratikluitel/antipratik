@@ -151,3 +151,51 @@ export type FilterAction =
   | { type: 'SET_SORT'; order: FilterState['sortOrder'] }
   | { type: 'CLEAR_ALL' }
   | { type: 'CLEAR_TAGS' };
+
+// ─── BROADCASTER ─────────────────────────────────────────────────────────────
+
+export interface SubscriberSummary {
+  type: string;
+  address: string;
+  confirmed: boolean;
+  createdAt: string;
+  confirmedAt?: string;
+  unsubscribedAt?: string;
+}
+
+export interface BroadcastSummary {
+  id: number;
+  type: string;
+  title: string;
+  caption: string;
+  postIDs: string[] | null;
+  emailBody: string;
+  buffered: number;
+  success: number;
+  failed: number;
+}
+
+export interface BroadcastPreview {
+  id: number;
+  html: string;
+}
+
+export interface CreateBroadcastInput {
+  type: string;
+  title: string;
+  data: { caption: string; postIDs: string[] };
+}
+
+export interface UpdateBroadcastInput {
+  title: string;
+  caption: string;
+  postIDs: string[];
+}
+
+export interface BroadcastSendDetail {
+  address: string;
+  status: 'BUFFERED' | 'SUCCESS' | 'FAILED';
+  message?: string;
+  scheduledAt: string;
+  sentAt?: string;
+}

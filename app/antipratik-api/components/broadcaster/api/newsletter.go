@@ -206,6 +206,24 @@ func (h *broadcasterHandler) DispatchBroadcast(w http.ResponseWriter, r *http.Re
 	writeJSON(w, http.StatusOK, map[string]any{"buffered_count": n})
 }
 
+// GetBroadcastSendDetails handles GET /api/broadcasts/{id}/sends.
+func (h *broadcasterHandler) GetBroadcastSendDetails(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseBroadcastID(w, r)
+	if !ok {
+		return
+	}
+	details, err := h.logic.GetBroadcastSends(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "broadcast not found")
+			return
+		}
+		handleLogicError(w, h.log, "GetBroadcastSendDetails", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, details)
+}
+
 // ── Contact endpoint ──────────────────────────────────────────────────────────
 
 type contactRequest struct {
