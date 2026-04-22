@@ -133,6 +133,11 @@
 --pill-text-links-light:             #3D3830;
 
 /* ═══════════════════════════════════════════════
+   UNIVERSAL COLOURS
+═══════════════════════════════════════════════ */
+--color-white:                       #ffffff;  /* pure white — email preview frames, light-mode content surfaces */
+
+/* ═══════════════════════════════════════════════
    DARK MODE SURFACES — Himalayan Dusk
 ═══════════════════════════════════════════════ */
 --color-deepest:                     #0A0E14;  /* player bar, newsletter, footer */

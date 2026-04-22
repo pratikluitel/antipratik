@@ -262,13 +262,13 @@
 }
 
 .actionBtnDispatch {
-  color: var(--accent-essays);
-  border-color: color-mix(in srgb, var(--accent-essays) 40%, transparent);
+  color: var(--color-text-primary-dark);
+  border-color: color-mix(in srgb, var(--color-text-primary-dark) 40%, transparent);
 }
 
 .actionBtnDispatch:hover:not(:disabled) {
-  color: var(--accent-essays);
-  border-color: var(--accent-essays);
+  color: var(--color-text-primary-dark);
+  border-color: var(--color-text-primary-dark);
 }
 
 .actionBtnActive {
@@ -373,7 +373,7 @@
   border: 1px solid var(--color-border-dark);
   border-radius: var(--admin-input-radius);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-deepest) 40%, transparent);
 }
 
 .selectorSearch {
@@ -428,7 +428,7 @@
 }
 
 .selectorOptionSelected {
-  background: color-mix(in srgb, var(--accent-essays) 8%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary-dark) 8%, transparent);
 }
 
 .postTypeBadge {
@@ -485,7 +485,7 @@
 }
 
 .checkmark {
-  color: var(--accent-essays);
+  color: var(--color-text-primary-dark);
   font-size: var(--text-meta);
   margin-left: 4px;
   flex-shrink: 0;
@@ -721,7 +721,7 @@
   height: 600px;
   border: 1px solid var(--color-border-dark);
   border-radius: var(--admin-input-radius);
-  background: #fff;
+  background: var(--color-white);
 }
 
 /* ─── Subscriber table ─────────────────────────────────────────────────────── */

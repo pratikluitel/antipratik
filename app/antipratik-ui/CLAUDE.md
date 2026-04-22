@@ -174,6 +174,7 @@ These tokens were added or modified during implementation (not in the original d
 | `--color-text-body` | *(theme alias)* | Theme-switching alias for `--color-text-body-dark/light` |
 | `--color-text-muted` | *(theme alias)* | Theme-switching alias for `--color-text-muted-dark/light` |
 | `--color-text-subtle` | *(theme alias)* | Theme-switching alias for `--color-text-subtle-dark/light` |
+| `--color-white` | `#ffffff` | Pure white — email preview iframes and any surface that must render light-mode HTML content |
 | `--admin-content-max` | `860px` | Admin panel main content max-width |
 | `--admin-tab-height` | `44px` | Admin dashboard tab bar item height |
 | `--admin-top-bar-height` | `52px` | Admin top bar height |

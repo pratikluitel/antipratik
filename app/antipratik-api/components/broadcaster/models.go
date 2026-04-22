@@ -121,6 +121,8 @@ type BroadcastSendSummary struct {
 }
 
 // BroadcastSendDetail is a single send row returned by the admin sends endpoint.
+//
+//nolint:govet // 4 strings (16 B each) + 1 *string (8 B) = 72 B; cannot be reduced without changing semantics
 type BroadcastSendDetail struct {
 	Address     string  `json:"address"`
 	Status      string  `json:"status"`
