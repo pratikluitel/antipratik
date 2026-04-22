@@ -14,11 +14,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/pratikluitel/antipratik/components/files"
 	"github.com/pratikluitel/antipratik/config"
 )
 
 // NewFileStore returns a FileStore implementation based on the supplied config.
-func NewFileStore(cfg config.StorageConfig) (FileStore, error) {
+func NewFileStore(cfg config.StorageConfig) (files.FileStore, error) {
 	switch cfg.Backend {
 	case "r2":
 		return newR2FileStore(cfg.R2)

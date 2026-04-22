@@ -476,10 +476,26 @@ export async function subscribeNewsletter(email: string): Promise<void> {
   const res = await fetch(`${getFetchBase()}/api/subscribe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ type: 'email', address: email }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error((body as { error?: string }).error ?? 'subscription failed');
+  }
+}
+
+export async function confirmSubscription(token: string): Promise<void> {
+  const res = await fetch(`${getFetchBase()}/api/confirm?token=${encodeURIComponent(token)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as { error?: string }).error ?? 'confirmation failed');
+  }
+}
+
+export async function unsubscribeNewsletter(token: string): Promise<void> {
+  const res = await fetch(`${getFetchBase()}/api/unsubscribe?token=${encodeURIComponent(token)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as { error?: string }).error ?? 'unsubscribe failed');
   }
 }

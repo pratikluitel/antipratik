@@ -8,40 +8,33 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/pratikluitel/antipratik/components/auth"
 )
 
-// SQLiteUserStore implements UserStore using a SQLite database.
-type SQLiteUserStore struct {
+// sqliteUserStore implements UserStore using a SQLite database.
+type sqliteUserStore struct {
 	db *sql.DB
 }
 
-// User represents an authenticated user.
-type User struct {
-	CurrentToken   *string
-	TokenExpiresAt *time.Time
-	ID             string
-	Username       string
-	PasswordHash   string
+// NewUserStore creates a new sqliteUserStore backed by db.
+func NewUserStore(db *sql.DB) auth.UserStore {
+	return &sqliteUserStore{db: db}
 }
 
-// NewUserStore creates a new SQLiteUserStore backed by db.
-func NewUserStore(db *sql.DB) *SQLiteUserStore {
-	return &SQLiteUserStore{db: db}
-}
-
-func (s *SQLiteUserStore) GetUserByUsername(ctx context.Context, username string) (*User, error) {
+func (s *sqliteUserStore) GetUserByUsername(ctx context.Context, username string) (*auth.User, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, username, password_hash, current_token, token_expires_at FROM users WHERE username=?`, username)
 	return scanUser(row)
 }
 
-func (s *SQLiteUserStore) GetUserByToken(ctx context.Context, token string) (*User, error) {
+func (s *sqliteUserStore) GetUserByToken(ctx context.Context, token string) (*auth.User, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, username, password_hash, current_token, token_expires_at FROM users WHERE current_token=?`, token)
 	return scanUser(row)
 }
 
-func (s *SQLiteUserStore) UpsertToken(ctx context.Context, username string, token string, expiresAt time.Time) error {
+func (s *sqliteUserStore) UpsertToken(ctx context.Context, username string, token string, expiresAt time.Time) error {
 	_, err := s.db.ExecContext(ctx,
 		`UPDATE users SET current_token=?, token_expires_at=? WHERE username=?`,
 		token, expiresAt.UTC().Format(time.RFC3339), username)
@@ -50,7 +43,7 @@ func (s *SQLiteUserStore) UpsertToken(ctx context.Context, username string, toke
 
 // UpsertAdminUser ensures an admin user exists with the given password.
 // Creates the user if absent; updates the password hash if it has changed.
-func (s *SQLiteUserStore) UpsertAdminUser(ctx context.Context, password string) error {
+func (s *sqliteUserStore) UpsertAdminUser(ctx context.Context, password string) error {
 	var id, hash string
 	err := s.db.QueryRowContext(ctx, `SELECT id, password_hash FROM users WHERE username = ?`, "admin").Scan(&id, &hash)
 	if err != nil && err != sql.ErrNoRows {
@@ -80,8 +73,8 @@ func (s *SQLiteUserStore) UpsertAdminUser(ctx context.Context, password string) 
 	return err
 }
 
-func scanUser(row *sql.Row) (*User, error) {
-	var u User
+func scanUser(row *sql.Row) (*auth.User, error) {
+	var u auth.User
 	var currentToken sql.NullString
 	var tokenExpiresAt sql.NullString
 	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &currentToken, &tokenExpiresAt)

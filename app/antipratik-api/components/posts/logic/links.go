@@ -5,40 +5,40 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+
 	commonerrors "github.com/pratikluitel/antipratik/common/errors"
-	"github.com/pratikluitel/antipratik/components/posts/models"
-	"github.com/pratikluitel/antipratik/components/posts/store"
+	"github.com/pratikluitel/antipratik/components/posts"
 )
 
-// LinkService implements LinkLogic.
-type LinkService struct {
-	store store.LinkStore
+// linkLogic implements LinkLogic.
+type linkLogic struct {
+	store posts.LinkStore
 }
 
-// NewLinkService creates a new LinkService backed by the given store.
-func NewLinkService(s store.LinkStore) *LinkService {
-	return &LinkService{store: s}
+// NewlinkLogic creates a new linkLogic backed by the given store.
+func NewLinkLogic(s posts.LinkStore) posts.LinkLogic {
+	return &linkLogic{store: s}
 }
 
 // GetLinks returns all external links.
-func (s *LinkService) GetLinks(ctx context.Context) ([]models.ExternalLink, error) {
+func (s *linkLogic) GetLinks(ctx context.Context) ([]posts.ExternalLink, error) {
 	links, err := s.store.GetLinks(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("LinkService.GetLinks: %w", err)
+		return nil, fmt.Errorf("linkLogic.GetLinks: %w", err)
 	}
 	return links, nil
 }
 
 // GetFeaturedLinks returns up to 4 featured external links.
-func (s *LinkService) GetFeaturedLinks(ctx context.Context) ([]models.ExternalLink, error) {
+func (s *linkLogic) GetFeaturedLinks(ctx context.Context) ([]posts.ExternalLink, error) {
 	links, err := s.store.GetFeaturedLinks(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("LinkService.GetFeaturedLinks: %w", err)
+		return nil, fmt.Errorf("linkLogic.GetFeaturedLinks: %w", err)
 	}
 	return links, nil
 }
 
-func validateExternalLink(input models.CreateExternalLink) error {
+func validateExternalLink(input posts.CreateExternalLink) error {
 	if err := commonerrors.RequireNonEmpty("title", input.Title); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func validateExternalLink(input models.CreateExternalLink) error {
 	return nil
 }
 
-func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExternalLink) (string, error) {
+func (s *linkLogic) CreateLink(ctx context.Context, input posts.CreateExternalLink) (string, error) {
 	if err := validateExternalLink(input); err != nil {
 		return "", err
 	}
@@ -65,21 +65,21 @@ func (s *LinkService) CreateLink(ctx context.Context, input models.CreateExterna
 	input.Domain = domain
 	id := uuid.New().String()
 	if err := s.store.CreateLink(ctx, id, input); err != nil {
-		return "", fmt.Errorf("LinkService.CreateLink: %w", err)
+		return "", fmt.Errorf("linkLogic.CreateLink: %w", err)
 	}
 	return id, nil
 }
 
-func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.UpdateExternalLink) (models.ExternalLink, error) {
+func (s *linkLogic) UpdateLink(ctx context.Context, id string, input posts.UpdateExternalLink) (posts.ExternalLink, error) {
 	if err := commonerrors.RequireNonEmpty("id", id); err != nil {
-		return models.ExternalLink{}, err
+		return posts.ExternalLink{}, err
 	}
 	cur, err := s.store.GetLinkByID(ctx, id)
 	if err != nil {
-		return models.ExternalLink{}, fmt.Errorf("LinkService.UpdateLink: %w", err)
+		return posts.ExternalLink{}, fmt.Errorf("linkLogic.UpdateLink: %w", err)
 	}
 
-	merged := models.CreateExternalLink{
+	merged := posts.CreateExternalLink{
 		Title: cur.Title, URL: cur.URL, Domain: cur.Domain,
 		Description: cur.Description, Featured: cur.Featured, Category: cur.Category,
 	}
@@ -100,23 +100,23 @@ func (s *LinkService) UpdateLink(ctx context.Context, id string, input models.Up
 	}
 
 	if err = validateExternalLink(merged); err != nil {
-		return models.ExternalLink{}, err
+		return posts.ExternalLink{}, err
 	}
 	domain, err := extractDomain(merged.URL)
 	if err != nil {
-		return models.ExternalLink{}, err
+		return posts.ExternalLink{}, err
 	}
 	merged.Domain = domain
 
 	if err = s.store.UpdateLink(ctx, id, merged); err != nil {
-		return models.ExternalLink{}, fmt.Errorf("LinkService.UpdateLink: %w", err)
+		return posts.ExternalLink{}, fmt.Errorf("linkLogic.UpdateLink: %w", err)
 	}
-	return models.ExternalLink{
+	return posts.ExternalLink{
 		ID: id, Title: merged.Title, URL: merged.URL, Domain: merged.Domain,
 		Description: merged.Description, Featured: merged.Featured, Category: merged.Category,
 	}, nil
 }
 
-func (s *LinkService) DeleteLink(ctx context.Context, id string) error {
+func (s *linkLogic) DeleteLink(ctx context.Context, id string) error {
 	return s.store.DeleteLink(ctx, id)
 }

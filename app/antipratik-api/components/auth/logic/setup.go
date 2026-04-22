@@ -3,28 +3,28 @@ package logic
 import (
 	"context"
 
-	"github.com/pratikluitel/antipratik/components/auth/store"
+	"github.com/pratikluitel/antipratik/components/auth"
 )
 
-// SetupService implements SetupLogic, providing application bootstrapping
+// setupLogic implements SetupLogic, providing application bootstrapping
 // operations so that main.go never calls the store layer directly.
-type SetupService struct {
-	users    store.UserStore
-	settings store.SettingsStore
+type setupLogic struct {
+	users    auth.UserStore
+	settings auth.SettingsStore
 }
 
-// NewSetupService creates a new SetupService.
-func NewSetupService(users store.UserStore, settings store.SettingsStore) *SetupService {
-	return &SetupService{users: users, settings: settings}
+// NewSetupLogic creates a new setupLogic.
+func NewSetupLogic(users auth.UserStore, settings auth.SettingsStore) auth.SetupLogic {
+	return &setupLogic{users: users, settings: settings}
 }
 
 // UpsertAdminUser creates or updates the admin user with the given password.
-func (s *SetupService) UpsertAdminUser(ctx context.Context, password string) error {
+func (s *setupLogic) UpsertAdminUser(ctx context.Context, password string) error {
 	return s.users.UpsertAdminUser(ctx, password)
 }
 
 // GetOrCreateJWTSecret returns the persisted JWT signing secret,
 // generating and storing a new one if none exists yet.
-func (s *SetupService) GetOrCreateJWTSecret(ctx context.Context) (string, error) {
+func (s *setupLogic) GetOrCreateJWTSecret(ctx context.Context) (string, error) {
 	return s.settings.GetOrCreateJWTSecret(ctx)
 }

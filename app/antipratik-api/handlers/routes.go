@@ -6,22 +6,22 @@ import (
 
 	"golang.org/x/time/rate"
 
+	"github.com/pratikluitel/antipratik/components/auth"
 	authapi "github.com/pratikluitel/antipratik/components/auth/api"
-	authlogic "github.com/pratikluitel/antipratik/components/auth/logic"
-	broadcasterapi "github.com/pratikluitel/antipratik/components/broadcaster/api"
-	filesapi "github.com/pratikluitel/antipratik/components/files/api"
-	postsapi "github.com/pratikluitel/antipratik/components/posts/api"
+	"github.com/pratikluitel/antipratik/components/broadcaster"
+	"github.com/pratikluitel/antipratik/components/files"
+	"github.com/pratikluitel/antipratik/components/posts"
 )
 
 // RegisterRoutes registers all HTTP routes on mux.
 func RegisterRoutes(
 	mux *http.ServeMux,
-	postH postsapi.PostHandler,
-	linkH postsapi.LinkHandler,
-	authH *authapi.AuthHandlerImpl,
-	authSvc authlogic.AuthLogic,
-	fileH *filesapi.FileServingHandler,
-	newsletterH *broadcasterapi.NewsletterHandlerImpl,
+	postH posts.PostHandler,
+	linkH posts.LinkHandler,
+	authH auth.AuthAPI,
+	authSvc auth.AuthLogic,
+	fileH files.FilesAPI,
+	broadcasterH broadcaster.BroadcasterAPI,
 	openAPIPath, swaggerPath string,
 ) {
 	// Public file serving
@@ -29,7 +29,7 @@ func RegisterRoutes(
 	mux.HandleFunc("GET /thumbnails/{thumbnailId}", fileH.ServeThumbnail)
 
 	// Health check
-	mux.HandleFunc("GET /api/health", postsapi.HealthHandler)
+	mux.HandleFunc("GET /api/health", HealthHandler)
 
 	// Public read routes
 	mux.HandleFunc("GET /api/posts/{slug}", postH.GetPost)
@@ -41,13 +41,19 @@ func RegisterRoutes(
 	// Auth
 	mux.HandleFunc("POST /api/auth/login", authH.Login)
 
-	// Newsletter — 3 requests/hour per IP, burst of 3
+	// Public broadcaster endpoints — rate limited
 	subscribeRL := RateLimitMiddleware(rate.Every(time.Hour/3), 3, time.Hour)
-	mux.Handle("POST /api/subscribe", subscribeRL(http.HandlerFunc(newsletterH.Subscribe)))
+	mux.Handle("POST /api/subscribe", subscribeRL(http.HandlerFunc(broadcasterH.Subscribe)))
+	contactRL := RateLimitMiddleware(rate.Every(time.Hour/3), 3, time.Hour)
+	mux.Handle("POST /api/contact", contactRL(http.HandlerFunc(broadcasterH.Contact)))
+
+	// Token-based subscriber actions (no auth, no rate limit — tokens are one-time-use)
+	mux.HandleFunc("GET /api/confirm", broadcasterH.Confirm)
+	mux.HandleFunc("GET /api/unsubscribe", broadcasterH.Unsubscribe)
 
 	// OpenAPI spec + Swagger UI
-	mux.HandleFunc("GET /api/openapi.yaml", postsapi.OpenAPIHandler(openAPIPath))
-	mux.HandleFunc("GET /api/index.html", postsapi.SwaggerHandler(swaggerPath))
+	mux.HandleFunc("GET /api/openapi.yaml", OpenAPIHandler(openAPIPath))
+	mux.HandleFunc("GET /api/index.html", SwaggerHandler(swaggerPath))
 
 	// Protected write routes
 	protect := authapi.JWTAuthMiddleware(authSvc)
@@ -71,4 +77,12 @@ func RegisterRoutes(
 	mux.Handle("POST /api/links", protect(http.HandlerFunc(linkH.CreateLink)))
 	mux.Handle("PUT /api/links/{id}", protect(http.HandlerFunc(linkH.UpdateLink)))
 	mux.Handle("DELETE /api/links/{id}", protect(http.HandlerFunc(linkH.DeleteLink)))
+
+	// Protected broadcaster endpoints
+	mux.Handle("POST /api/broadcasts", protect(http.HandlerFunc(broadcasterH.CreateBroadcast)))
+	mux.Handle("PUT /api/broadcasts/{id}", protect(http.HandlerFunc(broadcasterH.UpdateBroadcast)))
+	mux.Handle("GET /api/broadcasts", protect(http.HandlerFunc(broadcasterH.GetBroadcasts)))
+	mux.Handle("POST /api/broadcasts/{id}/dispatch", protect(http.HandlerFunc(broadcasterH.DispatchBroadcast)))
+	mux.Handle("POST /api/subscribers/resend-confirmation", protect(http.HandlerFunc(broadcasterH.ResendConfirmation)))
+	mux.Handle("GET /api/subscribers", protect(http.HandlerFunc(broadcasterH.GetSubscribers)))
 }

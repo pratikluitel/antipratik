@@ -5,23 +5,22 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/common/logging"
-	"github.com/pratikluitel/antipratik/components/posts/logic"
-	"github.com/pratikluitel/antipratik/components/posts/models"
+	"github.com/pratikluitel/antipratik/components/posts"
 )
 
-// LinkHandlerImpl implements LinkHandler.
-type LinkHandlerImpl struct {
-	logic logic.LinkLogic
+// linkHandler implements LinkHandler.
+type linkHandler struct {
+	logic posts.LinkLogic
 	log   logging.Logger
 }
 
-// NewLinkHandler creates a new LinkHandlerImpl using the given logic layer.
-func NewLinkHandler(l logic.LinkLogic, log logging.Logger) *LinkHandlerImpl {
-	return &LinkHandlerImpl{logic: l, log: log}
+// NewLinkHandler creates a new linkHandler using the given logic layer.
+func NewLinkHandler(l posts.LinkLogic, log logging.Logger) posts.LinkHandler {
+	return &linkHandler{logic: l, log: log}
 }
 
 // GetLinks handles GET /api/links
-func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
+func (h *linkHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetLinks(r.Context())
 	if err != nil {
 		handleLogicError(w, h.log, "GetLinks", err)
@@ -31,7 +30,7 @@ func (h *LinkHandlerImpl) GetLinks(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetFeaturedLinks handles GET /api/links/featured
-func (h *LinkHandlerImpl) GetFeaturedLinks(w http.ResponseWriter, r *http.Request) {
+func (h *linkHandler) GetFeaturedLinks(w http.ResponseWriter, r *http.Request) {
 	links, err := h.logic.GetFeaturedLinks(r.Context())
 	if err != nil {
 		handleLogicError(w, h.log, "GetFeaturedLinks", err)
@@ -40,8 +39,8 @@ func (h *LinkHandlerImpl) GetFeaturedLinks(w http.ResponseWriter, r *http.Reques
 	writeJSON(w, http.StatusOK, links)
 }
 
-func (h *LinkHandlerImpl) CreateLink(w http.ResponseWriter, r *http.Request) {
-	var input models.CreateExternalLink
+func (h *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
+	var input posts.CreateExternalLink
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -54,9 +53,9 @@ func (h *LinkHandlerImpl) CreateLink(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 
-func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
+func (h *linkHandler) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var input models.UpdateExternalLink
+	var input posts.UpdateExternalLink
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
@@ -69,7 +68,7 @@ func (h *LinkHandlerImpl) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, link)
 }
 
-func (h *LinkHandlerImpl) DeleteLink(w http.ResponseWriter, r *http.Request) {
+func (h *linkHandler) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if err := h.logic.DeleteLink(r.Context(), id); err != nil {
 		handleLogicError(w, h.log, "DeleteLink", err)

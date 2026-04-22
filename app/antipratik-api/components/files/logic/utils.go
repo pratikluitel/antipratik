@@ -297,3 +297,12 @@ func contentTypeForExt(ext string) string {
 		return "application/octet-stream"
 	}
 }
+
+// storageExt returns the file extension used when storing the encoded image.
+// WebP inputs are encoded as JPEG, so they are stored with a .jpg extension.
+func storageExt(ext string) string {
+	if ext == ".webp" || ext == ".heic" || ext == ".heif" {
+		return ".jpg"
+	}
+	return ext
+}

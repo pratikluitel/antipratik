@@ -7,23 +7,23 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	commonerrors "github.com/pratikluitel/antipratik/common/errors"
-	"github.com/pratikluitel/antipratik/components/auth/store"
 	"golang.org/x/crypto/bcrypt"
+
+	commonerrors "github.com/pratikluitel/antipratik/common/errors"
+	"github.com/pratikluitel/antipratik/components/auth"
 )
 
-// AuthService implements AuthLogic.
-type AuthService struct {
-	users     store.UserStore
+type authLogic struct {
+	users     auth.UserStore
 	jwtSecret string
 }
 
-// NewAuthService creates a new AuthService.
-func NewAuthService(users store.UserStore, jwtSecret string) *AuthService {
-	return &AuthService{users: users, jwtSecret: jwtSecret}
+// NewAuthLogic creates a new authLogic.
+func NewAuthLogic(users auth.UserStore, jwtSecret string) auth.AuthLogic {
+	return &authLogic{users: users, jwtSecret: jwtSecret}
 }
 
-func (s *AuthService) Login(ctx context.Context, username, password string) (string, error) {
+func (s *authLogic) Login(ctx context.Context, username, password string) (string, error) {
 	if err := commonerrors.RequireNonEmpty("username", username); err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (str
 	return tokenStr, nil
 }
 
-func (s *AuthService) ValidateToken(ctx context.Context, token string) error {
+func (s *authLogic) ValidateToken(ctx context.Context, token string) error {
 	parsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")

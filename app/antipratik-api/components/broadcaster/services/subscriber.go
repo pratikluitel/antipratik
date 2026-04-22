@@ -6,24 +6,18 @@ package services
 import (
 	"context"
 
-	"github.com/pratikluitel/antipratik/components/broadcaster/logic"
+	"github.com/pratikluitel/antipratik/components/broadcaster"
 )
 
-// SubscriberService exposes the broadcaster's subscription capability to other
-// components. Inject this interface rather than importing broadcaster/logic directly.
-type SubscriberService interface {
-	Subscribe(ctx context.Context, email string) error
-}
-
 type subscriberService struct {
-	logic logic.NewsletterLogic
+	logic broadcaster.BroadcasterLogic
 }
 
-// NewSubscriberService returns a SubscriberService backed by the given NewsletterLogic.
-func NewSubscriberService(l logic.NewsletterLogic) SubscriberService {
+// NewSubscriberService returns a SubscriberService backed by the given BroadcasterLogic.
+func NewSubscriberService(l broadcaster.BroadcasterLogic) broadcaster.SubscriberService {
 	return &subscriberService{logic: l}
 }
 
-func (s *subscriberService) Subscribe(ctx context.Context, email string) error {
-	return s.logic.Subscribe(ctx, email)
+func (s *subscriberService) Subscribe(ctx context.Context, subType, address string) error {
+	return s.logic.Subscribe(ctx, subType, address)
 }

@@ -41,7 +41,7 @@ export default function NewsletterBlock({ variant }: Props) {
       {nlState === 'success' ? (
         <div className={styles.success}>
           <span className={styles.successIcon}>✓</span>
-          <span className={styles.successText}>You&apos;re in.</span>
+          <span className={styles.successText}>You&apos;re in! Make sure you check your email to confirm your subscription!</span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
