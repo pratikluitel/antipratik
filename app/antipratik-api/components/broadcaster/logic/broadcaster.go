@@ -471,6 +471,20 @@ func (svc *broadcasterLogic) GetSubscribers(ctx context.Context, subType string)
 	return out, nil
 }
 
+// DeleteSubscriber hard-deletes the subscriber with the given address.
+func (svc *broadcasterLogic) DeleteSubscriber(ctx context.Context, address string) error {
+	if err := commonerrors.RequireNonEmpty(address, "address"); err != nil {
+		return err
+	}
+	if err := svc.store.DeleteSubscriber(ctx, address); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			return store.ErrNotFound
+		}
+		return fmt.Errorf("broadcasterLogic.DeleteSubscriber: %w", err)
+	}
+	return nil
+}
+
 // ── Broadcast management ──────────────────────────────────────────────────────
 
 func (svc *broadcasterLogic) validateBroadcastInput(bType, title string, postIDs []string) error {

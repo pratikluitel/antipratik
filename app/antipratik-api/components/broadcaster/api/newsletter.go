@@ -108,6 +108,24 @@ func (h *broadcasterHandler) GetSubscribers(w http.ResponseWriter, r *http.Reque
 	writeJSON(w, http.StatusOK, subs)
 }
 
+// DeleteSubscriber handles DELETE /api/subscribers/{address}.
+func (h *broadcasterHandler) DeleteSubscriber(w http.ResponseWriter, r *http.Request) {
+	address := r.PathValue("address")
+	if address == "" {
+		writeError(w, http.StatusBadRequest, "address is required")
+		return
+	}
+	if err := h.logic.DeleteSubscriber(r.Context(), address); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "subscriber not found")
+			return
+		}
+		handleLogicError(w, h.log, "DeleteSubscriber", err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // ── Broadcast endpoints ───────────────────────────────────────────────────────
 
 type broadcastRequest struct {
