@@ -34,7 +34,7 @@ export default function ConfirmClient({ token }: { token: string }) {
         {state === 'success' && (
           <>
             <span className={styles.icon}>✓</span>
-            <h1 className={styles.heading}>You&apos;re in! Make sure you check your email to confirm your subscription!</h1>
+            <h1 className={styles.heading}>You&apos;re confirmed — welcome aboard!</h1>
             <p className={styles.body}>
               Visit{' '}
               <Link href="/" className={styles.link}>
