@@ -188,8 +188,7 @@ export interface CreateBroadcastInput {
 
 export interface UpdateBroadcastInput {
   title: string;
-  caption: string;
-  postIDs: string[];
+  data: { caption: string; postIDs: string[] };
 }
 
 export interface BroadcastSendDetail {

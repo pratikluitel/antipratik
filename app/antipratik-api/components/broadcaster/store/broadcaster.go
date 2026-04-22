@@ -106,6 +106,24 @@ func (s *sqliteBroadcasterStore) GetUnconfirmedSubscribers(ctx context.Context, 
 		 WHERE type = ? AND confirmed = FALSE AND unsubscribed_at IS NULL`, subType)
 }
 
+// DeleteSubscriber hard-deletes the subscriber row with the given address.
+// Returns ErrNotFound if no row matches.
+func (s *sqliteBroadcasterStore) DeleteSubscriber(ctx context.Context, address string) error {
+	address = strings.ToLower(strings.TrimSpace(address))
+	res, err := s.db.ExecContext(ctx, `DELETE FROM subscribers WHERE address = ?`, address)
+	if err != nil {
+		return fmt.Errorf("DeleteSubscriber: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("DeleteSubscriber rows: %w", err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // GetAllSubscribers returns all subscribers of the given type, including inactive ones.
 func (s *sqliteBroadcasterStore) GetAllSubscribers(ctx context.Context, subType string) ([]broadcaster.Subscriber, error) {
 	return s.querySubscribers(ctx,

@@ -6,6 +6,7 @@ import {
   getPosts,
   getBroadcasts,
   getSubscribers,
+  deleteSubscriber,
   createBroadcast,
   updateBroadcast,
   dispatchBroadcast,
@@ -203,8 +204,6 @@ function BroadcastForm({ posts, mode, token, onSaved, onCancel }: BroadcastFormP
   const [selectedPostIDs, setSelectedPostIDs] = useState<string[]>(existing?.postIDs ?? ([] as string[]));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [preview, setPreview] = useState<{ id: number; html: string } | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -213,7 +212,7 @@ function BroadcastForm({ posts, mode, token, onSaved, onCancel }: BroadcastFormP
     try {
       let result: { id: number; html: string };
       if (mode.kind === 'edit') {
-        result = await updateBroadcast(mode.broadcast.id, { title, caption, postIDs: selectedPostIDs }, token);
+        result = await updateBroadcast(mode.broadcast.id, { title, data: { caption, postIDs: selectedPostIDs } }, token);
       } else {
         const input: CreateBroadcastInput = {
           type: bType,
@@ -222,7 +221,6 @@ function BroadcastForm({ posts, mode, token, onSaved, onCancel }: BroadcastFormP
         };
         result = await createBroadcast(input, token);
       }
-      setPreview(result);
       onSaved(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save broadcast');
@@ -232,83 +230,132 @@ function BroadcastForm({ posts, mode, token, onSaved, onCancel }: BroadcastFormP
   }
 
   return (
-    <div className={styles.formSection}>
-      <h3 className={styles.formTitle}>
-        {mode.kind === 'edit' ? 'Edit Broadcast' : 'New Broadcast'}
-      </h3>
-      <form className={formStyles.form} onSubmit={handleSubmit}>
-        {mode.kind === 'create' && (
-          <div className={formStyles.field}>
-            <label className={formStyles.label}>Type</label>
-            <select
-              className={formStyles.input}
-              value={bType}
-              onChange={(e) => setBType(e.target.value)}
-              required
-            >
-              {TYPE_OPTIONS.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-        )}
+    <form className={formStyles.form} onSubmit={handleSubmit}>
+      {mode.kind === 'create' && (
         <div className={formStyles.field}>
-          <label className={formStyles.label}><span className={formStyles.required}>Title</span></label>
-          <input
+          <label className={formStyles.label}>Type</label>
+          <select
             className={formStyles.input}
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Email subject / broadcast title"
+            value={bType}
+            onChange={(e) => setBType(e.target.value)}
             required
-          />
-        </div>
-        <div className={formStyles.field}>
-          <label className={formStyles.label}>Caption</label>
-          <input
-            className={formStyles.input}
-            type="text"
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Optional caption / preview text"
-          />
-        </div>
-        <div className={formStyles.field}>
-          <label className={formStyles.label}>Posts</label>
-          <PostSelector posts={posts} selectedIDs={selectedPostIDs} onChange={setSelectedPostIDs} />
-        </div>
-
-        {error && <p className={formStyles.error}>{error}</p>}
-
-        <div className={formStyles.actions}>
-          <button type="submit" className={formStyles.submitBtn} disabled={saving}>
-            {saving ? 'Saving…' : mode.kind === 'edit' ? 'Update' : 'Create'}
-          </button>
-          <button type="button" className={formStyles.cancelBtn} onClick={onCancel}>
-            Cancel
-          </button>
-        </div>
-      </form>
-
-      {preview && (
-        <div className={styles.previewSection}>
-          <button
-            type="button"
-            className={styles.previewToggle}
-            onClick={() => setShowPreview((s) => !s)}
           >
-            {showPreview ? 'Hide preview' : 'Show email preview'} {showPreview ? '▴' : '▾'}
-          </button>
-          {showPreview && (
-            <iframe
-              className={styles.previewFrame}
-              srcDoc={preview.html}
-              title="Email preview"
-              sandbox="allow-same-origin"
-            />
-          )}
+            {TYPE_OPTIONS.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
       )}
+      <div className={formStyles.field}>
+        <label className={formStyles.label}><span className={formStyles.required}>Title</span></label>
+        <input
+          className={formStyles.input}
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Email subject / broadcast title"
+          required
+        />
+      </div>
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Caption</label>
+        <input
+          className={formStyles.input}
+          type="text"
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder="Optional caption / preview text"
+        />
+      </div>
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Posts</label>
+        <PostSelector posts={posts} selectedIDs={selectedPostIDs} onChange={setSelectedPostIDs} />
+      </div>
+
+      {error && <p className={formStyles.error}>{error}</p>}
+
+      <div className={formStyles.actions}>
+        <button type="submit" className={formStyles.submitBtn} disabled={saving}>
+          {saving ? 'Saving…' : mode.kind === 'edit' ? 'Update' : 'Create'}
+        </button>
+        <button type="button" className={formStyles.cancelBtn} onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ─── Broadcast modal ──────────────────────────────────────────────────────────
+
+type ActiveFormMode = Exclude<FormMode, { kind: 'none' }>;
+
+interface BroadcastModalProps {
+  posts: Post[];
+  mode: ActiveFormMode;
+  token: string;
+  onSaved: () => void;
+  onClose: () => void;
+}
+
+function BroadcastModal({ posts, mode, token, onSaved, onClose }: BroadcastModalProps) {
+  const initialHtml = mode.kind === 'edit' ? (mode.broadcast.emailBody || null) : null;
+  const [previewHtml, setPreviewHtml] = useState<string | null>(initialHtml);
+
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  function handleSaved(result: { id: number; html: string }) {
+    setPreviewHtml(result.html);
+    onSaved();
+  }
+
+  const title = mode.kind === 'edit'
+    ? `Edit Broadcast #${mode.broadcast.id}`
+    : 'New Broadcast';
+
+  return (
+    <div className={styles.modalBackdrop} onClick={onClose}>
+      <div
+        className={`${styles.modal} ${previewHtml ? styles.modalWide : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
+          <h2 className={styles.modalTitle}>{title}</h2>
+          <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div className={styles.modalBody}>
+          <div className={`${styles.modalFormCol} ${previewHtml ? '' : styles.modalFormColOnly}`}>
+            <BroadcastForm
+              posts={posts}
+              mode={mode}
+              token={token}
+              onSaved={handleSaved}
+              onCancel={onClose}
+            />
+          </div>
+          {previewHtml && (
+            <div className={styles.modalPreviewCol}>
+              <p className={styles.modalPreviewLabel}>Email Preview</p>
+              <iframe
+                className={styles.modalPreviewFrame}
+                srcDoc={previewHtml}
+                title="Email preview"
+                sandbox="allow-same-origin"
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -476,6 +523,9 @@ export default function BroadcastsPage() {
   const [formMode, setFormMode] = useState<FormMode>({ kind: 'none' });
   const [typeFilter, setTypeFilter] = useState('email');
   const [confirmedFilter, setConfirmedFilter] = useState<'all' | 'confirmed' | 'unconfirmed'>('all');
+  const [deletingAddress, setDeletingAddress] = useState<string | null>(null);
+  const [confirmDeleteAddress, setConfirmDeleteAddress] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token');
@@ -505,9 +555,23 @@ export default function BroadcastsPage() {
     if (token) loadData(token);
   }, [token, loadData]);
 
-  function handleSaved(_preview: { id: number; html: string }) {
+  function handleSaved() {
     if (token) loadData(token);
-    setFormMode({ kind: 'none' });
+  }
+
+  async function handleDeleteSubscriber(address: string) {
+    if (!token) return;
+    setDeleteError('');
+    setDeletingAddress(address);
+    try {
+      await deleteSubscriber(address, token);
+      setSubscribers((prev) => prev.filter((s) => s.address !== address));
+      setConfirmDeleteAddress(null);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeletingAddress(null);
+    }
   }
 
   function handleDispatched(id: number, buffered: number) {
@@ -576,12 +640,12 @@ export default function BroadcastsPage() {
             </div>
 
             {formMode.kind !== 'none' && (
-              <BroadcastForm
+              <BroadcastModal
                 posts={posts}
                 mode={formMode}
                 token={token}
                 onSaved={handleSaved}
-                onCancel={() => setFormMode({ kind: 'none' })}
+                onClose={() => setFormMode({ kind: 'none' })}
               />
             )}
 
@@ -643,6 +707,8 @@ export default function BroadcastsPage() {
               <p className={styles.empty}>No subscribers match.</p>
             )}
 
+            {deleteError && <p className={styles.rowError}>{deleteError}</p>}
+
             {filteredSubscribers.length > 0 && (
               <div className={styles.subscriberTable}>
                 <div className={styles.subscriberHeader}>
@@ -651,6 +717,7 @@ export default function BroadcastsPage() {
                   <span>Status</span>
                   <span>Signed up</span>
                   <span>Confirmed</span>
+                  <span></span>
                 </div>
                 {filteredSubscribers.map((s) => (
                   <div key={s.address} className={styles.subscriberRow}>
@@ -668,6 +735,37 @@ export default function BroadcastsPage() {
                     <span className={styles.subscriberDate}>{formatDate(s.createdAt)}</span>
                     <span className={styles.subscriberDate}>
                       {s.confirmedAt ? formatDate(s.confirmedAt) : '—'}
+                    </span>
+                    <span className={styles.subscriberActions}>
+                      {confirmDeleteAddress === s.address ? (
+                        <span className={styles.confirmInline}>
+                          <span className={styles.confirmText}>Delete?</span>
+                          <button
+                            type="button"
+                            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                            onClick={() => handleDeleteSubscriber(s.address)}
+                            disabled={deletingAddress === s.address}
+                          >
+                            {deletingAddress === s.address ? '…' : 'Yes'}
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.actionBtn}
+                            onClick={() => setConfirmDeleteAddress(null)}
+                          >
+                            No
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                          onClick={() => { setDeleteError(''); setConfirmDeleteAddress(s.address); }}
+                          disabled={deletingAddress !== null}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </span>
                   </div>
                 ))}

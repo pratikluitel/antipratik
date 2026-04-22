@@ -1634,6 +1634,24 @@ paths:
         "200":
           description: Confirmation emails resent
 
+  /subscribers/{address}:
+    delete:
+      tags: [Broadcaster]
+      summary: Hard-delete a subscriber by email address
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Subscriber deleted
+        "404":
+          description: Subscriber not found
+
   /subscribers:
     get:
       tags: [Broadcaster]

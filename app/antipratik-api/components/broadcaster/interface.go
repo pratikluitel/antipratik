@@ -14,6 +14,7 @@ type BroadcasterLogic interface {
 	ConfirmSubscription(ctx context.Context, token string) error
 	Unsubscribe(ctx context.Context, token string) error
 	GetSubscribers(ctx context.Context, subType string) ([]SubscriberSummary, error)
+	DeleteSubscriber(ctx context.Context, address string) error
 
 	// Broadcast management
 	CreateBroadcast(ctx context.Context, input BroadcastInput) (BroadcastPreview, error)
@@ -41,6 +42,7 @@ type BroadcasterStore interface {
 	GetConfirmedSubscribers(ctx context.Context, subType string) ([]Subscriber, error)
 	GetUnconfirmedSubscribers(ctx context.Context, subType string) ([]Subscriber, error)
 	GetAllSubscribers(ctx context.Context, subType string) ([]Subscriber, error)
+	DeleteSubscriber(ctx context.Context, address string) error
 
 	// Broadcast operations
 	CreateBroadcast(ctx context.Context, input StoreBroadcastInput, emailBody string) (int64, error)
@@ -67,6 +69,7 @@ type BroadcasterAPI interface {
 	Confirm(w http.ResponseWriter, r *http.Request)
 	Unsubscribe(w http.ResponseWriter, r *http.Request)
 	GetSubscribers(w http.ResponseWriter, r *http.Request)
+	DeleteSubscriber(w http.ResponseWriter, r *http.Request)
 	CreateBroadcast(w http.ResponseWriter, r *http.Request)
 	UpdateBroadcast(w http.ResponseWriter, r *http.Request)
 	GetBroadcasts(w http.ResponseWriter, r *http.Request)

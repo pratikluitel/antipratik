@@ -308,22 +308,111 @@
 
 /* ─── Broadcast form section ───────────────────────────────────────────────── */
 
-.formSection {
-  background: var(--color-surface-dark);
-  border: 1px solid var(--color-border-dark);
-  border-radius: var(--admin-form-section-radius);
-  padding: var(--space-4);
+/* ─── Broadcast modal ──────────────────────────────────────────────────────── */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--color-deepest) 80%, transparent);
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  overflow-y: auto;
 }
 
-.formTitle {
+.modal {
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--admin-form-section-radius);
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.modalWide {
+  max-width: 1200px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-dark);
+  flex-shrink: 0;
+}
+
+.modalTitle {
   font-family: var(--font-sans);
   font-size: var(--text-body);
   font-weight: 600;
   color: var(--color-text-primary-dark);
   margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--color-text-muted-dark);
+  font-size: var(--text-body);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color var(--motion-fast);
+  flex-shrink: 0;
+}
+
+.modalClose:hover {
+  color: var(--color-text-primary-dark);
+}
+
+.modalBody {
+  display: flex;
+  min-height: 0;
+}
+
+.modalFormCol {
+  flex: 0 0 480px;
+  max-width: 100%;
+  padding: var(--space-4);
+  border-right: 1px solid var(--color-border-dark);
+}
+
+.modalFormColOnly {
+  flex: 1;
+  border-right: none;
+}
+
+.modalPreviewCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  min-width: 0;
+}
+
+.modalPreviewLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.modalPreviewFrame {
+  flex: 1;
+  width: 100%;
+  min-height: 560px;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--admin-input-radius);
+  background: var(--color-white);
 }
 
 /* ─── Post selector ────────────────────────────────────────────────────────── */
@@ -690,39 +779,6 @@
   border: 1px solid color-mix(in srgb, var(--accent-short) 25%, transparent);
 }
 
-/* ─── Email preview ────────────────────────────────────────────────────────── */
-
-.previewSection {
-  border-top: 1px solid var(--color-border-dark);
-  padding-top: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.previewToggle {
-  background: none;
-  border: none;
-  color: var(--color-text-muted-dark);
-  font-family: var(--font-sans);
-  font-size: var(--text-ui);
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
-  transition: color var(--motion-fast);
-}
-
-.previewToggle:hover {
-  color: var(--color-text-primary-dark);
-}
-
-.previewFrame {
-  width: 100%;
-  height: 600px;
-  border: 1px solid var(--color-border-dark);
-  border-radius: var(--admin-input-radius);
-  background: var(--color-white);
-}
 
 /* ─── Subscriber table ─────────────────────────────────────────────────────── */
 
@@ -736,7 +792,7 @@
 
 .subscriberHeader {
   display: grid;
-  grid-template-columns: 1fr 80px 110px 110px 110px;
+  grid-template-columns: 1fr 80px 110px 110px 110px 80px;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
   background: var(--color-elevated-dark);
@@ -749,7 +805,7 @@
 
 .subscriberRow {
   display: grid;
-  grid-template-columns: 1fr 80px 110px 110px 110px;
+  grid-template-columns: 1fr 80px 110px 110px 110px 80px;
   gap: var(--space-2);
   align-items: center;
   padding: var(--space-2) var(--space-3);
@@ -763,6 +819,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.subscriberActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .subscriberType {

@@ -510,6 +510,14 @@ export async function getSubscribers(type: string, token: string): Promise<Subsc
   return response.json() as Promise<SubscriberSummary[]>;
 }
 
+export async function deleteSubscriber(address: string, token: string): Promise<void> {
+  const response = await fetch(`${API_URL}/api/subscribers/${encodeURIComponent(address)}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'deleteSubscriber');
+}
+
 export async function getBroadcasts(type: string, token: string): Promise<BroadcastSummary[]> {
   const response = await fetch(`${API_URL}/api/broadcasts?type=${encodeURIComponent(type)}`, {
     headers: authHeaders(token),
