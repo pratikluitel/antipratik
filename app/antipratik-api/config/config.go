@@ -11,12 +11,29 @@ import (
 
 // Config holds all runtime configuration for the server.
 type Config struct {
-	Storage       StorageConfig `yaml:"storage"`
-	DB            DBConfig      `yaml:"db"`
-	Static        StaticConfig  `yaml:"static"`
-	Logging       LoggingConfig `yaml:"logging"`
-	AdminPassword string        `yaml:"admin_password"`
-	Server        ServerConfig  `yaml:"server"`
+	Storage       StorageConfig     `yaml:"storage"`
+	Broadcaster   BroadcasterConfig `yaml:"broadcaster"`
+	DB            DBConfig          `yaml:"db"`
+	Static        StaticConfig      `yaml:"static"`
+	Logging       LoggingConfig     `yaml:"logging"`
+	AdminPassword string            `yaml:"admin_password"`
+	AdminEmail    string            `yaml:"admin_email"`
+	SiteDomain    string            `yaml:"site_domain"`
+	Server        ServerConfig      `yaml:"server"`
+}
+
+// BroadcasterConfig holds email delivery settings.
+type BroadcasterConfig struct {
+	Resend ResendConfig `yaml:"resend"`
+}
+
+// ResendConfig holds Resend SMTP credentials and sender identity.
+type ResendConfig struct {
+	APIKey    string `yaml:"api_key"`
+	Host      string `yaml:"host"`
+	FromEmail string `yaml:"from_email"`
+	FromName  string `yaml:"from_name"`
+	Port      int    `yaml:"port"`
 }
 
 // LoggingConfig controls log verbosity. Level accepts "debug", "info", "warn", or "error".
@@ -97,6 +114,15 @@ func Load(path string) (*Config, error) {
 	}
 	if v := os.Getenv("ANTIPRATIK_R2_SECRET_ACCESS_KEY"); v != "" {
 		cfg.Storage.R2.SecretAccessKey = v
+	}
+	if v := os.Getenv("ANTIPRATIK_RESEND_API_KEY"); v != "" {
+		cfg.Broadcaster.Resend.APIKey = v
+	}
+	if v := os.Getenv("ANTIPRATIK_ADMIN_EMAIL"); v != "" {
+		cfg.AdminEmail = v
+	}
+	if v := os.Getenv("ANTIPRATIK_SITE_DOMAIN"); v != "" {
+		cfg.SiteDomain = v
 	}
 
 	return &cfg, nil

@@ -59,9 +59,11 @@ components/files/               ← file storage, upload processing, serving
   api/ → logic/ → store/        (3-layer pattern)
   services/                     ← StorageService + UploaderService for cross-component injection
 
-components/broadcaster/         ← newsletter subscription
+components/broadcaster/         ← newsletter, email broadcast, contact form
   api/ → logic/ → store/        (3-layer pattern)
+  lib/resend/                   ← Resend SMTP client (EmailSender interface)
   services/                     ← SubscriberService for cross-component injection
+  logic/emails/dist/            ← pre-built React Email HTML templates (gitignored; built by CI)
 
 handlers/                       ← route registration, CORS, rate-limit middleware
   routes.go                     ← RegisterRoutes; wires all component handlers onto the mux
@@ -72,7 +74,7 @@ handlers/                       ← route registration, CORS, rate-limit middlew
 │ (common/db/)    │     Called from main.go; not a business-logic store
 └─────────────────┘
 
-migrations/                     ← top-level SQL migration files (embedded in main.go)
+migrations/                     ← top-level SQL migration files (embedded in main.go via //go:embed)
 ```
 
 **Services layer:** When one component needs to call another's logic, it imports the
@@ -83,9 +85,9 @@ Each layer has an **interface** and a **concrete implementation** created via fa
 
 **Wiring Example:**
 ```go
-postStore := postsstore.NewPostStore(db)
-postLogic := postslogic.NewPostService(postStore, storageSvc, logger)
-postH     := postsapi.NewPostHandler(postLogic, uploaderSvc, logger)
+postStore := postsstore.NewPostStore(db)          // returns posts.PostStore
+postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger) // returns posts.PostLogic
+postH     := postsapi.NewPostHandler(postLogic, uploaderSvc, logger) // returns posts.PostHandler
 ```
 
 **Benefits:**
@@ -180,7 +182,7 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 ### Rule 12 — Store Is Never Called Directly from `main`
 **`main.go` must never import or call the `store` layer for business operations.**
 - Wrong: `store.UpsertAdminUser(db, password)` or `store.GetOrCreateJWTSecret(db)` in `main.go`
-- Right: Delegate to a `logic.SetupService` which wraps the relevant store interfaces
+- Right: Delegate to `authlogic.NewSetupLogic(...)` which wraps the relevant store interfaces
 - The `db/` package (Open, RunMigrations) is infrastructure and may be called from `main.go` directly — it is not a business logic store.
 - Any future bootstrapping operations (seeding data, secrets rotation) must go through a logic-layer service.
 
@@ -209,10 +211,10 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle HTTP status codes and headers
 
 **Key Components:**
-- `PostHandler`, `LinkHandler` interfaces in `components/posts/api/`
-- `AuthHandlerImpl` in `components/auth/api/`; `JWTAuthMiddleware` in `components/auth/api/middleware.go`
-- `FileServingHandler` in `components/files/api/`
-- `NewsletterHandlerImpl` in `components/broadcaster/api/`
+- `PostHandler`, `LinkHandler` interfaces in `components/posts/`; implementations `postHandler`, `linkHandler` in `components/posts/api/`
+- `authHandler` in `components/auth/api/`; `JWTAuthMiddleware` in `components/auth/api/middleware.go`
+- `fileServingHandler` in `components/files/api/`
+- `broadcasterHandler` in `components/broadcaster/api/`
 
 **Never Does:** Business logic, database queries, complex validation.
 
@@ -226,10 +228,10 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle business logic errors
 
 **Key Components:**
-- `PostLogic`, `LinkLogic` interfaces in `components/posts/logic/`
-- `AuthLogic`, `SetupLogic` interfaces in `components/auth/logic/`
-- `UploadLogic` interface in `components/files/logic/`
-- `NewsletterLogic` interface in `components/broadcaster/logic/`
+- `PostLogic`, `LinkLogic` interfaces in `components/posts/` (root `interface.go`); implementations `postLogic`, `linkLogic` in `components/posts/logic/`
+- `AuthLogic`, `SetupLogic` interfaces in `components/auth/` (root `interface.go`); implementations `authLogic`, `setupLogic` in `components/auth/logic/`
+- `UploadLogic` interface in `components/files/` (root `interface.go`); implementation `uploadLogic` in `components/files/logic/`
+- `BroadcasterLogic` interface in `components/broadcaster/` (root `interface.go`); implementation `broadcasterLogic` in `components/broadcaster/logic/`
 - Input validation and sanitization
 
 **Never Does:** HTTP concerns, direct database access.
@@ -243,10 +245,10 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 - Handle database transactions
 
 **Key Components:**
-- `PostStore`, `LinkStore` interfaces in `components/posts/store/`
-- `UserStore`, `SettingsStore` interfaces in `components/auth/store/`
-- `FileStore` interface in `components/files/store/` with `LocalFileStore` and `R2FileStore` implementations
-- `NewsletterStore` interface in `components/broadcaster/store/`
+- `PostStore`, `LinkStore` interfaces in `components/posts/` (root `interface.go`); implementations in `components/posts/store/`
+- `UserStore`, `SettingsStore` interfaces in `components/auth/` (root `interface.go`); implementations in `components/auth/store/`
+- `FileStore` interface in `components/files/` (root `interface.go`) with `localFileStore` and `r2FileStore` implementations in `components/files/store/`
+- `BroadcasterStore` interface in `components/broadcaster/` (root `interface.go`); implementation `sqliteBroadcasterStore` in `components/broadcaster/store/`
 - SQLite implementations with prepared statements
 
 **Never Does:** Business logic, HTTP responses.
@@ -279,7 +281,43 @@ The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed 
 11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
 12. **Never add a generic upload endpoint** — File uploads belong inside post handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes. _Exception:_ per-resource sub-collection endpoints such as `POST /api/posts/{id}/images` are acceptable when they manage images on an already-existing post (e.g. adding an image to an existing photo post).
 13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` (from `handlers/middleware.go`) in `handlers/routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
-14. **A photo post must always contain at least 1 image** — `DELETE /api/posts/{id}/images/{imageID}` returns a 400 ValidationError if the post has only one image remaining. This is enforced in the logic layer (`PostService.DeletePhotoImage`). Never bypass this check.
+14. **A photo post must always contain at least 1 image** — `DELETE /api/posts/{id}/images/{imageID}` returns a 400 ValidationError if the post has only one image remaining. This is enforced in the logic layer (`postLogic.DeletePhotoImage`). Never bypass this check.
+
+### Rule 15 — Never Violate Component Boundaries
+
+**Components must never import another component's `api/`, `logic/`, or `store/` sub-packages directly.**
+
+Each component exposes capabilities to other components exclusively through its `services/` package, which implements an interface defined in the component's root `interface.go`. The consuming component accepts that interface by value — it never imports the provider's concrete implementation.
+
+**Cross-component wiring happens only in `main.go`:**
+```go
+// posts exposes PostsService to broadcaster — never pass postLogic directly
+postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger) // posts.PostLogic
+postsSvc  := postsservices.NewPostsService(postLogic)               // posts.PostsService
+broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...)            // accepts posts.PostsService
+```
+
+**Rules:**
+- A component's root `interface.go` (package `<component>`) is the only file other components may import from that component.
+- A component's `services/` package wraps its logic and returns the root interface type — it is the only permitted cross-component injection point.
+- Logic, store, and API interfaces are internal to the component that owns them.
+- Models shared across components live in the component's root package (`models.go`), not in `logic/` or `store/`.
+
+**Wrong:**
+```go
+import postslogic "github.com/pratikluitel/antipratik/components/posts/logic"
+broadcasterlogic.NewBroadcasterLogic(..., postLogic, ...) // passes posts.PostLogic — violation
+```
+
+**Right:**
+```go
+import (
+    "github.com/pratikluitel/antipratik/components/posts"
+    postsservices "github.com/pratikluitel/antipratik/components/posts/services"
+)
+postsSvc := postsservices.NewPostsService(postLogic) // returns posts.PostsService
+broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...) // accepts posts.PostsService — correct
+```
 
 ---
 
@@ -480,9 +518,65 @@ Both commands must produce **zero errors**. Warnings from `golangci-lint` that a
 
 ---
 
+## Broadcaster Component
+
+The broadcaster handles newsletter subscriptions, email broadcasts, and the contact form.
+
+### Email Template Architecture
+
+Templates are written as React Email components in `app/emails/` and built to static HTML at CI time. The built HTML is embedded into the Go binary at compile time via `//go:embed`.
+
+```
+app/emails/                                        ← React Email source (TypeScript)
+  emails/newsletter.tsx                            ← newsletter template
+  emails/confirmation.tsx                          ← subscription confirmation email
+  emails/contact.tsx                               ← contact form notification email
+  scripts/render.ts                                ← renders templates to dist/
+  package.json                                     ← react-email, tsx
+
+components/broadcaster/logic/emails/dist/          ← built HTML (gitignored; built by CI)
+  newsletter.html
+  confirmation.html
+  contact.html
+
+components/broadcaster/logic/templates.go          ← //go:embed directives
+```
+
+**Build flow:**
+1. `npm run build` in `app/emails/` renders templates to `dist/`
+2. Dockerfile copies `dist/` to `components/broadcaster/logic/emails/dist/`
+3. `go build` embeds the HTML files at compile time via `templates.go`
+
+**For local development:** run `npm run build` in `app/emails/` and copy `dist/` to `components/broadcaster/logic/emails/dist/` before running the Go server.
+
+### Token substitution
+
+Templates use `__TOKEN__` placeholders replaced at send time by `strings.NewReplacer`. The `__UNSUBSCRIBE_TOKEN__` and `__POSTS_HTML__` tokens are substituted per-subscriber at dispatch time.
+
+### Post adapter
+
+`components/broadcaster/logic/post_adapter.go` adapts `posts.PostsService` to the broadcaster's internal `PostService` interface. `NewBroadcasterLogic` accepts a `posts.PostsService` (from `components/posts/services/`) and creates the adapter internally. `posts.PostsService` is wired in `main.go` via `postsservices.NewPostsService(postLogic)`. The adapter maps all six post model types (`essay`, `short`, `music`, `photo`, `video`, `link`) to `PostSummary` values used for email rendering, including markdown-to-HTML conversion for essay bodies via `goldmark`.
+
+### Email image URLs
+
+All file/thumbnail URLs stored in the database are **relative** (`/thumbnails/…`, `/files/…`). The broadcaster's `absoluteURL` helper prefixes them with `cfg.SiteDomain` before writing them into email HTML. **`site_domain` must be set to the publicly reachable base URL** (e.g. `https://antipratik.com`) — email clients cannot load relative or `localhost` URLs. Set via `ANTIPRATIK_SITE_DOMAIN` env var in production.
+
+### Email click-through URLs
+
+| Post type | Email link destination |
+|-----------|----------------------|
+| essay | `{site_domain}/{slug}` |
+| photo | `{site_domain}/feed?photo={id}` → opens lightbox |
+| music | `{site_domain}/feed?track={id}` → auto-plays track |
+| video | video URL directly |
+| link | external URL directly |
+
+---
+
 ## Deployment Considerations
 
 - **Environment Variables:** `ANTIPRATIK_HOST`, `ANTIPRATIK_PORT` for configuration
+- **`ANTIPRATIK_SITE_DOMAIN`:** Must be set to the public base URL (e.g. `https://antipratik.com`). Used for email image URLs and user-facing links. Without it, email images will not load.
 - **Database Path:** Configurable SQLite file location
 - **Static Serving:** Serves Next.js build from configurable directory
 - **CORS:** Must be configured for production domains

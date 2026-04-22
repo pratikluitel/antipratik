@@ -1,7 +1,6 @@
 // Package models defines the shared data structures used across all layers.
 // JSON tags use camelCase to match the TypeScript types in the frontend.
-package models
-
+package posts
 
 // PostType is the discriminator string stored in the posts table.
 type PostType = string
@@ -57,14 +56,14 @@ type MusicPost struct {
 	AlbumArtMedURL   *string  `json:"albumArtMediumUrl,omitempty"`
 	AlbumArtLargeURL *string  `json:"albumArtLargeUrl,omitempty"`
 	Album            *string  `json:"album,omitempty"`
-	ID              string   `json:"id"`
-	Type            string   `json:"type"`
-	CreatedAt       string   `json:"createdAt"`
-	Title           string   `json:"title"`
-	AlbumArt        string   `json:"albumArt"`
-	AudioURL        string   `json:"audioUrl"`
-	Tags            []string `json:"tags"`
-	Duration        int      `json:"duration"`
+	ID               string   `json:"id"`
+	Type             string   `json:"type"`
+	CreatedAt        string   `json:"createdAt"`
+	Title            string   `json:"title"`
+	AlbumArt         string   `json:"albumArt"`
+	AudioURL         string   `json:"audioUrl"`
+	Tags             []string `json:"tags"`
+	Duration         int      `json:"duration"`
 }
 
 func (m MusicPost) postType() string { return "music" }
@@ -107,14 +106,14 @@ type VideoPost struct {
 	ThumbnailMedURL   *string  `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string  `json:"thumbnailLargeUrl,omitempty"`
 	Playlist          *string  `json:"playlist,omitempty"`
-	ID               string   `json:"id"`
-	Type             string   `json:"type"`
-	CreatedAt        string   `json:"createdAt"`
-	Title            string   `json:"title"`
-	ThumbnailURL     string   `json:"thumbnailUrl"`
-	VideoURL         string   `json:"videoUrl"`
-	Tags             []string `json:"tags"`
-	Duration         int      `json:"duration"`
+	ID                string   `json:"id"`
+	Type              string   `json:"type"`
+	CreatedAt         string   `json:"createdAt"`
+	Title             string   `json:"title"`
+	ThumbnailURL      string   `json:"thumbnailUrl"`
+	VideoURL          string   `json:"videoUrl"`
+	Tags              []string `json:"tags"`
+	Duration          int      `json:"duration"`
 }
 
 func (v VideoPost) postType() string { return "video" }
@@ -128,13 +127,13 @@ type LinkPost struct {
 	ThumbnailMedURL   *string  `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string  `json:"thumbnailLargeUrl,omitempty"`
 	Category          *string  `json:"category,omitempty"`
-	ID               string   `json:"id"`
-	Type             string   `json:"type"`
-	CreatedAt        string   `json:"createdAt"`
-	Title            string   `json:"title"`
-	URL              string   `json:"url"`
-	Domain           string   `json:"domain"`
-	Tags             []string `json:"tags"`
+	ID                string   `json:"id"`
+	Type              string   `json:"type"`
+	CreatedAt         string   `json:"createdAt"`
+	Title             string   `json:"title"`
+	URL               string   `json:"url"`
+	Domain            string   `json:"domain"`
+	Tags              []string `json:"tags"`
 }
 
 func (l LinkPost) postType() string { return "link" }

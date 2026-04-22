@@ -1,0 +1,52 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.card {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.icon {
+  display: block;
+  font-size: 32px;
+  color: var(--accent-photos);
+  margin-bottom: var(--space-2);
+}
+
+.heading {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: var(--lh-heading);
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+  line-height: var(--lh-body);
+}
+
+.link {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: var(--color-text-primary);
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--text-body);
+  color: var(--color-text-subtle);
+}

@@ -5,23 +5,24 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/common/logging"
+	"github.com/pratikluitel/antipratik/components/files"
 	"github.com/pratikluitel/antipratik/components/files/store"
 )
 
-// FileServingHandler serves uploaded files and thumbnails from storage.
-type FileServingHandler struct {
-	fileStore store.FileStore
+// fileServingHandler serves uploaded files and thumbnails from storage.
+type fileServingHandler struct {
+	fileStore files.FileStore
 	log       logging.Logger
 }
 
-// NewFileServingHandler returns a new FileServingHandler.
-func NewFileServingHandler(fs store.FileStore, log logging.Logger) *FileServingHandler {
-	return &FileServingHandler{fileStore: fs, log: log}
+// NewFileServingHandler returns a new fileServingHandler.
+func NewFileServingHandler(fs files.FileStore, log logging.Logger) files.FilesAPI {
+	return &fileServingHandler{fileStore: fs, log: log}
 }
 
 // ServeFile handles GET /files/{fileId}.
 // Tries photos/ prefix first, then music/.
-func (h *FileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
+func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 	fileID := r.PathValue("fileId")
 	if fileID == "" {
 		writeError(w, http.StatusBadRequest, "fileId is required")
@@ -44,7 +45,7 @@ func (h *FileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 }
 
 // ServeThumbnail handles GET /thumbnails/{thumbnailId}.
-func (h *FileServingHandler) ServeThumbnail(w http.ResponseWriter, r *http.Request) {
+func (h *fileServingHandler) ServeThumbnail(w http.ResponseWriter, r *http.Request) {
 	thumbnailID := r.PathValue("thumbnailId")
 	if thumbnailID == "" {
 		writeError(w, http.StatusBadRequest, "thumbnailId is required")

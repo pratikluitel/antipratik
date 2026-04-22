@@ -1282,3 +1282,352 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+
+  /tags:
+    get:
+      tags: [All Posts]
+      summary: Get all tags
+      responses:
+        "200":
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /subscribe:
+    post:
+      tags: [Broadcaster]
+      summary: Subscribe to newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  default: email
+                address:
+                  type: string
+      responses:
+        "201":
+          description: Subscribed successfully
+
+  /contact:
+    post:
+      tags: [Broadcaster]
+      summary: Send a contact message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, message]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                message:
+                  type: string
+      responses:
+        "200":
+          description: Message sent
+
+  /confirm:
+    get:
+      tags: [Broadcaster]
+      summary: Confirm a subscription
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Confirmation successful
+        "404":
+          description: Token not found
+
+  /unsubscribe:
+    get:
+      tags: [Broadcaster]
+      summary: Unsubscribe from newsletter
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Unsubscribed successful
+        "404":
+          description: Token not found
+
+  /posts/{id}/images:
+    post:
+      tags: [Photos]
+      summary: Add an image to a photo post
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                alt:
+                  type: string
+                caption:
+                  type: string
+      responses:
+        "201":
+          description: Image added
+
+  /posts/{id}/images/{imageID}:
+    get:
+      tags: [Photos]
+      summary: Get a specific photo image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: imageID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Photo image details
+    put:
+      tags: [Photos]
+      summary: Update a photo image
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: imageID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                alt:
+                  type: string
+                caption:
+                  type: string
+      responses:
+        "200":
+          description: Image updated
+    delete:
+      tags: [Photos]
+      summary: Delete a photo image
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: imageID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Image deleted
+
+  /broadcasts:
+    get:
+      tags: [Broadcaster]
+      summary: List broadcasts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: email
+      responses:
+        "200":
+          description: List of broadcasts
+    post:
+      tags: [Broadcaster]
+      summary: Create a broadcast
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, title]
+              properties:
+                type:
+                  type: string
+                title:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    caption:
+                      type: string
+                    postIDs:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        "201":
+          description: Broadcast created
+
+  /broadcasts/{id}:
+    put:
+      tags: [Broadcaster]
+      summary: Update a broadcast
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    caption:
+                      type: string
+                    postIDs:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        "200":
+          description: Broadcast updated
+
+  /broadcasts/{id}/dispatch:
+    post:
+      tags: [Broadcaster]
+      summary: Dispatch a broadcast
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Broadcast dispatched
+
+  /subscribers/resend-confirmation:
+    post:
+      tags: [Broadcaster]
+      summary: Resend confirmation emails
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  default: email
+      responses:
+        "200":
+          description: Confirmation emails resent
+
+  /subscribers:
+    get:
+      tags: [Broadcaster]
+      summary: List all subscribers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            default: email
+      responses:
+        "200":
+          description: List of subscribers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    address:
+                      type: string
+                    confirmed:
+                      type: boolean
+                    createdAt:
+                      type: string
+                      format: date-time
+                    confirmedAt:
+                      type: string
+                      format: date-time
+                    unsubscribedAt:
+                      type: string
+                      format: date-time

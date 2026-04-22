@@ -6,17 +6,27 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pratikluitel/antipratik/components/posts/models"
+	"github.com/pratikluitel/antipratik/components/posts"
 )
+
+// sqlitePostStore implements PostStore using a SQLite database.
+type sqlitePostStore struct {
+	db *sql.DB
+}
+
+// NewPostStore creates a new sqlitePostStore backed by db.
+func NewPostStore(db *sql.DB) posts.PostStore {
+	return &sqlitePostStore{db: db}
+}
 
 // ── Write methods ─────────────────────────────────────────────────────────────
 
-func (s *SQLitePostStore) CreatePost(ctx context.Context, postType string, id string, createdAt string) error {
+func (s *sqlitePostStore) CreatePost(ctx context.Context, postType string, id string, createdAt string) error {
 	_, err := s.db.ExecContext(ctx, `INSERT INTO posts (id, type, created_at) VALUES (?, ?, ?)`, id, postType, createdAt)
 	return err
 }
 
-func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string, tags []string) error {
+func (s *sqlitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string, tags []string) error {
 	for _, tag := range tags {
 		// Upsert tag into the normalized tags table.
 		if _, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO tags (name) VALUES (?)`, tag); err != nil {
@@ -33,7 +43,7 @@ func (s *SQLitePostStore) insertTags(ctx context.Context, tx *sql.Tx, id string,
 	return nil
 }
 
-func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input models.EssayPostInput) error {
+func (s *sqlitePostStore) CreateEssayData(ctx context.Context, id string, input posts.EssayPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -50,7 +60,7 @@ func (s *SQLitePostStore) CreateEssayData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input models.ShortPostInput) error {
+func (s *sqlitePostStore) CreateShortData(ctx context.Context, id string, input posts.ShortPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -66,7 +76,7 @@ func (s *SQLitePostStore) CreateShortData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input models.MusicPostInput) error {
+func (s *sqlitePostStore) CreateMusicData(ctx context.Context, id string, input posts.MusicPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -83,7 +93,7 @@ func (s *SQLitePostStore) CreateMusicData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input models.PhotoPostInput) error {
+func (s *sqlitePostStore) CreatePhotoData(ctx context.Context, id string, input posts.PhotoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -107,7 +117,7 @@ func (s *SQLitePostStore) CreatePhotoData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input models.VideoPostInput) error {
+func (s *sqlitePostStore) CreateVideoData(ctx context.Context, id string, input posts.VideoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -124,7 +134,7 @@ func (s *SQLitePostStore) CreateVideoData(ctx context.Context, id string, input 
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, input models.LinkPostInput) error {
+func (s *sqlitePostStore) CreateLinkPostData(ctx context.Context, id string, input posts.LinkPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -141,7 +151,7 @@ func (s *SQLitePostStore) CreateLinkPostData(ctx context.Context, id string, inp
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input models.EssayPostInput) error {
+func (s *sqlitePostStore) UpdateEssay(ctx context.Context, id string, input posts.EssayPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -161,7 +171,7 @@ func (s *SQLitePostStore) UpdateEssay(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input models.ShortPostInput) error {
+func (s *sqlitePostStore) UpdateShort(ctx context.Context, id string, input posts.ShortPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -179,7 +189,7 @@ func (s *SQLitePostStore) UpdateShort(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input models.MusicPostInput) error {
+func (s *sqlitePostStore) UpdateMusic(ctx context.Context, id string, input posts.MusicPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -198,7 +208,7 @@ func (s *SQLitePostStore) UpdateMusic(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input models.PhotoPostInput) error {
+func (s *sqlitePostStore) UpdatePhoto(ctx context.Context, id string, input posts.PhotoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -226,7 +236,7 @@ func (s *SQLitePostStore) UpdatePhoto(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input models.VideoPostInput) error {
+func (s *sqlitePostStore) UpdateVideo(ctx context.Context, id string, input posts.VideoPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -245,7 +255,7 @@ func (s *SQLitePostStore) UpdateVideo(ctx context.Context, id string, input mode
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input models.LinkPostInput) error {
+func (s *sqlitePostStore) UpdateLinkPost(ctx context.Context, id string, input posts.LinkPostInput) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -264,12 +274,12 @@ func (s *SQLitePostStore) UpdateLinkPost(ctx context.Context, id string, input m
 	return tx.Commit()
 }
 
-func (s *SQLitePostStore) DeletePost(ctx context.Context, id string) error {
+func (s *sqlitePostStore) DeletePost(ctx context.Context, id string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM posts WHERE id=?`, id)
 	return err
 }
 
-func (s *SQLitePostStore) AddPhotoImage(ctx context.Context, postID string, image models.PhotoImage) (*models.PhotoImage, error) {
+func (s *sqlitePostStore) AddPhotoImage(ctx context.Context, postID string, image posts.PhotoImage) (*posts.PhotoImage, error) {
 	// Determine the next sort_order for this post.
 	var maxOrder int
 	row := s.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(sort_order), -1) FROM photo_images WHERE post_id=?`, postID)
@@ -291,8 +301,8 @@ func (s *SQLitePostStore) AddPhotoImage(ctx context.Context, postID string, imag
 	return &image, nil
 }
 
-func (s *SQLitePostStore) GetPhotoImage(ctx context.Context, postID string, imageID int) (*models.PhotoImage, error) {
-	var img models.PhotoImage
+func (s *sqlitePostStore) GetPhotoImage(ctx context.Context, postID string, imageID int) (*posts.PhotoImage, error) {
+	var img posts.PhotoImage
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, url, alt, caption, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE id=? AND post_id=?`,
 		imageID, postID,
@@ -306,7 +316,7 @@ func (s *SQLitePostStore) GetPhotoImage(ctx context.Context, postID string, imag
 	return &img, nil
 }
 
-func (s *SQLitePostStore) UpdatePhotoImage(ctx context.Context, postID string, imageID int, input models.UpdatePhotoImage) (*models.PhotoImage, error) {
+func (s *sqlitePostStore) UpdatePhotoImage(ctx context.Context, postID string, imageID int, input posts.UpdatePhotoImage) (*posts.PhotoImage, error) {
 	// Build a dynamic SET clause for only the non-nil fields.
 	setClauses := []string{}
 	args := []any{}
@@ -328,31 +338,21 @@ func (s *SQLitePostStore) UpdatePhotoImage(ctx context.Context, postID string, i
 	return s.GetPhotoImage(ctx, postID, imageID)
 }
 
-func (s *SQLitePostStore) DeletePhotoImage(ctx context.Context, postID string, imageID int) error {
+func (s *sqlitePostStore) DeletePhotoImage(ctx context.Context, postID string, imageID int) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM photo_images WHERE id=? AND post_id=?`, imageID, postID)
 	return err
-}
-
-// SQLitePostStore implements PostStore using a SQLite database.
-type SQLitePostStore struct {
-	db *sql.DB
-}
-
-// NewPostStore creates a new SQLitePostStore backed by db.
-func NewPostStore(db *sql.DB) *SQLitePostStore {
-	return &SQLitePostStore{db: db}
 }
 
 // ── Public methods ────────────────────────────────────────────────────────────
 
 // GetPosts returns all posts matching the optional type and tag filters.
-func (s *SQLitePostStore) GetPosts(ctx context.Context, types, tags []string) ([]models.Post, error) {
+func (s *sqlitePostStore) GetPosts(ctx context.Context, types, tags []string) ([]posts.Post, error) {
 	baseRows, err := s.queryBaseRows(ctx, types, tags)
 	if err != nil {
 		return nil, err
 	}
 	if len(baseRows) == 0 {
-		return []models.Post{}, nil
+		return []posts.Post{}, nil
 	}
 
 	ids := extractIDs(baseRows)
@@ -367,7 +367,7 @@ func (s *SQLitePostStore) GetPosts(ctx context.Context, types, tags []string) ([
 }
 
 // GetPostByID returns any post type by ID, or an error if not found.
-func (s *SQLitePostStore) GetPostByID(ctx context.Context, id string) (models.Post, error) {
+func (s *sqlitePostStore) GetPostByID(ctx context.Context, id string) (posts.Post, error) {
 	row := s.db.QueryRowContext(ctx, `SELECT id, type, created_at FROM posts WHERE id = ?`, id)
 	var r baseRow
 	if err := row.Scan(&r.ID, &r.Type, &r.CreatedAt); err != nil {
@@ -392,8 +392,23 @@ func (s *SQLitePostStore) GetPostByID(ctx context.Context, id string) (models.Po
 	return posts[0], nil
 }
 
+// GetPostsByIDs returns posts for each given ID, in the order of ids.
+// IDs not found in the database are silently skipped.
+func (s *sqlitePostStore) GetPostsByIDs(ctx context.Context, ids []string) ([]posts.Post, error) {
+	var out []posts.Post
+	for _, id := range ids {
+		p, err := s.GetPostByID(ctx, id)
+		if err != nil {
+			// Not found — skip silently.
+			continue
+		}
+		out = append(out, p)
+	}
+	return out, nil
+}
+
 // GetPostBySlug returns the essay with the given slug, or nil if not found.
-func (s *SQLitePostStore) GetPostBySlug(ctx context.Context, slug string) (*models.EssayPost, error) {
+func (s *sqlitePostStore) GetPostBySlug(ctx context.Context, slug string) (*posts.EssayPost, error) {
 	const q = `
 		SELECT p.id, p.created_at,
 		       e.title, e.slug, e.excerpt, e.body, e.reading_time_minutes
@@ -418,7 +433,7 @@ func (s *SQLitePostStore) GetPostBySlug(ctx context.Context, slug string) (*mode
 		return nil, err
 	}
 
-	return &models.EssayPost{
+	return &posts.EssayPost{
 		ID:                 id,
 		Type:               "essay",
 		CreatedAt:          createdAt,
@@ -440,7 +455,7 @@ type baseRow struct {
 }
 
 // queryBaseRows fetches (id, type, created_at) rows matching filters.
-func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []string) ([]baseRow, error) {
+func (s *sqlitePostStore) queryBaseRows(ctx context.Context, types, tags []string) ([]baseRow, error) {
 	var sb strings.Builder
 	var args []any
 
@@ -492,7 +507,7 @@ func (s *SQLitePostStore) queryBaseRows(ctx context.Context, types, tags []strin
 }
 
 // fetchTagsMap returns a map of post_id → []tag for the given post IDs.
-func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[string][]string, error) {
+func (s *sqlitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[string][]string, error) {
 	if len(ids) == 0 {
 		return map[string][]string{}, nil
 	}
@@ -516,7 +531,7 @@ func (s *SQLitePostStore) fetchTagsMap(ctx context.Context, ids []string) (map[s
 }
 
 // GetAllTags returns all tag names sorted alphabetically.
-func (s *SQLitePostStore) GetAllTags(ctx context.Context) ([]string, error) {
+func (s *sqlitePostStore) GetAllTags(ctx context.Context) ([]string, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT name FROM tags ORDER BY name`)
 	if err != nil {
 		return nil, fmt.Errorf("GetAllTags: %w", err)
@@ -535,355 +550,4 @@ func (s *SQLitePostStore) GetAllTags(ctx context.Context) ([]string, error) {
 		result = []string{}
 	}
 	return result, rows.Err()
-}
-
-// ── Per-type fetchers ─────────────────────────────────────────────────────────
-
-type essayData struct {
-	title, slug, excerpt, body string
-	readingTimeMinutes         int
-}
-
-func (s *SQLitePostStore) fetchEssayData(ctx context.Context, ids []string) (map[string]essayData, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, title, slug, excerpt, body, reading_time_minutes FROM essay_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchEssayData: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]essayData)
-	for rows.Next() {
-		var id string
-		var d essayData
-		if err := rows.Scan(&id, &d.title, &d.slug, &d.excerpt, &d.body, &d.readingTimeMinutes); err != nil {
-			return nil, fmt.Errorf("fetchEssayData scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-type shortData struct{ body string }
-
-func (s *SQLitePostStore) fetchShortData(ctx context.Context, ids []string) (map[string]shortData, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, body FROM short_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchShortData: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]shortData)
-	for rows.Next() {
-		var id string
-		var d shortData
-		if err := rows.Scan(&id, &d.body); err != nil {
-			return nil, fmt.Errorf("fetchShortData scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-type musicData struct {
-	albumArtTiny  *string
-	albumArtSmall *string
-	albumArtMed   *string
-	albumArtLarge *string
-	album         *string
-	title         string
-	albumArt      string
-	audioURL      string
-	duration      int
-}
-
-func (s *SQLitePostStore) fetchMusicData(ctx context.Context, ids []string) (map[string]musicData, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, title, album_art, album_art_tiny, album_art_small, album_art_medium, album_art_large, audio_url, duration, album FROM music_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchMusicData: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]musicData)
-	for rows.Next() {
-		var id string
-		var d musicData
-		if err := rows.Scan(&id, &d.title, &d.albumArt, &d.albumArtTiny, &d.albumArtSmall, &d.albumArtMed, &d.albumArtLarge, &d.audioURL, &d.duration, &d.album); err != nil {
-			return nil, fmt.Errorf("fetchMusicData scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-type photoMeta struct{ location *string }
-
-func (s *SQLitePostStore) fetchPhotoMeta(ctx context.Context, ids []string) (map[string]photoMeta, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, location FROM photo_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchPhotoMeta: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]photoMeta)
-	for rows.Next() {
-		var id string
-		var d photoMeta
-		if err := rows.Scan(&id, &d.location); err != nil {
-			return nil, fmt.Errorf("fetchPhotoMeta scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-func (s *SQLitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (map[string][]models.PhotoImage, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT id, post_id, url, alt, caption, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url FROM photo_images WHERE post_id IN (" + placeholders(len(ids)) + ") ORDER BY post_id, sort_order"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchPhotoImages: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string][]models.PhotoImage)
-	for rows.Next() {
-		var postID string
-		var img models.PhotoImage
-		if err := rows.Scan(&img.ID, &postID, &img.URL, &img.Alt, &img.Caption, &img.ThumbnailTinyURL, &img.ThumbnailSmallURL, &img.ThumbnailMedURL, &img.ThumbnailLargeURL); err != nil {
-			return nil, fmt.Errorf("fetchPhotoImages scan: %w", err)
-		}
-		m[postID] = append(m[postID], img)
-	}
-	return m, rows.Err()
-}
-
-type videoData struct {
-	thumbnailTinyURL  *string
-	thumbnailSmallURL *string
-	thumbnailMedURL   *string
-	thumbnailLargeURL *string
-	playlist          *string
-	title             string
-	thumbnailURL      string
-	videoURL          string
-	duration          int
-}
-
-func (s *SQLitePostStore) fetchVideoData(ctx context.Context, ids []string) (map[string]videoData, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, title, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url, duration, playlist FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchVideoData: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]videoData)
-	for rows.Next() {
-		var id string
-		var d videoData
-		if err := rows.Scan(&id, &d.title, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.videoURL, &d.duration, &d.playlist); err != nil {
-			return nil, fmt.Errorf("fetchVideoData scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-type linkPostData struct {
-	description       *string
-	thumbnailURL      *string
-	thumbnailTinyURL  *string
-	thumbnailSmallURL *string
-	thumbnailMedURL   *string
-	thumbnailLargeURL *string
-	category          *string
-	title             string
-	url               string
-	domain            string
-}
-
-func (s *SQLitePostStore) fetchLinkPostData(ctx context.Context, ids []string) (map[string]linkPostData, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	q := "SELECT post_id, title, url, domain, description, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, category FROM link_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
-	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
-	if err != nil {
-		return nil, fmt.Errorf("fetchLinkPostData: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-
-	m := make(map[string]linkPostData)
-	for rows.Next() {
-		var id string
-		var d linkPostData
-		if err := rows.Scan(&id, &d.title, &d.url, &d.domain, &d.description, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.category); err != nil {
-			return nil, fmt.Errorf("fetchLinkPostData scan: %w", err)
-		}
-		m[id] = d
-	}
-	return m, rows.Err()
-}
-
-// ── Assembly ──────────────────────────────────────────────────────────────────
-
-func (s *SQLitePostStore) assembleAll(
-	ctx context.Context,
-	baseRows []baseRow,
-	byType map[string][]string,
-	tagsMap map[string][]string,
-) ([]models.Post, error) {
-	essayMap, err := s.fetchEssayData(ctx, byType["essay"])
-	if err != nil {
-		return nil, err
-	}
-	shortMap, err := s.fetchShortData(ctx, byType["short"])
-	if err != nil {
-		return nil, err
-	}
-	musicMap, err := s.fetchMusicData(ctx, byType["music"])
-	if err != nil {
-		return nil, err
-	}
-	photoMeta, err := s.fetchPhotoMeta(ctx, byType["photo"])
-	if err != nil {
-		return nil, err
-	}
-	photoImages, err := s.fetchPhotoImages(ctx, byType["photo"])
-	if err != nil {
-		return nil, err
-	}
-	videoMap, err := s.fetchVideoData(ctx, byType["video"])
-	if err != nil {
-		return nil, err
-	}
-	linkPostMap, err := s.fetchLinkPostData(ctx, byType["link"])
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]models.Post, 0, len(baseRows))
-	for _, r := range baseRows {
-		tags := coalesceStringSlice(tagsMap[r.ID])
-		var post models.Post
-
-		switch r.Type {
-		case "essay":
-			d := essayMap[r.ID]
-			post = models.EssayPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Title: d.title, Slug: d.slug, Excerpt: d.excerpt, Body: d.body,
-				ReadingTimeMinutes: d.readingTimeMinutes,
-			}
-		case "short":
-			d := shortMap[r.ID]
-			post = models.ShortPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Body: d.body,
-			}
-		case "music":
-			d := musicMap[r.ID]
-			post = models.MusicPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Title: d.title, AlbumArt: d.albumArt, AlbumArtTinyURL: d.albumArtTiny,
-				AlbumArtSmallURL: d.albumArtSmall, AlbumArtMedURL: d.albumArtMed,
-				AlbumArtLargeURL: d.albumArtLarge,
-				AudioURL: d.audioURL, Duration: d.duration, Album: d.album,
-			}
-		case "photo":
-			meta := photoMeta[r.ID]
-			imgs := photoImages[r.ID]
-			if imgs == nil {
-				imgs = []models.PhotoImage{}
-			}
-			post = models.PhotoPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Images: imgs, Location: meta.location,
-			}
-		case "video":
-			d := videoMap[r.ID]
-			post = models.VideoPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Title: d.title, ThumbnailURL: d.thumbnailURL, ThumbnailTinyURL: d.thumbnailTinyURL,
-				ThumbnailSmallURL: d.thumbnailSmallURL, ThumbnailMedURL: d.thumbnailMedURL,
-				ThumbnailLargeURL: d.thumbnailLargeURL,
-				VideoURL: d.videoURL, Duration: d.duration, Playlist: d.playlist,
-			}
-		case "link":
-			d := linkPostMap[r.ID]
-			post = models.LinkPost{
-				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Title: d.title, URL: d.url, Domain: d.domain,
-				Description: d.description, ThumbnailURL: d.thumbnailURL,
-				ThumbnailTinyURL: d.thumbnailTinyURL, ThumbnailSmallURL: d.thumbnailSmallURL,
-				ThumbnailMedURL: d.thumbnailMedURL, ThumbnailLargeURL: d.thumbnailLargeURL,
-				Category: d.category,
-			}
-		default:
-			continue
-		}
-		result = append(result, post)
-	}
-	return result, nil
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-func placeholders(n int) string {
-	if n == 0 {
-		return ""
-	}
-	return strings.Repeat("?,", n-1) + "?"
-}
-
-func stringsToAny(ss []string) []any {
-	out := make([]any, len(ss))
-	for i, s := range ss {
-		out[i] = s
-	}
-	return out
-}
-
-func extractIDs(rows []baseRow) []string {
-	ids := make([]string, len(rows))
-	for i, r := range rows {
-		ids[i] = r.ID
-	}
-	return ids
-}
-
-func groupByType(rows []baseRow) map[string][]string {
-	m := make(map[string][]string)
-	for _, r := range rows {
-		m[r.Type] = append(m[r.Type], r.ID)
-	}
-	return m
-}
-
-func coalesceStringSlice(s []string) []string {
-	if s == nil {
-		return []string{}
-	}
-	return s
 }

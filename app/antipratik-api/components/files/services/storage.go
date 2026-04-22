@@ -6,22 +6,15 @@ import (
 	"context"
 	"io"
 
-	"github.com/pratikluitel/antipratik/components/files/store"
+	"github.com/pratikluitel/antipratik/components/files"
 )
 
-// StorageService exposes file retrieval and deletion to other components.
-// Inject this interface rather than importing files/store directly.
-type StorageService interface {
-	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
-	Delete(ctx context.Context, key string) error
-}
-
 type storageService struct {
-	store store.FileStore
+	store files.FileStore
 }
 
-// NewStorageService returns a StorageService backed by the given FileStore.
-func NewStorageService(s store.FileStore) StorageService {
+// NewStorageService returns a StorageService backed by the given Filefiles.
+func NewStorageService(s files.FileStore) files.StorageService {
 	return &storageService{store: s}
 }
 

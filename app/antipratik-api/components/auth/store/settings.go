@@ -6,21 +6,23 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/pratikluitel/antipratik/components/auth"
 )
 
-// SQLiteSettingsStore implements SettingsStore using a SQLite database.
-type SQLiteSettingsStore struct {
+// sqliteSettingsStore implements SettingsStore using a SQLite database.
+type sqliteSettingsStore struct {
 	db *sql.DB
 }
 
-// NewSettingsStore creates a new SQLiteSettingsStore backed by db.
-func NewSettingsStore(db *sql.DB) *SQLiteSettingsStore {
-	return &SQLiteSettingsStore{db: db}
+// NewSettingsStore creates a new sqliteSettingsStore backed by db.
+func NewSettingsStore(db *sql.DB) auth.SettingsStore {
+	return &sqliteSettingsStore{db: db}
 }
 
 // GetOrCreateJWTSecret returns the persisted JWT secret from the settings table,
 // generating and storing a new one if none exists yet.
-func (s *SQLiteSettingsStore) GetOrCreateJWTSecret(ctx context.Context) (string, error) {
+func (s *sqliteSettingsStore) GetOrCreateJWTSecret(ctx context.Context) (string, error) {
 	var secret string
 	err := s.db.QueryRowContext(ctx, `SELECT value FROM settings WHERE key='jwt_secret'`).Scan(&secret)
 	if err == nil {

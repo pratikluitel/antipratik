@@ -9,11 +9,19 @@ export const metadata: Metadata = {
 };
 
 interface Props {
-  searchParams: Promise<{ tag?: string }>;
+  searchParams: Promise<{ tag?: string; photo?: string; track?: string }>;
 }
 
 export default async function FeedPage({ searchParams }: Props) {
-  const { tag } = await searchParams;
+  const { tag, photo, track } = await searchParams;
   const [posts, allTags] = await Promise.all([getPosts(), getTags()]);
-  return <FeedPageClient posts={posts} allTags={allTags} initialTag={tag} />;
+  return (
+    <FeedPageClient
+      posts={posts}
+      allTags={allTags}
+      initialTag={tag}
+      initialPhotoId={photo}
+      initialTrackId={track}
+    />
+  );
 }

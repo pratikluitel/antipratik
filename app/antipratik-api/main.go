@@ -11,16 +11,19 @@ import (
 	authlogic "github.com/pratikluitel/antipratik/components/auth/logic"
 	authstore "github.com/pratikluitel/antipratik/components/auth/store"
 	broadcasterapi "github.com/pratikluitel/antipratik/components/broadcaster/api"
+	"github.com/pratikluitel/antipratik/components/broadcaster/lib/resend"
 	broadcasterlogic "github.com/pratikluitel/antipratik/components/broadcaster/logic"
-	broadcasterstore "github.com/pratikluitel/antipratik/components/broadcaster/store"
 	broadcastersvc "github.com/pratikluitel/antipratik/components/broadcaster/services"
+	broadcasterstore "github.com/pratikluitel/antipratik/components/broadcaster/store"
 	filesapi "github.com/pratikluitel/antipratik/components/files/api"
 	fileslogic "github.com/pratikluitel/antipratik/components/files/logic"
 	filesservices "github.com/pratikluitel/antipratik/components/files/services"
 	filesstore "github.com/pratikluitel/antipratik/components/files/store"
 	postsapi "github.com/pratikluitel/antipratik/components/posts/api"
 	postslogic "github.com/pratikluitel/antipratik/components/posts/logic"
+	postsservices "github.com/pratikluitel/antipratik/components/posts/services"
 	postsstore "github.com/pratikluitel/antipratik/components/posts/store"
+
 	"github.com/pratikluitel/antipratik/common/db"
 	"github.com/pratikluitel/antipratik/common/logging"
 	"github.com/pratikluitel/antipratik/config"
@@ -60,50 +63,74 @@ func main() {
 	if err != nil {
 		log.Fatalf("init file store: %v", err)
 	}
-	uploadSvc := fileslogic.NewUploadService(fileStore)
+	uploadLogic := fileslogic.NewUploadLogic(fileStore)
 	storageSvc := filesservices.NewStorageService(fileStore)
-	uploaderSvc := filesservices.NewUploaderService(uploadSvc)
+	uploaderSvc := filesservices.NewUploaderService(uploadLogic)
 	fileH := filesapi.NewFileServingHandler(fileStore, logger)
 
 	// Auth component
 	userStore := authstore.NewUserStore(sqlDB)
 	settingsStore := authstore.NewSettingsStore(sqlDB)
-	setupSvc := authlogic.NewSetupService(userStore, settingsStore)
+	setupLogic := authlogic.NewSetupLogic(userStore, settingsStore)
 
 	ctx := context.Background()
 
 	if cfg.AdminPassword != "" {
-		if err = setupSvc.UpsertAdminUser(ctx, cfg.AdminPassword); err != nil {
+		if err = setupLogic.UpsertAdminUser(ctx, cfg.AdminPassword); err != nil {
 			log.Fatalf("upsert admin user: %v", err)
 		}
 	}
 
-	jwtSecret, err := setupSvc.GetOrCreateJWTSecret(ctx)
+	jwtSecret, err := setupLogic.GetOrCreateJWTSecret(ctx)
 	if err != nil {
 		log.Fatalf("jwt secret: %v", err)
 	}
 
-	authService := authlogic.NewAuthService(userStore, jwtSecret)
-	authH := authapi.NewAuthHandler(authService, logger)
+	authLogic := authlogic.NewAuthLogic(userStore, jwtSecret)
+	authH := authapi.NewAuthHandler(authLogic, logger)
 
 	// Posts component
 	postStore := postsstore.NewPostStore(sqlDB)
 	linkStore := postsstore.NewLinkStore(sqlDB)
 
-	postLogic := postslogic.NewPostService(postStore, storageSvc, logger)
-	linkLogic := postslogic.NewLinkService(linkStore)
+	postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger)
+	linkLogic := postslogic.NewLinkLogic(linkStore)
+
+	postsSvc := postsservices.NewPostsService(postLogic)
 
 	postH := postsapi.NewPostHandler(postLogic, uploaderSvc, logger)
 	linkH := postsapi.NewLinkHandler(linkLogic, logger)
 
 	// Broadcaster component
-	nlStore := broadcasterstore.NewNewsletterStore(sqlDB)
-	nlLogic := broadcasterlogic.NewNewsletterService(nlStore)
-	_ = broadcastersvc.NewSubscriberService(nlLogic)
-	newsletterH := broadcasterapi.NewNewsletterHandler(nlLogic, logger)
+	broadcasterStore := broadcasterstore.NewBroadcasterStore(sqlDB)
+
+	resendClient := resend.NewClient(resend.Config{
+		APIKey:   cfg.Broadcaster.Resend.APIKey,
+		Host:     cfg.Broadcaster.Resend.Host,
+		Port:     cfg.Broadcaster.Resend.Port,
+		From:     cfg.Broadcaster.Resend.FromEmail,
+		FromName: cfg.Broadcaster.Resend.FromName,
+	}, logger)
+
+	broadcasterLogic, err := broadcasterlogic.NewBroadcasterLogic(
+		broadcasterStore,
+		resendClient,
+		postsSvc,
+		cfg.AdminEmail,
+		cfg.SiteDomain,
+		"antipratik",
+		cfg.Broadcaster.Resend.FromName,
+		logger,
+	)
+	if err != nil {
+		log.Fatalf("init broadcaster: %v", err)
+	}
+
+	_ = broadcastersvc.NewSubscriberService(broadcasterLogic)
+	broadcasterH := broadcasterapi.NewBroadcasterHandler(broadcasterLogic, logger)
 
 	mux := http.NewServeMux()
-	handlers.RegisterRoutes(mux, postH, linkH, authH, authService, fileH, newsletterH, "swagger/openapi.yaml", "swagger/swagger.html")
+	handlers.RegisterRoutes(mux, postH, linkH, authH, authLogic, fileH, broadcasterH, "swagger/openapi.yaml", "swagger/swagger.html")
 
 	handler := handlers.CORSMiddleware(mux)
 

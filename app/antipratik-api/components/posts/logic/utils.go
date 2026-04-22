@@ -6,24 +6,25 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pratikluitel/antipratik/components/posts/models"
+
+	"github.com/pratikluitel/antipratik/components/posts"
 )
 
 func newID() string  { return uuid.New().String() }
 func nowUTC() string { return time.Now().UTC().Format(time.RFC3339) }
 
 // fileKeysForPost returns all storage keys for files attached to a post.
-func fileKeysForPost(post models.Post) []string {
+func fileKeysForPost(post posts.Post) []string {
 	var keys []string
 	switch p := post.(type) {
-	case models.MusicPost:
+	case posts.MusicPost:
 		if p.AudioURL != "" {
 			keys = append(keys, urlToStorageKey(p.AudioURL))
 		}
 		if p.AlbumArt != "" {
 			keys = append(keys, urlToStorageKey(p.AlbumArt))
 		}
-	case models.PhotoPost:
+	case posts.PhotoPost:
 		for _, img := range p.Images {
 			keys = append(keys, urlToStorageKey(img.URL))
 			if img.ThumbnailSmallURL != nil {
@@ -36,11 +37,11 @@ func fileKeysForPost(post models.Post) []string {
 				keys = append(keys, urlToStorageKey(*img.ThumbnailLargeURL))
 			}
 		}
-	case models.VideoPost:
+	case posts.VideoPost:
 		if p.ThumbnailURL != "" {
 			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
 		}
-	case models.LinkPost:
+	case posts.LinkPost:
 		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
 			keys = append(keys, urlToStorageKey(*p.ThumbnailURL))
 		}
@@ -49,7 +50,7 @@ func fileKeysForPost(post models.Post) []string {
 }
 
 // fileKeysForImage returns all storage keys for a single PhotoImage.
-func fileKeysForImage(img *models.PhotoImage) []string {
+func fileKeysForImage(img *posts.PhotoImage) []string {
 	if img == nil {
 		return nil
 	}
