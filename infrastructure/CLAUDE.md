@@ -33,7 +33,7 @@ docker/
 
 .github/
   workflows/
-    build.yaml               # Build, lint, and image push (triggered on every push)
+    build.yaml               # Build, lint, and image push (triggered on push to master/prod, PRs to master)
     deploy.yaml              # Deploy to server (triggered on successful Build run on master/prod)
 ```
 
@@ -102,7 +102,7 @@ Structure only — no credentials. Fields: `server.host`/`server.port` (always `
 
 ## CI/CD Workflows
 
-### `build.yaml` — triggered on every push
+### `build.yaml` — triggered on push to master/prod and PRs to master
 
 ```
 changes (dorny/paths-filter, base: master)
