@@ -394,7 +394,7 @@ func (s *postLogic) UpdateMusic(ctx context.Context, id string, input posts.Upda
 	}
 
 	var oldArtKeys []string
-	if input.AlbumArt != nil && cur.AlbumArt != "" {
+	if input.AlbumArt != nil && cur.AlbumArt != "" && cur.AlbumArt != *input.AlbumArt {
 		oldArtKeys = albumArtFileKeys(cur)
 	}
 
@@ -509,7 +509,7 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 	}
 
 	var oldThumbKeys []string
-	if input.ThumbnailURL != nil && cur.ThumbnailURL != "" {
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != "" && cur.ThumbnailURL != *input.ThumbnailURL {
 		oldThumbKeys = thumbnailFileKeys(cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
 	}
 
@@ -591,7 +591,7 @@ func (s *postLogic) UpdateLinkPost(ctx context.Context, id string, input posts.U
 	merged.Domain = domain
 
 	var oldThumbKeys []string
-	if input.ThumbnailURL != nil && cur.ThumbnailURL != nil && *cur.ThumbnailURL != "" {
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != nil && *cur.ThumbnailURL != "" && *cur.ThumbnailURL != *input.ThumbnailURL {
 		oldThumbKeys = thumbnailFileKeys(*cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
 	}
 
