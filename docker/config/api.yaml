@@ -29,6 +29,6 @@ broadcaster:
   resend:
     api_key: ""           # override via ANTIPRATIK_RESEND_API_KEY (secret)
     host: "smtp.resend.com"
-    port: 465
+    port: 587
     from_email: "newsletter@antipratik.com"        # e.g. "newsletter@antipratik.com"
     from_name: "AntiPratik DEV"         # e.g. "Pratik"
