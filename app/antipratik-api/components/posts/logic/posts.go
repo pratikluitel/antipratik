@@ -375,6 +375,10 @@ func (s *postLogic) UpdateMusic(ctx context.Context, id string, input posts.Upda
 	}
 	if input.AlbumArt != nil {
 		merged.AlbumArt = *input.AlbumArt
+		merged.AlbumArtTinyURL = input.AlbumArtTinyURL
+		merged.AlbumArtSmallURL = input.AlbumArtSmallURL
+		merged.AlbumArtMedURL = input.AlbumArtMedURL
+		merged.AlbumArtLargeURL = input.AlbumArtLargeURL
 	}
 	if input.Album != nil {
 		merged.Album = input.Album
@@ -494,6 +498,13 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 	if input.Playlist != nil {
 		merged.Playlist = input.Playlist
 	}
+	if input.ThumbnailURL != nil {
+		merged.ThumbnailURL = *input.ThumbnailURL
+		merged.ThumbnailTinyURL = input.ThumbnailTinyURL
+		merged.ThumbnailSmallURL = input.ThumbnailSmallURL
+		merged.ThumbnailMedURL = input.ThumbnailMedURL
+		merged.ThumbnailLargeURL = input.ThumbnailLargeURL
+	}
 	if input.Tags != nil {
 		merged.Tags = input.Tags
 	}
@@ -573,6 +584,13 @@ func (s *postLogic) UpdateLinkPost(ctx context.Context, id string, input posts.U
 	}
 	if input.Category != nil {
 		merged.Category = input.Category
+	}
+	if input.ThumbnailURL != nil {
+		merged.ThumbnailURL = input.ThumbnailURL
+		merged.ThumbnailTinyURL = input.ThumbnailTinyURL
+		merged.ThumbnailSmallURL = input.ThumbnailSmallURL
+		merged.ThumbnailMedURL = input.ThumbnailMedURL
+		merged.ThumbnailLargeURL = input.ThumbnailLargeURL
 	}
 	if input.Tags != nil {
 		merged.Tags = input.Tags
