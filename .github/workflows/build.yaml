@@ -145,3 +145,29 @@ jobs:
           file: ./docker/Dockerfile.nginx
           push: ${{ github.ref_name == 'master' || github.ref_name == 'prod' }}
           tags: ${{ env.NGINX_IMAGE }}:${{ env.TAG }}
+  
+  merge-status-check:
+    needs: [changes, build-nginx, build-api-image, build-ui-image]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required jobs
+        run: |
+          nginx="${{ needs.build-nginx.result }}"
+          api_changed="${{ needs.changes.outputs.api }}"
+          ui_changed="${{ needs.changes.outputs.ui }}"
+          api_build="${{ needs.build-api-image.result }}"
+          ui_build="${{ needs.build-ui-image.result }}"
+          ref="${{ github.ref_name }}"
+
+          [ "$nginx" = "success" ] || { echo "build-nginx failed"; exit 1; }
+
+          if [ "$api_changed" = "true" ] || [ "$ref" = "master" ] || [ "$ref" = "prod" ]; then
+            [ "$api_build" = "success" ] || { echo "build-api-image failed"; exit 1; }
+          fi
+
+          if [ "$ui_changed" = "true" ] || [ "$ref" = "master" ] || [ "$ref" = "prod" ]; then
+            [ "$ui_build" = "success" ] || { echo "build-ui-image failed"; exit 1; }
+          fi
+
+          echo "All required checks passed"
