@@ -23,7 +23,7 @@ type Config struct {
 	Host     string // Default: smtp.resend.com
 	From     string // Sender email address
 	FromName string // Sender display name
-	Port     int    // Default: 465 (implicit TLS)
+	Port     int    // Default: 587 (STARTTLS)
 }
 
 // ErrTransient wraps failures that are safe to retry.
@@ -59,18 +59,18 @@ type Client struct {
 	cfg    Config
 }
 
-// NewClient creates a new Client. Applies defaults for Host (smtp.resend.com) and Port (465).
+// NewClient creates a new Client. Applies defaults for Host (smtp.resend.com) and Port (587).
 func NewClient(cfg Config, logger Logger) *Client {
 	if cfg.Host == "" {
 		cfg.Host = "smtp.resend.com"
 	}
 	if cfg.Port == 0 {
-		cfg.Port = 465
+		cfg.Port = 587
 	}
 	return &Client{cfg: cfg, logger: logger}
 }
 
-// Send delivers an HTML email via Resend's SMTP interface (implicit TLS on port 465).
+// Send delivers an HTML email via Resend's SMTP interface (STARTTLS on port 587).
 func (c *Client) Send(_ context.Context, req SendRequest) error {
 	if len(req.To) == 0 {
 		return ErrPermanent{Cause: fmt.Errorf("no recipients")}
@@ -92,16 +92,15 @@ func (c *Client) Send(_ context.Context, req SendRequest) error {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	conn, dialErr := tls.Dial("tcp", addr, tlsCfg)
+	client, dialErr := smtp.Dial(addr)
 	if dialErr != nil {
 		return ErrTransient{Cause: fmt.Errorf("dial %s: %w", addr, dialErr)}
 	}
-
-	client, clientErr := smtp.NewClient(conn, c.cfg.Host)
-	if clientErr != nil {
-		return ErrTransient{Cause: fmt.Errorf("smtp client: %w", clientErr)}
-	}
 	defer func() { _ = client.Quit() }()
+
+	if startTLSErr := client.StartTLS(tlsCfg); startTLSErr != nil {
+		return ErrTransient{Cause: fmt.Errorf("starttls: %w", startTLSErr)}
+	}
 
 	auth := smtp.PlainAuth("", "resend", c.cfg.APIKey, c.cfg.Host)
 	if authErr := client.Auth(auth); authErr != nil {
