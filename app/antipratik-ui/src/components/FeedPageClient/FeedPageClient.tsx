@@ -1,7 +1,7 @@
 'use client';
 
-import { useReducer, useMemo, useState } from 'react';
-import type { Post, PhotoPost } from '../../lib/types';
+import { useReducer, useMemo, useState, useEffect } from 'react';
+import type { Post, PhotoPost, MusicPost } from '../../lib/types';
 import {
   filterReducer,
   initialFilterState,
@@ -12,15 +12,18 @@ import FilterBar from '../FilterBar/FilterBar';
 import ClusterDivider from '../ClusterDivider/ClusterDivider';
 import PostCard from '../PostCard/PostCard';
 import Lightbox from '../Lightbox/Lightbox';
+import { useMusicPlayer } from '../MusicProvider/MusicProvider';
 import styles from './FeedPageClient.module.css';
 
 interface Props {
   posts: Post[];
   allTags: string[];
   initialTag?: string;
+  initialPhotoId?: string;
+  initialTrackId?: string;
 }
 
-export default function FeedPageClient({ posts, allTags, initialTag }: Props) {
+export default function FeedPageClient({ posts, allTags, initialTag, initialPhotoId, initialTrackId }: Props) {
   const [state, dispatch] = useReducer(
     filterReducer,
     initialTag
@@ -40,6 +43,28 @@ export default function FeedPageClient({ posts, allTags, initialTag }: Props) {
 
   const [lightboxImages, setLightboxImages] = useState<PhotoPost['images'] | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const { play } = useMusicPlayer();
+
+  useEffect(() => {
+    if (!initialPhotoId) return;
+    const photoPost = posts.find((p): p is PhotoPost => p.type === 'photo' && p.id === initialPhotoId);
+    if (photoPost) {
+      const images = photoPost.images;
+      Promise.resolve().then(() => {
+        setLightboxImages(images);
+        setLightboxIndex(0);
+      });
+    }
+  }, [initialPhotoId, posts]);
+
+  useEffect(() => {
+    if (!initialTrackId) return;
+    const musicPost = posts.find((p): p is MusicPost => p.type === 'music' && p.id === initialTrackId);
+    if (musicPost) {
+      const track = musicPost;
+      Promise.resolve().then(() => play(track));
+    }
+  }, [initialTrackId, posts, play]);
 
   return (
     <div className={styles.page}>

@@ -45,15 +45,15 @@ export default function PhotoCard({ post, onOpen }: Props) {
         className={styles.imageWrapper}
         onClick={() => onOpen(images, 0)}
       >
-        {mainImage.thumbnailTinyUrl && (
+        {(mainImage.thumbnailSmallUrl ?? mainImage.thumbnailTinyUrl) && (
           <div
             className={styles.imagePlaceholder}
-            style={{ backgroundImage: `url(${mainImage.thumbnailTinyUrl})` }}
+            style={{ backgroundImage: `url(${mainImage.thumbnailSmallUrl ?? mainImage.thumbnailTinyUrl})` }}
             aria-hidden="true"
           />
         )}
         <Image
-          src={mainImage.url}
+          src={mainImage.thumbnailLargeUrl ?? mainImage.url}
           alt={mainImage.alt}
           fill
           sizes="(max-width: 860px) 100vw, 860px"

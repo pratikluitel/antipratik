@@ -28,9 +28,10 @@ function AlbumArtImage({ post }: { post: MusicPost }) {
         />
       )}
       <Image
-        src={post.albumArt}
+        src={post.albumArtSmallUrl ?? post.albumArt}
         alt={post.title}
         fill
+        sizes="96px"
         onLoad={() => setLoaded(true)}
         className={`${styles.albumArt} ${loaded ? styles.imageVisible : styles.imageHidden}`}
       />

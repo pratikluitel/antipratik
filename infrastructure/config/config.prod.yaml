@@ -5,6 +5,8 @@ server:
 db:
   path: "/data/antipratik.db"
 
+site_domain: "https://antipratik.com"
+admin_email: "contact@antipratik.com"
 admin_password: ""
 
 static:
@@ -20,3 +22,12 @@ storage:
 
 logging:
   level: "warning"
+
+
+broadcaster:
+  resend:
+    api_key: ""           # override via ANTIPRATIK_RESEND_API_KEY (secret)
+    host: "smtp.resend.com"
+    port: 587
+    from_email: "newsletter@antipratik.com"        # e.g. "newsletter@antipratik.com"
+    from_name: "AntiPratik"         # e.g. "Pratik"

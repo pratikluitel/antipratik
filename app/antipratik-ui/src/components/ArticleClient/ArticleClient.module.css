@@ -2,7 +2,7 @@
 
 .sideControls {
   position: fixed;
-  right: var(--progress-float-right);
+  right: var(--progress-ruler-right);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -19,22 +19,48 @@
   }
 }
 
-.progressTrack {
-  width: var(--progress-float-width);
-  height: var(--progress-float-height);
-  background: var(--progress-float-track-dark);
-  border-radius: 2px;
+/* Ruler track */
+.progressRuler {
+  position: relative;
+  width: var(--progress-ruler-width);
+  height: var(--progress-ruler-height);
+  background: var(--progress-ruler-track-dark);
+  border-radius: 1px;
 }
 
-[data-theme='light'] .progressTrack {
-  background: var(--progress-float-track-light);
+[data-theme='light'] .progressRuler {
+  background: var(--progress-ruler-track-light);
 }
 
-.progressFill {
-  width: var(--progress-float-width);
-  background: var(--progress-float-fill);
-  border-radius: 2px;
-  transition: var(--progress-transition);
+/* Tick marks — dim by default (unread) */
+.tick {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--progress-tick-width);
+  height: 1px;
+  background: var(--color-border-dark);
+  opacity: 0.35;
+  transition: background var(--motion-fast), opacity var(--motion-fast);
+}
+
+[data-theme='light'] .tick {
+  background: var(--color-border-light);
+}
+
+.tickLong {
+  width: var(--progress-tick-long-width);
+}
+
+/* Read tick — highlighted with accent */
+.tickRead {
+  background: var(--progress-fill);
+  opacity: 0.9;
+}
+
+[data-theme='light'] .tickRead {
+  background: var(--progress-fill);
+  opacity: 0.8;
 }
 
 /* ── Back button — fixed left ───────────────────────────────────────────── */
@@ -266,7 +292,7 @@
 }
 
 .body a {
-  color: var(--accent-essays);
+  color: var(--progress-fill);
   text-decoration: none;
   border-bottom: 0.5px solid var(--accent-essays);
   transition: opacity 200ms ease-in-out;
@@ -303,4 +329,98 @@
 [data-theme='light'] .body ul,
 [data-theme='light'] .body ol {
   color: var(--color-text-body-light);
+}
+
+/* ── Table of Contents — fixed left panel, below back button, desktop only ── */
+
+.toc {
+  position: fixed;
+  /* sit below the back button (~14px font + generous gap) */
+  top: calc(var(--nav-height) + var(--space-2) + var(--space-4));
+  left: var(--space-3);
+  width: 200px;
+  z-index: 10;
+}
+
+@media (max-width: 1279px) {
+  .toc {
+    display: none;
+  }
+}
+
+.tocToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted-dark);
+  padding: 0 0 var(--space-1);
+  display: block;
+  transition: color var(--motion-fast);
+}
+
+.tocToggle:hover {
+  color: var(--color-text-primary-dark);
+}
+
+[data-theme='light'] .tocToggle {
+  color: var(--color-text-muted-light);
+}
+
+[data-theme='light'] .tocToggle:hover {
+  color: var(--color-text-primary-light);
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-left: var(--border-thin) solid var(--color-border-dark);
+  padding-left: var(--space-2);
+}
+
+[data-theme='light'] .tocList {
+  border-left-color: var(--color-border-light);
+}
+
+.tocItemTop {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.tocItem {
+  margin-bottom: 6px;
+  padding-left: var(--space-2);
+}
+
+.tocItemSub {
+  margin-bottom: 6px;
+  padding-left: var(--space-4);
+}
+
+.tocLink {
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  color: var(--color-text-muted-dark);
+  text-decoration: none;
+  line-height: var(--lh-body);
+  opacity: 0.8;
+  transition: color var(--motion-fast), opacity var(--motion-fast);
+}
+
+.tocLink:hover {
+  opacity: 1;
+  color: var(--progress-fill);
+}
+
+[data-theme='light'] .tocLink {
+  color: var(--color-text-muted-light);
+}
+
+[data-theme='light'] .tocLink:hover {
+  color: var(--progress-fill);
 }

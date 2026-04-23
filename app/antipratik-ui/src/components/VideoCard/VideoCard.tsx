@@ -42,7 +42,7 @@ export default function VideoCard({ post }: Props) {
           )}
           {post.thumbnailUrl && (
             <Image
-              src={post.thumbnailUrl}
+              src={post.thumbnailLargeUrl ?? post.thumbnailUrl}
               alt={post.title}
               fill
               sizes="(max-width: 860px) 100vw, 860px"

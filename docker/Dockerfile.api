@@ -1,3 +1,11 @@
+# Email template build stage
+FROM node:20-alpine AS email-builder
+WORKDIR /emails
+COPY app/emails/package*.json ./
+RUN npm ci
+COPY app/emails/ ./
+RUN npm run build
+
 # Build stage
 FROM golang:1.25.1-alpine AS builder
 
@@ -12,6 +20,9 @@ RUN go mod download
 # Copy the source code
 COPY app/antipratik-api/ ./
 
+# Copy pre-built email templates so the broadcaster logic package can embed them
+COPY --from=email-builder /emails/dist/ ./components/broadcaster/logic/emails/dist/
+
 # Build the application
 RUN CGO_ENABLED=1 GOOS=linux go build -o main .
 
@@ -23,6 +34,7 @@ WORKDIR /root/
 
 # Copy the binary from builder
 COPY --from=builder /app/main .
+COPY --from=builder /app/swagger ./swagger
 
 # Config will be mounted
 # Expose port

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { marked } from 'marked';
 import type { EssayPost } from '../../lib/types';
@@ -9,6 +9,12 @@ import styles from './ArticleClient.module.css';
 
 interface Props {
   post: EssayPost;
+}
+
+interface Heading {
+  id: string;
+  text: string;
+  level: number;
 }
 
 function ChevronUpSVG() {
@@ -29,9 +35,14 @@ function ChevronUpSVG() {
 // dangerouslySetInnerHTML is acceptable here.
 const CATEGORY_LABEL = 'Essay';
 
+function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export default function ArticleClient({ post }: Props) {
   const { setArticleTitle } = useNavbarContext();
   const [progress, setProgress] = useState(0);
+  const [tocOpen, setTocOpen] = useState(true);
 
   // Register article title in Navbar context
   useEffect(() => {
@@ -60,7 +71,21 @@ export default function ArticleClient({ post }: Props) {
     timeZone: 'UTC',
   }).format(new Date(post.createdAt));
 
-  const htmlBody = marked.parse(post.body, { breaks: true }) as string;
+  // Parse markdown, collecting headings and adding IDs
+  const { htmlBody, headings } = useMemo(() => {
+    const collected: Heading[] = [];
+    const renderer = new marked.Renderer();
+    renderer.heading = ({ text, depth }: { text: string; depth: number }) => {
+      if (depth === 1 || depth === 2 || depth === 3) {
+        const id = slugify(text);
+        collected.push({ id, text, level: depth });
+        return `<h${depth} id="${id}">${text}</h${depth}>`;
+      }
+      return `<h${depth}>${text}</h${depth}>`;
+    };
+    const html = marked.parse(post.body, { breaks: true, renderer }) as string;
+    return { htmlBody: html, headings: collected };
+  }, [post.body]);
 
   return (
     <>
@@ -69,7 +94,7 @@ export default function ArticleClient({ post }: Props) {
         ← Feed
       </Link>
 
-      {/* Reading progress + scroll-to-top — desktop only, fixed right */}
+      {/* Ruler-style progress + scroll-to-top — desktop only, fixed right */}
       <div className={styles.sideControls}>
         <button
           className={`${styles.scrollToTop}${progress > 0 ? ` ${styles.scrollToTopVisible}` : ''}`}
@@ -78,13 +103,51 @@ export default function ArticleClient({ post }: Props) {
         >
           <ChevronUpSVG />
         </button>
-        <div className={styles.progressTrack} aria-hidden="true">
-          <div
-            className={styles.progressFill}
-            style={{ height: `${progress * 100}%` }}
-          />
+        <div className={styles.progressRuler} aria-hidden="true">
+          {Array.from({ length: 11 }, (_, i) => {
+            const isRead = i / 10 <= progress;
+            const isLong = i === 5;
+            const cls = [
+              styles.tick,
+              isLong ? styles.tickLong : '',
+              isRead ? styles.tickRead : '',
+            ].filter(Boolean).join(' ');
+            return (
+              <span key={i} className={cls} style={{ top: `${i * 10}%` }} />
+            );
+          })}
         </div>
       </div>
+
+      {/* Table of Contents — desktop only, fixed right panel */}
+      {headings.length > 0 && (
+        <nav
+          className={`${styles.toc}${tocOpen ? ` ${styles.tocOpen}` : ''}`}
+          aria-label="Table of contents"
+        >
+          <button
+            className={styles.tocToggle}
+            onClick={() => setTocOpen((o) => !o)}
+            aria-label={tocOpen ? 'Collapse contents' : 'Expand contents'}
+          >
+            {tocOpen ? 'Contents' : '≡'}
+          </button>
+          {tocOpen && (
+            <ol className={styles.tocList}>
+              {headings.map((h) => (
+                <li
+                  key={h.id}
+                  className={h.level === 1 ? styles.tocItemTop : h.level === 3 ? styles.tocItemSub : styles.tocItem}
+                >
+                  <a href={`#${h.id}`} className={styles.tocLink}>
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </nav>
+      )}
 
       <article className={styles.article}>
         <header className={styles.header}>

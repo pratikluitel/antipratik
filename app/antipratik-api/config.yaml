@@ -2,6 +2,9 @@ server:
   host: "0.0.0.0"
   port: 8080
 
+admin_email: ""           # contact form recipient; override via ANTIPRATIK_ADMIN_EMAIL
+site_domain: "http://localhost:8080"  # public base URL; set to "https://antipratik.com" in production via ANTIPRATIK_SITE_DOMAIN
+
 db:
   path: "./data/antipratik.db"
 
@@ -21,3 +24,11 @@ storage:
 
 logging:
   level: "info"           # debug | info | warn | error
+
+broadcaster:
+  resend:
+    api_key: ""           # override via ANTIPRATIK_RESEND_API_KEY (secret)
+    host: "smtp.resend.com"
+    port: 587
+    from_email: ""        # e.g. "newsletter@antipratik.com"
+    from_name: ""         # e.g. "Pratik"

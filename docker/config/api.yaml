@@ -5,6 +5,9 @@ server:
 db:
   path: "/data/antipratik.db"
 
+site_domain: "https://localhost"      # public base URL used for email links and image URLs; override via ANTIPRATIK_SITE_DOMAIN
+
+admin_email: "contact@antipratik.com"           # contact form recipient; override via ANTIPRATIK_ADMIN_EMAIL
 admin_password: "admin"
 
 static:
@@ -21,3 +24,11 @@ storage:
 
 logging:
   level: "info"         # debug | info | warn | error
+
+broadcaster:
+  resend:
+    api_key: ""           # override via ANTIPRATIK_RESEND_API_KEY (secret)
+    host: "smtp.resend.com"
+    port: 587
+    from_email: "newsletter@antipratik.com"        # e.g. "newsletter@antipratik.com"
+    from_name: "AntiPratik DEV"         # e.g. "Pratik"
