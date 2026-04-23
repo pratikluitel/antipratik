@@ -358,6 +358,25 @@ func (svc *broadcasterLogic) Subscribe(ctx context.Context, subType, address str
 		return fmt.Errorf("broadcasterLogic.Subscribe: %w", err)
 	}
 
+	// Try reactivating a previously unsubscribed address first.
+	reactivateErr := svc.store.ReactivateSubscriber(ctx, subType, address, token)
+	if reactivateErr == nil {
+		// Reactivated — send confirmation and return.
+		confirmURL := svc.cfg.SiteDomain + "/confirm?token=" + token
+		html := svc.renderConfirmationEmail(confirmURL)
+		if err := svc.sender.Send(ctx, resend.SendRequest{
+			To:      []string{address},
+			Subject: "Confirm your subscription",
+			HTML:    html,
+		}); err != nil {
+			svc.log.Error("broadcasterLogic.Subscribe reactivate send confirmation", "err", err)
+		}
+		return nil
+	}
+	if !errors.Is(reactivateErr, store.ErrNotFound) {
+		return fmt.Errorf("broadcasterLogic.Subscribe: %w", reactivateErr)
+	}
+
 	if err := svc.store.RegisterSubscriber(ctx, subType, address, token); err != nil {
 		if errors.Is(err, store.ErrDuplicate) {
 			return commonerrors.New("address already subscribed")
@@ -574,6 +593,14 @@ func (svc *broadcasterLogic) UpdateBroadcast(ctx context.Context, id int64, inpu
 		return broadcaster.BroadcastPreview{}, fmt.Errorf("broadcasterLogic.UpdateBroadcast: %w", err)
 	}
 	return broadcaster.BroadcastPreview{ID: id, HTML: html}, nil
+}
+
+// DeleteBroadcast deletes a broadcast and its send records.
+func (svc *broadcasterLogic) DeleteBroadcast(ctx context.Context, id int64) error {
+	if err := svc.store.DeleteBroadcast(ctx, id); err != nil {
+		return fmt.Errorf("broadcasterLogic.DeleteBroadcast: %w", err)
+	}
+	return nil
 }
 
 // GetBroadcasts returns all broadcasts of the given type with their send summaries.

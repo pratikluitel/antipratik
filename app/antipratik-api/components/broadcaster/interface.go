@@ -19,6 +19,7 @@ type BroadcasterLogic interface {
 	// Broadcast management
 	CreateBroadcast(ctx context.Context, input BroadcastInput) (BroadcastPreview, error)
 	UpdateBroadcast(ctx context.Context, id int64, input BroadcastUpdateInput) (BroadcastPreview, error)
+	DeleteBroadcast(ctx context.Context, id int64) error
 	GetBroadcasts(ctx context.Context, bType string) ([]BroadcastSummary, error)
 
 	// Dispatch — returns the number of BUFFERED send records created.
@@ -36,6 +37,7 @@ type BroadcasterLogic interface {
 type BroadcasterStore interface {
 	// Subscriber operations
 	RegisterSubscriber(ctx context.Context, subType, address, token string) error
+	ReactivateSubscriber(ctx context.Context, subType, address, token string) error
 	ConfirmSubscriber(ctx context.Context, token string) error
 	UnsubscribeByToken(ctx context.Context, token string) error
 	SetSubscriberToken(ctx context.Context, address, token string) error
@@ -47,6 +49,7 @@ type BroadcasterStore interface {
 	// Broadcast operations
 	CreateBroadcast(ctx context.Context, input StoreBroadcastInput, emailBody string) (int64, error)
 	UpdateBroadcast(ctx context.Context, id int64, input StoreBroadcastUpdateInput, emailBody string) error
+	DeleteBroadcast(ctx context.Context, id int64) error
 	GetBroadcasts(ctx context.Context, bType string) ([]BroadcastRow, error)
 	GetBroadcast(ctx context.Context, id int64) (BroadcastRow, error)
 
@@ -72,6 +75,7 @@ type BroadcasterAPI interface {
 	DeleteSubscriber(w http.ResponseWriter, r *http.Request)
 	CreateBroadcast(w http.ResponseWriter, r *http.Request)
 	UpdateBroadcast(w http.ResponseWriter, r *http.Request)
+	DeleteBroadcast(w http.ResponseWriter, r *http.Request)
 	GetBroadcasts(w http.ResponseWriter, r *http.Request)
 	DispatchBroadcast(w http.ResponseWriter, r *http.Request)
 	GetBroadcastSendDetails(w http.ResponseWriter, r *http.Request)

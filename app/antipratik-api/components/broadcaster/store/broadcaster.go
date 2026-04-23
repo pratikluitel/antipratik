@@ -61,6 +61,26 @@ func (s *sqliteBroadcasterStore) ConfirmSubscriber(ctx context.Context, token st
 	return nil
 }
 
+// ReactivateSubscriber clears unsubscribed_at and issues a new token for a previously unsubscribed subscriber.
+// Returns ErrNotFound if no matching unsubscribed subscriber exists.
+func (s *sqliteBroadcasterStore) ReactivateSubscriber(ctx context.Context, subType, address, token string) error {
+	res, err := s.db.ExecContext(ctx,
+		`UPDATE subscribers SET unsubscribed_at = NULL, confirmed = FALSE, confirmed_at = NULL, token = ?
+		 WHERE type = ? AND address = ? AND unsubscribed_at IS NOT NULL`,
+		token, subType, address)
+	if err != nil {
+		return fmt.Errorf("ReactivateSubscriber: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("ReactivateSubscriber rows: %w", err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // UnsubscribeByToken sets unsubscribed_at for the subscriber with the given token.
 // Returns ErrNotFound if no such token exists.
 func (s *sqliteBroadcasterStore) UnsubscribeByToken(ctx context.Context, token string) error {
@@ -255,6 +275,23 @@ func (s *sqliteBroadcasterStore) GetBroadcast(ctx context.Context, id int64) (br
 		return broadcaster.BroadcastRow{}, fmt.Errorf("GetBroadcast: %w", err)
 	}
 	return r, nil
+}
+
+// DeleteBroadcast deletes a broadcast and its send records (cascade).
+// Returns ErrNotFound if no broadcast with that ID exists.
+func (s *sqliteBroadcasterStore) DeleteBroadcast(ctx context.Context, id int64) error {
+	res, err := s.db.ExecContext(ctx, `DELETE FROM broadcasts WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("DeleteBroadcast: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("DeleteBroadcast rows: %w", err)
+	}
+	if n == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // ── Dispatch operations ───────────────────────────────────────────────────────
