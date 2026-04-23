@@ -81,6 +81,7 @@ func RegisterRoutes(
 	// Protected broadcaster endpoints
 	mux.Handle("POST /api/broadcasts", protect(http.HandlerFunc(broadcasterH.CreateBroadcast)))
 	mux.Handle("PUT /api/broadcasts/{id}", protect(http.HandlerFunc(broadcasterH.UpdateBroadcast)))
+	mux.Handle("DELETE /api/broadcasts/{id}", protect(http.HandlerFunc(broadcasterH.DeleteBroadcast)))
 	mux.Handle("GET /api/broadcasts", protect(http.HandlerFunc(broadcasterH.GetBroadcasts)))
 	mux.Handle("POST /api/broadcasts/{id}/dispatch", protect(http.HandlerFunc(broadcasterH.DispatchBroadcast)))
 	mux.Handle("GET /api/broadcasts/{id}/sends", protect(http.HandlerFunc(broadcasterH.GetBroadcastSendDetails)))

@@ -546,6 +546,14 @@ export async function updateBroadcast(id: number, data: UpdateBroadcastInput, to
   return response.json() as Promise<BroadcastPreview>;
 }
 
+export async function deleteBroadcast(id: number, token: string): Promise<void> {
+  const response = await fetch(`${API_URL}/api/broadcasts/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  await throwOnError(response, 'deleteBroadcast');
+}
+
 export async function getBroadcastSendDetails(id: number, token: string): Promise<BroadcastSendDetail[]> {
   const response = await fetch(`${API_URL}/api/broadcasts/${id}/sends`, {
     headers: authHeaders(token),

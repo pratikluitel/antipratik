@@ -7,6 +7,7 @@ import {
   getBroadcasts,
   getSubscribers,
   deleteSubscriber,
+  deleteBroadcast,
   createBroadcast,
   updateBroadcast,
   dispatchBroadcast,
@@ -192,7 +193,7 @@ interface BroadcastFormProps {
   posts: Post[];
   mode: FormMode;
   token: string;
-  onSaved: (preview: { id: number; html: string }) => void;
+  onSaved: (preview: { id: number; html: string; title: string; caption: string; type: string; postIDs: string[] }) => void;
   onCancel: () => void;
 }
 
@@ -221,7 +222,7 @@ function BroadcastForm({ posts, mode, token, onSaved, onCancel }: BroadcastFormP
         };
         result = await createBroadcast(input, token);
       }
-      onSaved(result);
+      onSaved({ ...result, title, caption, type: bType, postIDs: selectedPostIDs });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save broadcast');
     } finally {
@@ -298,8 +299,9 @@ interface BroadcastModalProps {
   onClose: () => void;
 }
 
-function BroadcastModal({ posts, mode, token, onSaved, onClose }: BroadcastModalProps) {
-  const initialHtml = mode.kind === 'edit' ? (mode.broadcast.emailBody || null) : null;
+function BroadcastModal({ posts, mode: initialMode, token, onSaved, onClose }: BroadcastModalProps) {
+  const [mode, setMode] = useState<FormMode>(initialMode);
+  const initialHtml = initialMode.kind === 'edit' ? (initialMode.broadcast.emailBody || null) : null;
   const [previewHtml, setPreviewHtml] = useState<string | null>(initialHtml);
 
   useEffect(() => {
@@ -314,8 +316,24 @@ function BroadcastModal({ posts, mode, token, onSaved, onClose }: BroadcastModal
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  function handleSaved(result: { id: number; html: string }) {
+  function handleSaved(result: { id: number; html: string; title: string; caption: string; type: string; postIDs: string[] }) {
     setPreviewHtml(result.html);
+    if (mode.kind === 'create') {
+      setMode({
+        kind: 'edit',
+        broadcast: {
+          id: result.id,
+          type: result.type,
+          title: result.title,
+          caption: result.caption,
+          postIDs: result.postIDs,
+          emailBody: result.html,
+          buffered: 0,
+          success: 0,
+          failed: 0,
+        },
+      });
+    }
     onSaved();
   }
 
@@ -367,10 +385,13 @@ interface BroadcastRowProps {
   token: string;
   onEdit: () => void;
   onDispatched: (id: number, buffered: number) => void;
+  onDelete: (id: number) => void;
 }
 
-function BroadcastRow({ broadcast, token, onEdit, onDispatched }: BroadcastRowProps) {
+function BroadcastRow({ broadcast, token, onEdit, onDispatched, onDelete }: BroadcastRowProps) {
   const [dispatching, setDispatching] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [error, setError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sendsOpen, setSendsOpen] = useState(false);
@@ -380,6 +401,20 @@ function BroadcastRow({ broadcast, token, onEdit, onDispatched }: BroadcastRowPr
 
   const isDispatched = broadcast.buffered > 0 || broadcast.success > 0 || broadcast.failed > 0;
   const postCount = (broadcast.postIDs ?? []).length;
+
+  async function handleDelete() {
+    setError('');
+    setDeleting(true);
+    setConfirmDeleteOpen(false);
+    try {
+      await deleteBroadcast(broadcast.id, token);
+      onDelete(broadcast.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function handleDispatch() {
     setError('');
@@ -441,6 +476,31 @@ function BroadcastRow({ broadcast, token, onEdit, onDispatched }: BroadcastRowPr
         <button type="button" className={styles.actionBtn} onClick={onEdit}>
           Edit
         </button>
+        {confirmDeleteOpen ? (
+          <div className={styles.confirmInline}>
+            <span className={styles.confirmText}>Delete broadcast?</span>
+            <button
+              type="button"
+              className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? '…' : 'Yes'}
+            </button>
+            <button type="button" className={styles.actionBtn} onClick={() => setConfirmDeleteOpen(false)}>
+              No
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+            onClick={() => { setError(''); setConfirmDeleteOpen(true); }}
+            disabled={deleting}
+          >
+            Delete
+          </button>
+        )}
         {isDispatched && (
           <button
             type="button"
@@ -580,6 +640,10 @@ export default function BroadcastsPage() {
     );
   }
 
+  function handleDeleteBroadcast(id: number) {
+    setBroadcasts((prev) => prev.filter((b) => b.id !== id));
+  }
+
   const filteredSubscribers = subscribers.filter((s) => {
     if (confirmedFilter === 'confirmed') return s.confirmed;
     if (confirmedFilter === 'unconfirmed') return !s.confirmed;
@@ -663,6 +727,7 @@ export default function BroadcastsPage() {
                   token={token}
                   onEdit={() => setFormMode({ kind: 'edit', broadcast: b })}
                   onDispatched={handleDispatched}
+                  onDelete={handleDeleteBroadcast}
                 />
               ))}
             </div>

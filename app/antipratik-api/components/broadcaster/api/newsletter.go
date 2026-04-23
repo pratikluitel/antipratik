@@ -192,6 +192,19 @@ func (h *broadcasterHandler) UpdateBroadcast(w http.ResponseWriter, r *http.Requ
 	writeJSON(w, http.StatusOK, map[string]any{"id": preview.ID, "html": preview.HTML})
 }
 
+// DeleteBroadcast handles DELETE /api/broadcasts/{id}.
+func (h *broadcasterHandler) DeleteBroadcast(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseBroadcastID(w, r)
+	if !ok {
+		return
+	}
+	if err := h.logic.DeleteBroadcast(r.Context(), id); err != nil {
+		handleLogicError(w, h.log, "DeleteBroadcast", err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // GetBroadcasts handles GET /api/broadcasts?type=email.
 func (h *broadcasterHandler) GetBroadcasts(w http.ResponseWriter, r *http.Request) {
 	bType := r.URL.Query().Get("type")

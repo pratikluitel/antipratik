@@ -1557,6 +1557,24 @@ paths:
       responses:
         "200":
           description: Broadcast updated
+    delete:
+      tags: [Broadcaster]
+      summary: Delete a broadcast and its send records
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Broadcast deleted
+        "400":
+          description: Broadcast not found
+        "401":
+          description: Unauthorized
 
   /broadcasts/{id}/sends:
     get:
