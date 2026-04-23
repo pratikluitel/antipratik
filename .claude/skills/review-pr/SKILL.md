@@ -36,6 +36,7 @@ gh pr diff $ARGUMENTS --repo pratikluitel/antipratik -- path/to/file
 Inspect the list of changed files — this is the authoritative scope signal:
 - Any path under `app/antipratik-ui/` → **FE**
 - Any path under `app/antipratik-api/` → **BE**
+- Any path under `app/antipratik-api/components/broadcaster/` or `app/emails/` → **Broadcaster** (subset of BE)
 - Any path under `infrastructure/`, `docker/`, `.github/workflows/`, `.github/scripts/` → **Infra**
 - Multiple categories present → combine (e.g. **FE + Infra**)
 
@@ -77,20 +78,24 @@ Record the scope — it determines which CLAUDE.md(s) to read and which rules to
 - No Tailwind classes (Rule 3)
 - No direct `fetch()` in components — all data through `src/lib/api.ts` (Rule 4)
 - No `--accent-*` tokens on UI chrome (Rule 6)
-- Text contrast ≥ 4.5:1 normal / ≥ 3:1 large (Rule 16)
-- Typography not crossed: serif = content, sans = interface (Rule 9)
-- If tokens were changed: is the Token Additions & Modifications table in `CLAUDE.md` updated?
+- Text contrast ≥ 4.5:1 normal / ≥ 3:1 large (Rule 15)
+- Typography not crossed: serif = content, sans = interface (Rule 8)
+- If new tokens were added: are they in the categories table in `app/antipratik-ui/CLAUDE.md`?
 
 **BE CLAUDE.md compliance** *(check only if scope includes BE):*
 - All input parameters validated in the logic layer before reaching the store (Rule 1 & 2)
-- Validation errors return descriptive messages via `ValidationError`; handlers use `logic.IsValidationError` for 400 vs 500 (Rule 3)
+- Validation errors use `commonerrors.ValidationError`; handlers use `handleLogicError` (`api/errors.go`) which maps `commonerrors.Is(err)` → 400, else → 500 (Rules 3 & 8)
+- `ValidationError` never redefined locally — always imported from `common/errors` (Rule 8)
 - JWT middleware on all POST/PUT/DELETE endpoints (Rule 4)
 - No database access in the API layer — must delegate to logic → store (Rule 5)
 - `context.Context` passed through all layers (Rule 6)
-- Errors logged with operation context; no passwords/tokens in logs (Rule 7)
-- New error types defined in `errors.go` of the owning package (Rule 8)
-- No `panic` — errors returned instead (Guardrail 9)
-- No ignored errors (Guardrail 7)
+- No passwords/tokens/validation errors (400s)/404s/401s in logs (Rule 7)
+- No `panic` — errors returned instead (Rule 9)
+- No ignored errors (Rule 9)
+
+**Broadcaster compliance** *(check only if scope includes broadcaster):*
+- Email templates (`app/emails/`) must be built via `npm run build` in `app/emails/` before Go server will work — verify `dist/` files are present or CI builds them
+- File/thumbnail URLs in email HTML must be absolute (prefixed by `absoluteURL` helper) — relative URLs won't load in email clients
 
 **Infra CLAUDE.md compliance** *(check only if scope includes Infra):*
 - No secrets hardcoded in workflow files, compose files, config files, or scripts

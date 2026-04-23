@@ -30,6 +30,7 @@ Extract: title, body, labels, and comments. Identify affected areas and any spec
 - No matching labels → scan title + body for keywords:
   - FE signals: component, style, token, CSS, page, layout, UI, design, frontend validation
   - BE signals: endpoint, route, store, migration, database, SQL, Go, API, auth, api/backend validation
+  - Broadcaster signals: newsletter, email, subscribe, broadcast, template, resend
   - Infra signals: docker, compose, nginx, deploy, workflow, CI, pipeline, SSL, cert, server, port
 - If signals are mixed or absent → treat as **FE + BE**
 
@@ -74,12 +75,15 @@ Make the changes. Apply **only the rules relevant to the scope**:
 
 **BE rules (from `antipratik-api/CLAUDE.md`):**
 - All input parameters must be validated in the logic layer before reaching the store
-- Return descriptive `ValidationError` messages; use `logic.IsValidationError` in handlers for 400 vs 500
+- Use `commonerrors.ValidationError` (from `common/errors`) for validation failures — never redefine it locally; handlers use `handleLogicError` (`api/errors.go`) which maps `commonerrors.Is(err)` → 400, else → 500
 - JWT middleware on all write endpoints (POST/PUT/DELETE)
 - No database access in the API layer — always delegate to logic → store
 - Pass `context.Context` through all layers
-- Log errors with operation context; never log passwords or tokens
-- New error types belong in the `errors.go` of the owning package
+- Never log passwords, tokens, validation errors (400s), 404s, or 401s
+
+**Broadcaster rules (from `antipratik-api/CLAUDE.md`, Broadcaster section):**
+- Email templates live in `app/emails/` — run `npm run build` there and copy `dist/` to `components/broadcaster/logic/emails/dist/` before running the Go server locally
+- All file/thumbnail URLs must be made absolute via the `absoluteURL` helper before writing into email HTML — never use relative URLs in emails
 
 **Infra rules (from `infrastructure/CLAUDE.md`):**
 - Never hardcode secrets — all secrets live in GitHub Secrets and land on the server via `printf` into `.env`
@@ -91,7 +95,7 @@ Make the changes. Apply **only the rules relevant to the scope**:
 
 ### 6. Update CLAUDE.md if needed
 
-If the fix introduces or modifies tokens (FE), updates a Sacred Rule, or records a design decision, update the relevant `CLAUDE.md`. Change only what is required.
+If the fix introduces new tokens (FE) — add them to the token categories table in `app/antipratik-ui/CLAUDE.md`. If it introduces a new inviolable rule or non-obvious constraint, add it to the Sacred Rules. Change only what is required.
 
 ### 7. Create a branch and commit locally
 
