@@ -25,7 +25,7 @@ export default function ConfirmationEmail() {
           <Section style={content}>
             <Heading style={heading}>Confirm your subscription</Heading>
             <Text style={paragraph}>
-              Welcome to the AntiPratik newsletter! click below to confirm your subscription to __SITE_NAME__.
+              Welcome to the AntiPratik newsletter! Click below to confirm your subscription to __SITE_NAME__.
             </Text>
             <Link href="__CONFIRM_URL__" style={button}>
               Confirm subscription

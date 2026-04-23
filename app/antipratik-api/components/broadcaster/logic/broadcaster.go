@@ -598,9 +598,6 @@ func (svc *broadcasterLogic) UpdateBroadcast(ctx context.Context, id int64, inpu
 // DeleteBroadcast deletes a broadcast and its send records.
 func (svc *broadcasterLogic) DeleteBroadcast(ctx context.Context, id int64) error {
 	if err := svc.store.DeleteBroadcast(ctx, id); err != nil {
-		if errors.Is(err, store.ErrNotFound) {
-			return commonerrors.New("broadcast not found")
-		}
 		return fmt.Errorf("broadcasterLogic.DeleteBroadcast: %w", err)
 	}
 	return nil

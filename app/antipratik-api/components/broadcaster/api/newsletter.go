@@ -199,6 +199,10 @@ func (h *broadcasterHandler) DeleteBroadcast(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	if err := h.logic.DeleteBroadcast(r.Context(), id); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "broadcast not found")
+			return
+		}
 		handleLogicError(w, h.log, "DeleteBroadcast", err)
 		return
 	}

@@ -1571,7 +1571,7 @@ paths:
       responses:
         "204":
           description: Broadcast deleted
-        "400":
+        "404":
           description: Broadcast not found
         "401":
           description: Unauthorized
