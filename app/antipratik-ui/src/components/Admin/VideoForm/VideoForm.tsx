@@ -35,6 +35,7 @@ export default function VideoForm({ token, initial, onSuccess, onCancel }: Video
         if (videoURL !== initial.videoUrl) fd.append('videoURL', videoURL);
         if (duration && parseInt(duration) !== initial.duration) fd.append('duration', duration);
         if (playlist !== (initial.playlist ?? '')) fd.append('playlist', playlist);
+        if (thumbnailFile) fd.append('thumbnailFile', thumbnailFile);
         tags.forEach((t) => fd.append('tags[]', t));
         await updateVideoPost(initial.id, fd, token);
       } else {
@@ -81,14 +82,9 @@ export default function VideoForm({ token, initial, onSuccess, onCancel }: Video
       </div>
 
       <div className={f.field}>
-        <label className={f.label} htmlFor="video-thumb">
-          Thumbnail {initial && <span className={f.immutableNote}>(cannot be changed after creation)</span>}
-        </label>
-        {initial ? (
-          <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>
-        ) : (
-          <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
-        )}
+        <label className={f.label} htmlFor="video-thumb">Thumbnail</label>
+        {initial && <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>}
+        <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
       </div>
 
       <div className={f.field}>

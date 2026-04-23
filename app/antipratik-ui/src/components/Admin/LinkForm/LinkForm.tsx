@@ -38,6 +38,7 @@ export default function LinkForm({ token, initial, onSuccess, onCancel }: LinkFo
         if (url !== initial.url) fd.append('url', url);
         if (description !== (initial.description ?? '')) fd.append('description', description);
         if (category && category !== initial.category) fd.append('category', category);
+        if (thumbnailFile) fd.append('thumbnailFile', thumbnailFile);
         tags.forEach((t) => fd.append('tags[]', t));
         await updateLinkPost(initial.id, fd, token);
       } else {
@@ -87,14 +88,9 @@ export default function LinkForm({ token, initial, onSuccess, onCancel }: LinkFo
       </div>
 
       <div className={f.field}>
-        <label className={f.label} htmlFor="link-thumb">
-          Thumbnail {initial && <span className={f.immutableNote}>(cannot be changed after creation)</span>}
-        </label>
-        {initial ? (
-          <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>
-        ) : (
-          <input id="link-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
-        )}
+        <label className={f.label} htmlFor="link-thumb">Thumbnail</label>
+        {initial && <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>}
+        <input id="link-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
       </div>
 
       <div className={f.field}>
