@@ -49,6 +49,7 @@ export default function MusicForm({ token, initial, onSuccess, onCancel }: Music
       if (initial) {
         if (title !== initial.title) fd.append('title', title);
         if (album !== (initial.album ?? '')) fd.append('album', album);
+        if (albumArtFile) fd.append('albumArtFile', albumArtFile);
         tags.forEach((t) => fd.append('tags[]', t));
         await updateMusicPost(initial.id, fd, token);
       } else {
@@ -129,14 +130,9 @@ export default function MusicForm({ token, initial, onSuccess, onCancel }: Music
       )}
 
       <div className={f.field}>
-        <label className={f.label} htmlFor="music-art">
-          Album art {initial && <span className={f.immutableNote}>(cannot be changed after creation)</span>}
-        </label>
-        {initial ? (
-          <p className={f.immutableNote}>Current: {initial.albumArt || 'none'}</p>
-        ) : (
-          <input id="music-art" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setAlbumArtFile(e.target.files?.[0] ?? null)} disabled={loading} />
-        )}
+        <label className={f.label} htmlFor="music-art">Album art</label>
+        {initial && <p className={f.immutableNote}>Current: {initial.albumArt || 'none'}</p>}
+        <input id="music-art" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setAlbumArtFile(e.target.files?.[0] ?? null)} disabled={loading} />
       </div>
 
       <div className={f.field}>

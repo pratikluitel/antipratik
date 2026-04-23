@@ -393,8 +393,25 @@ func (s *postLogic) UpdateMusic(ctx context.Context, id string, input posts.Upda
 		return posts.MusicPost{}, err
 	}
 
+	var oldArtKeys []string
+	if input.AlbumArt != nil && cur.AlbumArt != "" {
+		oldArtKeys = albumArtFileKeys(cur)
+	}
+
 	if err := s.store.UpdateMusic(ctx, id, merged); err != nil {
 		return posts.MusicPost{}, fmt.Errorf("postLogic.UpdateMusic: %w", err)
+	}
+
+	if len(oldArtKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldArtKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateMusic: failed to delete old album art", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 
 	tags := merged.Tags
@@ -491,8 +508,25 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 		return posts.VideoPost{}, err
 	}
 
+	var oldThumbKeys []string
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != "" {
+		oldThumbKeys = thumbnailFileKeys(cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
+	}
+
 	if err := s.store.UpdateVideo(ctx, id, merged); err != nil {
 		return posts.VideoPost{}, fmt.Errorf("postLogic.UpdateVideo: %w", err)
+	}
+
+	if len(oldThumbKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldThumbKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateVideo: failed to delete old thumbnail", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 
 	tags := merged.Tags
@@ -556,8 +590,25 @@ func (s *postLogic) UpdateLinkPost(ctx context.Context, id string, input posts.U
 	}
 	merged.Domain = domain
 
+	var oldThumbKeys []string
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != nil && *cur.ThumbnailURL != "" {
+		oldThumbKeys = thumbnailFileKeys(*cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
+	}
+
 	if err = s.store.UpdateLinkPost(ctx, id, merged); err != nil {
 		return posts.LinkPost{}, fmt.Errorf("postLogic.UpdateLinkPost: %w", err)
+	}
+
+	if len(oldThumbKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldThumbKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateLinkPost: failed to delete old thumbnail", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 	tags := merged.Tags
 	if tags == nil {

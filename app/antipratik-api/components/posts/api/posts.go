@@ -226,6 +226,33 @@ func (h *postHandler) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 		input.Album = &albumStr
 	}
 
+	if artFile, artHeader, artErr := r.FormFile("albumArtFile"); artErr == nil {
+		defer func() { _ = artFile.Close() }()
+		uploaded, uploadErr := h.uploads.UploadMusicFiles(r.Context(), postID, nil,
+			&files.FileInput{File: artFile, Header: artHeader})
+		if uploadErr != nil {
+			handleLogicError(w, h.log, "UpdateMusic album art upload", uploadErr)
+			return
+		}
+		input.AlbumArt = &uploaded.AlbumArtURL
+		if uploaded.AlbumArtTinyURL != "" {
+			v := uploaded.AlbumArtTinyURL
+			input.AlbumArtTinyURL = &v
+		}
+		if uploaded.AlbumArtSmallURL != "" {
+			v := uploaded.AlbumArtSmallURL
+			input.AlbumArtSmallURL = &v
+		}
+		if uploaded.AlbumArtMedURL != "" {
+			v := uploaded.AlbumArtMedURL
+			input.AlbumArtMedURL = &v
+		}
+		if uploaded.AlbumArtLargeURL != "" {
+			v := uploaded.AlbumArtLargeURL
+			input.AlbumArtLargeURL = &v
+		}
+	}
+
 	post, err := h.logic.UpdateMusic(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, h.log, "UpdateMusic", err)
@@ -401,6 +428,21 @@ func (h *postHandler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		input.Playlist = &pl
 	}
 
+	if thumbFile, thumbHeader, thumbErr := r.FormFile("thumbnailFile"); thumbErr == nil {
+		defer func() { _ = thumbFile.Close() }()
+		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+			files.FileInput{File: thumbFile, Header: thumbHeader})
+		if uploadErr != nil {
+			handleLogicError(w, h.log, "UpdateVideo thumbnail upload", uploadErr)
+			return
+		}
+		input.ThumbnailURL = &result.URL
+		input.ThumbnailTinyURL = &result.TinyURL
+		input.ThumbnailSmallURL = &result.SmallURL
+		input.ThumbnailMedURL = &result.MedURL
+		input.ThumbnailLargeURL = &result.LargeURL
+	}
+
 	post, err := h.logic.UpdateVideo(r.Context(), postID, input)
 	if err != nil {
 		handleLogicError(w, h.log, "UpdateVideo", err)
@@ -477,6 +519,21 @@ func (h *postHandler) UpdateLinkPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if cat := r.FormValue("category"); cat != "" {
 		input.Category = &cat
+	}
+
+	if thumbFile, thumbHeader, thumbErr := r.FormFile("thumbnailFile"); thumbErr == nil {
+		defer func() { _ = thumbFile.Close() }()
+		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
+			files.FileInput{File: thumbFile, Header: thumbHeader})
+		if uploadErr != nil {
+			handleLogicError(w, h.log, "UpdateLinkPost thumbnail upload", uploadErr)
+			return
+		}
+		input.ThumbnailURL = &result.URL
+		input.ThumbnailTinyURL = &result.TinyURL
+		input.ThumbnailSmallURL = &result.SmallURL
+		input.ThumbnailMedURL = &result.MedURL
+		input.ThumbnailLargeURL = &result.LargeURL
 	}
 
 	post, err := h.logic.UpdateLinkPost(r.Context(), postID, input)
