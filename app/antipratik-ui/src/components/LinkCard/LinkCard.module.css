@@ -14,6 +14,12 @@
   padding: var(--link-card-padding);
   text-decoration: none;
   color: inherit;
+  width: 100%;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
 }
 
 .thumbnailWrapper {

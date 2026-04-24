@@ -24,3 +24,4 @@ export * from './ExternalLinksBlock';
 export * from './NewsletterBlock';
 export * from './HomeFeedClient';
 export * from './ArticleClient';
+export { default as VideoPlayer } from './VideoPlayer';

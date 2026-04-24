@@ -293,6 +293,12 @@ func contentTypeForExt(ext string) string {
 		return "audio/ogg"
 	case ".m4a":
 		return "audio/mp4"
+	case ".mp4":
+		return "video/mp4"
+	case ".webm":
+		return "video/webm"
+	case ".mov":
+		return "video/quicktime"
 	default:
 		return "application/octet-stream"
 	}

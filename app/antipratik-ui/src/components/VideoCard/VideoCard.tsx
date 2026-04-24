@@ -7,15 +7,10 @@ import styles from './VideoCard.module.css';
 
 interface Props {
   post: VideoPost;
+  onPlay?: (post: VideoPost) => void;
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-export default function VideoCard({ post }: Props) {
+export default function VideoCard({ post, onPlay }: Props) {
   const [loaded, setLoaded] = useState(false);
   const date = new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -26,11 +21,10 @@ export default function VideoCard({ post }: Props) {
 
   return (
     <article className={styles.card}>
-      <a
-        href={post.videoUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
         className={styles.link}
+        onClick={() => onPlay?.(post)}
       >
         <div className={styles.thumbnail}>
           {post.thumbnailUrl && post.thumbnailTinyUrl && (
@@ -62,12 +56,11 @@ export default function VideoCard({ post }: Props) {
         <div className={styles.body}>
           <span className={styles.tag}>Video</span>
           <h2 className={styles.title}>{post.title}</h2>
-          <div className={styles.footerRow}>
-            <span>{post.playlist ?? ''}</span>
-            <span>{formatDuration(post.duration)}</span>
-          </div>
+          {post.description && (
+            <p className={styles.description}>{post.description}</p>
+          )}
         </div>
-      </a>
+      </button>
     </article>
   );
 }

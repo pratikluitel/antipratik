@@ -123,8 +123,8 @@ func (s *sqlitePostStore) CreateVideoData(ctx context.Context, id string, input 
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url, duration, playlist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		id, input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.VideoURL, input.Duration, input.Playlist)
+	_, err = tx.ExecContext(ctx, `INSERT INTO video_posts (post_id, title, description, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		id, input.Title, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.VideoURL)
 	if err != nil {
 		return err
 	}
@@ -242,8 +242,8 @@ func (s *sqlitePostStore) UpdateVideo(ctx context.Context, id string, input post
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
-	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, thumbnail_url=?, thumbnail_tiny_url=?, thumbnail_small_url=?, thumbnail_medium_url=?, thumbnail_large_url=?, video_url=?, duration=?, playlist=? WHERE post_id=?`,
-		input.Title, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, input.VideoURL, input.Duration, input.Playlist, id); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE video_posts SET title=?, description=?, thumbnail_url=?, thumbnail_tiny_url=?, thumbnail_small_url=?, thumbnail_medium_url=?, thumbnail_large_url=? WHERE post_id=?`,
+		input.Title, input.Description, input.ThumbnailURL, input.ThumbnailTinyURL, input.ThumbnailSmallURL, input.ThumbnailMedURL, input.ThumbnailLargeURL, id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM post_tags WHERE post_id=?`, id); err != nil {

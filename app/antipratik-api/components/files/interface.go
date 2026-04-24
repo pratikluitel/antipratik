@@ -21,6 +21,11 @@ type UploadLogic interface {
 	// UploadThumbnail stores a single thumbnail image plus a 20px-wide tiny variant.
 	// suffix is appended to the postID in the stored file name (e.g. "thumb").
 	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error)
+
+	// UploadVideoFile stores a video file for the given post.
+	// Accepted extensions: mp4, webm, mov. Stored at videos/<postID>.<ext>.
+	// Returns a relative URL of the form /files/videos/<postID>.<ext>.
+	UploadVideoFile(ctx context.Context, postID string, file FileInput) (VideoFileResult, error)
 }
 
 // UploaderService exposes file upload capabilities to other components.
@@ -29,6 +34,7 @@ type UploaderService interface {
 	UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error)
 	UploadMusicFiles(ctx context.Context, postID string, audioFile *FileInput, albumArtFile *FileInput) (MusicFilesResult, error)
 	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error)
+	UploadVideoFile(ctx context.Context, postID string, file FileInput) (VideoFileResult, error)
 }
 
 // StorageService exposes file retrieval and deletion to other components.

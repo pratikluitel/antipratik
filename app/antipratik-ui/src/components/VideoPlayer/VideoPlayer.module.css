@@ -1,0 +1,214 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--lightbox-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(90vw, 900px);
+  gap: 6px;
+}
+
+.title {
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  opacity: 0.8;
+  text-align: center;
+}
+
+.video {
+  width: 100%;
+  max-height: 70vh;
+  background: #000;
+  border-radius: var(--radius-sm, 4px);
+  display: block;
+}
+
+/* ── Controls bar ── */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--lightbox-btn-bg);
+  border: 1px solid var(--lightbox-btn-border);
+  border-radius: var(--radius-sm, 4px);
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.controlBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-snow);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm, 4px);
+  flex-shrink: 0;
+  transition: color var(--motion-default);
+}
+
+.controlBtn:hover,
+.controlBtn:focus-visible {
+  color: var(--accent-videos);
+  outline: none;
+}
+
+/* ── Seek bar ── */
+
+.seekWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent-videos) var(--seek-fill, 0%),
+    var(--lightbox-btn-border) var(--seek-fill, 0%)
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+}
+
+.seek::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+  border: none;
+}
+
+/* ── Volume group ── */
+
+.volumeGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.volumeSliderWrapper {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--motion-default);
+  display: flex;
+  align-items: center;
+}
+
+.volumeGroup:hover .volumeSliderWrapper,
+.volumeGroup:focus-within .volumeSliderWrapper {
+  width: 72px;
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent-videos) var(--volume-fill, 100%),
+    var(--lightbox-btn-border) var(--volume-fill, 100%)
+  );
+  outline: none;
+  cursor: pointer;
+  display: block;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+  border: none;
+}
+
+/* ── Quality select ── */
+
+.qualitySelect {
+  background: var(--lightbox-btn-bg);
+  border: 1px solid var(--lightbox-btn-border);
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+  font-size: var(--text-nano);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  flex-shrink: 0;
+  height: 24px;
+  box-sizing: border-box;
+}
+
+.qualitySelect:focus-visible {
+  outline: 2px solid var(--accent-videos);
+  outline-offset: 2px;
+}
+
+/* ── Fullscreen: container fills viewport ── */
+
+.container:fullscreen,
+.container:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  justify-content: center;
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
+
+.container:fullscreen .video,
+.container:-webkit-full-screen .video {
+  flex: 1;
+  max-height: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+.container:fullscreen .controls,
+.container:-webkit-full-screen .controls {
+  flex-shrink: 0;
+}

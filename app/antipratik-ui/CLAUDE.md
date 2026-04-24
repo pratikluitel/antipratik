@@ -141,7 +141,7 @@ src/lib/
 
 `api.ts` checks `process.env.NEXT_PUBLIC_API_URL`: set → fetch from `${API_URL}/endpoint`; not set → return dummy data. Function signatures never change when switching.
 
-**URL prefixing:** Backend stores relative URLs for all file fields (`/files/…`, `/thumbnails/…`). `api.ts` must prefix every file-backed URL with `API_URL` via the `prefixPost()` helper in `getPosts()`. Affected fields: `MusicPost.albumArt`, `MusicPost.audioUrl`, `PhotoImage.url`, `PhotoImage.thumbnailSmallUrl/thumbnailMediumUrl/thumbnailLargeUrl`, `VideoPost.thumbnailUrl`, `LinkPost.thumbnailUrl`.
+**URL prefixing:** Backend stores relative URLs for all file fields (`/files/…`, `/thumbnails/…`). `api.ts` must prefix every file-backed URL with `API_URL` via the `prefixPost()` helper in `getPosts()`. Affected fields: `MusicPost.albumArt`, `MusicPost.audioUrl`, `PhotoImage.url`, `PhotoImage.thumbnailSmallUrl/thumbnailMediumUrl/thumbnailLargeUrl`, `VideoPost.videoUrl`, `VideoPost.thumbnailUrl`, `LinkPost.thumbnailUrl`.
 
 **Type notes:**
 - `ShortPost` has no `hashtags` field — use `post.tags` from `BasePost`
@@ -168,8 +168,9 @@ src/lib/
 |---|---|
 | `/feed?photo=<postId>` | Opens lightbox for that PhotoPost on mount |
 | `/feed?track=<postId>` | Auto-plays that MusicPost on mount |
+| `/feed?video=<postId>` | Opens VideoPlayer modal for that video-category LinkPost on mount |
 
-Both use `Promise.resolve().then(setState)` microtask to satisfy `react-hooks/set-state-in-effect`. Don't remove param handling without updating the Go broadcaster too.
+All use `Promise.resolve().then(setState)` microtask to satisfy `react-hooks/set-state-in-effect`. Don't remove param handling without updating the Go broadcaster too.
 
 ---
 

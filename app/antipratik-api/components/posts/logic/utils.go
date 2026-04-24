@@ -38,8 +38,8 @@ func fileKeysForPost(post posts.Post) []string {
 			}
 		}
 	case posts.VideoPost:
-		if p.ThumbnailURL != "" {
-			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
+		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
+			keys = append(keys, urlToStorageKey(*p.ThumbnailURL))
 		}
 	case posts.LinkPost:
 		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {

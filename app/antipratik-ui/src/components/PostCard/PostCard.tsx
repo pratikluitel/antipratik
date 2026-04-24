@@ -1,6 +1,6 @@
 'use client';
 
-import type { Post, PhotoPost } from '../../lib/types';
+import type { Post, PhotoPost, VideoPost } from '../../lib/types';
 import EssayCard from '../EssayCard/EssayCard';
 import ShortPostCard from '../ShortPostCard/ShortPostCard';
 import MusicCard from '../MusicCard/MusicCard';
@@ -12,9 +12,10 @@ interface Props {
   post: Post;
   onPhotoOpen: (images: PhotoPost['images'], startIndex: number) => void;
   onTagClick?: (tag: string) => void;
+  onVideoPlay?: (post: VideoPost) => void;
 }
 
-export default function PostCard({ post, onPhotoOpen, onTagClick }: Props) {
+export default function PostCard({ post, onPhotoOpen, onTagClick, onVideoPlay }: Props) {
   switch (post.type) {
     case 'essay':
       return <EssayCard post={post} />;
@@ -25,7 +26,7 @@ export default function PostCard({ post, onPhotoOpen, onTagClick }: Props) {
     case 'photo':
       return <PhotoCard post={post} onOpen={onPhotoOpen} />;
     case 'video':
-      return <VideoCard post={post} />;
+      return <VideoCard post={post} onPlay={onVideoPlay} />;
     case 'link':
       return <LinkCard post={post} />;
     default:
