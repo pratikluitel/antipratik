@@ -4,13 +4,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './VideoPlayer.module.css';
 
-type Quality = 'low' | 'med' | 'high';
-
-function qualityUrl(base: string, quality: Quality): string {
-  if (quality === 'med') return base;
-  return `${base}?q=${quality}`;
-}
-
 // SVG icons (20×20 viewBox)
 function IconPlay() {
   return (
@@ -95,13 +88,14 @@ interface Props {
 export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [quality, setQuality] = useState<Quality>('med');
+  const [controlsVisible, setControlsVisible] = useState(true);
 
   // Lock body scroll while modal is open
   useEffect(() => {
@@ -162,11 +156,46 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
     };
   }, []);
 
+  // Auto-hide controls in fullscreen; always show in normal mode.
+  const scheduleHide = useCallback(() => {
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    hideTimeoutRef.current = setTimeout(() => setControlsVisible(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      scheduleHide();
+    } else {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      Promise.resolve().then(() => setControlsVisible(true));
+    }
+    return () => { if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current); };
+  }, [isFullscreen, scheduleHide]);
+
+  const revealControls = useCallback(() => {
+    setControlsVisible(true);
+    if (isFullscreen) scheduleHide();
+  }, [isFullscreen, scheduleHide]);
+
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) { video.play().catch(() => {}); } else { video.pause(); }
-  }, []);
+    revealControls();
+  }, [revealControls]);
+
+  // Space bar toggles play from anywhere in the modal (except when a control is focused).
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== ' ' && e.code !== 'Space') return;
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+      e.preventDefault();
+      togglePlay();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [togglePlay]);
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
@@ -203,22 +232,13 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
     }
   }, []);
 
-  const handleQualityChange = useCallback((next: Quality) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const savedTime = video.currentTime;
-    const wasPlaying = !video.paused;
-    setQuality(next);
-    video.src = qualityUrl(videoUrl, next);
-    video.load();
-    video.addEventListener('canplay', () => {
-      video.currentTime = savedTime;
-      if (wasPlaying) video.play().catch(() => {});
-    }, { once: true });
-  }, [videoUrl]);
-
   const seekFill = duration > 0 ? (currentTime / duration) * 100 : 0;
   const volumeFill = isMuted ? 0 : volume * 100;
+
+  const containerClass = [
+    styles.container,
+    isFullscreen && !controlsVisible ? styles.controlsHidden : '',
+  ].filter(Boolean).join(' ');
 
   const modal = (
     <div
@@ -228,13 +248,19 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
       aria-modal="true"
       aria-label={title ?? 'Video player'}
     >
-      <div ref={containerRef} className={styles.container} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={containerRef}
+        className={containerClass}
+        onClick={(e) => { e.stopPropagation(); revealControls(); }}
+        onMouseMove={revealControls}
+      >
         {title && <div className={styles.title}>{title}</div>}
 
         <video
           ref={videoRef}
           className={styles.video}
-          src={qualityUrl(videoUrl, quality)}
+          src={videoUrl}
+          onClick={togglePlay}
           playsInline
         />
 
@@ -285,17 +311,6 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
               />
             </div>
           </div>
-
-          <select
-            className={styles.qualitySelect}
-            value={quality}
-            onChange={(e) => handleQualityChange(e.target.value as Quality)}
-            aria-label="Quality"
-          >
-            <option value="low">Low</option>
-            <option value="med">Med</option>
-            <option value="high">High</option>
-          </select>
 
           <button
             type="button"

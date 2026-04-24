@@ -89,8 +89,86 @@
 .controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+/* ── Volume group ───────────────────────────────────────────── */
+
+.volumeGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.volumeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary-dark);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  transition: color var(--motion-default);
+}
+
+.volumeBtn:hover,
+.volumeBtn:focus-visible {
+  color: var(--accent-music);
+  outline: none;
+}
+
+.volumeSliderWrapper {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--motion-default);
+  display: flex;
+  align-items: center;
+}
+
+.volumeGroup:hover .volumeSliderWrapper,
+.volumeGroup:focus-within .volumeSliderWrapper {
+  width: 72px;
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent-music) var(--volume-fill, 100%),
+    var(--player-progress-bg) var(--volume-fill, 100%)
+  );
+  outline: none;
+  cursor: pointer;
+  display: block;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-music);
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-music);
+  cursor: pointer;
+  border: none;
 }
 
 .playBtn {

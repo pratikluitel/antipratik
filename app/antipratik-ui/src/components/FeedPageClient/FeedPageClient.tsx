@@ -1,7 +1,7 @@
 'use client';
 
 import { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
-import type { Post, PhotoPost, MusicPost, LinkPost, VideoPost } from '../../lib/types';
+import type { Post, PhotoPost, MusicPost, VideoPost } from '../../lib/types';
 import {
   filterReducer,
   initialFilterState,
@@ -71,8 +71,6 @@ export default function FeedPageClient({ posts, allTags, initialTag, initialPhot
 
   useEffect(() => {
     if (!initialVideoId) return;
-    const lp = posts.find((p): p is LinkPost => p.type === 'link' && (p as LinkPost).category === 'video' && p.id === initialVideoId);
-    if (lp) Promise.resolve().then(() => setActiveVideo({ url: lp.url, title: lp.title }));
     const vp = posts.find((p): p is VideoPost => p.type === 'video' && p.id === initialVideoId);
     if (vp) Promise.resolve().then(() => setActiveVideo({ url: vp.videoUrl, title: vp.title }));
   }, [initialVideoId, posts]);

@@ -168,7 +168,7 @@ src/lib/
 |---|---|
 | `/feed?photo=<postId>` | Opens lightbox for that PhotoPost on mount |
 | `/feed?track=<postId>` | Auto-plays that MusicPost on mount |
-| `/feed?video=<postId>` | Opens VideoPlayer modal for that video-category LinkPost on mount |
+| `/feed?video=<postId>` | Opens VideoPlayer modal for that VideoPost on mount |
 
 All use `Promise.resolve().then(setState)` microtask to satisfy `react-hooks/set-state-in-effect`. Don't remove param handling without updating the Go broadcaster too.
 

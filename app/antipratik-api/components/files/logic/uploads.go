@@ -280,11 +280,8 @@ func (s *uploadLogic) UploadVideoFile(ctx context.Context, postID string, file f
 		return files.VideoFileResult{}, commonerrors.New(fmt.Sprintf("videoFile must be one of mp4, webm, mov — got %q", ext))
 	}
 	videoFileID := postID + ext
-	ct := contentTypeForExt(ext)
-	if err := s.files.Put(ctx, storePrefixVideos+videoFileID, file.File, ct); err != nil {
+	if err := s.files.Put(ctx, storePrefixVideos+videoFileID, file.File, contentTypeForExt(ext)); err != nil {
 		return files.VideoFileResult{}, fmt.Errorf("UploadVideoFile store: %w", err)
 	}
-	// URL uses /files/<fileId> without the storage prefix — ServeFile resolves
-	// the prefix by trying photos/, music/, and videos/ in sequence.
 	return files.VideoFileResult{VideoURL: urlPrefixFiles + videoFileID}, nil
 }
