@@ -9,8 +9,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -78,7 +76,7 @@ func (s *localFileStore) Get(_ context.Context, key string) (io.ReadSeekCloser, 
 	return f, contentTypeFromKey(key), nil
 }
 
-func (s *localFileStore) GetRange(_ context.Context, key, rangeHeader string) (io.ReadCloser, string, string, int64, error) {
+func (s *localFileStore) GetRange(_ context.Context, key string, r *files.ParsedRange) (io.ReadCloser, string, string, int64, error) {
 	path := filepath.Join(s.baseDir, filepath.FromSlash(key))
 	f, err := os.Open(path)
 	if err != nil {
@@ -95,14 +93,14 @@ func (s *localFileStore) GetRange(_ context.Context, key, rangeHeader string) (i
 	ct := contentTypeFromKey(key)
 	total := fi.Size()
 
-	if rangeHeader == "" {
+	if r == nil {
 		return f, ct, "", total, nil
 	}
 
-	start, end, ok := parseByteRange(rangeHeader, total)
+	start, end, ok := resolveRange(r, total)
 	if !ok {
 		_ = f.Close()
-		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange: unsatisfiable range %q", rangeHeader)
+		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange: unsatisfiable range")
 	}
 	if _, err := f.Seek(start, io.SeekStart); err != nil {
 		_ = f.Close()
@@ -190,13 +188,13 @@ func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadSeekCloser, s
 	return &bytesReadSeekCloser{bytes.NewReader(buf)}, ct, nil
 }
 
-func (s *r2FileStore) GetRange(ctx context.Context, key, rangeHeader string) (io.ReadCloser, string, string, int64, error) {
+func (s *r2FileStore) GetRange(ctx context.Context, key string, r *files.ParsedRange) (io.ReadCloser, string, string, int64, error) {
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(key),
 	}
-	if rangeHeader != "" {
-		input.Range = aws.String(rangeHeader)
+	if r != nil {
+		input.Range = aws.String(parsedRangeToS3Header(r))
 	}
 	out, err := s.client.GetObject(ctx, input)
 	if err != nil {
@@ -229,84 +227,8 @@ type bytesReadSeekCloser struct{ *bytes.Reader }
 
 func (bytesReadSeekCloser) Close() error { return nil }
 
-// contentTypeFromKey returns a MIME type based on the file extension in key.
-func contentTypeFromKey(key string) string {
-	switch filepath.Ext(key) {
-	case ".jpg", ".jpeg":
-		return "image/jpeg"
-	case ".png":
-		return "image/png"
-	case ".webp":
-		return "image/webp"
-	case ".gif":
-		return "image/gif"
-	case ".mp3":
-		return "audio/mpeg"
-	case ".wav":
-		return "audio/wav"
-	case ".ogg":
-		return "audio/ogg"
-	case ".m4a":
-		return "audio/mp4"
-	case ".mp4":
-		return "video/mp4"
-	case ".webm":
-		return "video/webm"
-	case ".mov":
-		return "video/quicktime"
-	default:
-		return "application/octet-stream"
-	}
-}
-
 // limitedReadCloser pairs a limited reader with the underlying closer.
 type limitedReadCloser struct {
 	io.Reader
 	io.Closer
-}
-
-// parseByteRange parses a "bytes=start-end" Range header against totalSize.
-// Returns the resolved start and end byte positions (inclusive) and whether the range is satisfiable.
-// Only single-range requests are supported; multi-range (comma-separated) returns false.
-func parseByteRange(header string, total int64) (start, end int64, ok bool) {
-	const prefix = "bytes="
-	if !strings.HasPrefix(header, prefix) {
-		return 0, 0, false
-	}
-	spec := header[len(prefix):]
-	if strings.Contains(spec, ",") {
-		return 0, 0, false // multi-range not supported
-	}
-	dash := strings.IndexByte(spec, '-')
-	if dash < 0 {
-		return 0, 0, false
-	}
-	startStr, endStr := spec[:dash], spec[dash+1:]
-	if startStr == "" {
-		// Suffix range: bytes=-N
-		n, err := strconv.ParseInt(endStr, 10, 64)
-		if err != nil || n <= 0 {
-			return 0, 0, false
-		}
-		s := total - n
-		if s < 0 {
-			s = 0
-		}
-		return s, total - 1, true
-	}
-	s, err := strconv.ParseInt(startStr, 10, 64)
-	if err != nil || s < 0 || s >= total {
-		return 0, 0, false
-	}
-	if endStr == "" {
-		return s, total - 1, true
-	}
-	e, err := strconv.ParseInt(endStr, 10, 64)
-	if err != nil || e < s {
-		return 0, 0, false
-	}
-	if e >= total {
-		e = total - 1
-	}
-	return s, e, true
 }

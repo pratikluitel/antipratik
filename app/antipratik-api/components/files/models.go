@@ -40,3 +40,11 @@ type MusicFilesResult struct {
 type VideoFileResult struct {
 	VideoURL string // relative: /files/videos/<postID>.<ext>
 }
+
+// ParsedRange is a pre-parsed (but not yet size-resolved) HTTP Range request.
+// Start == nil means suffix range (End holds the suffix length).
+// End == nil means open-ended (read to EOF).
+type ParsedRange struct {
+	Start *int64
+	End   *int64
+}

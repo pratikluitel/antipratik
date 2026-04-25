@@ -49,7 +49,7 @@ const (
 
 var allowedPhotoExts = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".heic": true, ".heif": true}
 var allowedMusicExts = map[string]bool{".mp3": true, ".wav": true, ".ogg": true, ".m4a": true}
-var allowedVideoExts = map[string]bool{".mp4": true, ".webm": true, ".mov": true}
+var allowedVideoExts = map[string]bool{".mp4": true, ".webm": true}
 
 // uploadLogic implements UploadLogic.
 type uploadLogic struct {
@@ -270,14 +270,14 @@ func (s *uploadLogic) UploadThumbnail(ctx context.Context, postID string, suffix
 }
 
 // UploadVideoFile implements UploadLogic.
-// Accepted extensions: mp4, webm, mov. Stored at videos/<postID>.<ext>.
+// Accepted extensions: mp4, webm. Stored at videos/<postID>.<ext>.
 func (s *uploadLogic) UploadVideoFile(ctx context.Context, postID string, file files.FileInput) (files.VideoFileResult, error) {
 	if err := commonerrors.RequireNonEmpty("postId", postID); err != nil {
 		return files.VideoFileResult{}, err
 	}
 	ext := strings.ToLower(filepath.Ext(file.Header.Filename))
 	if !allowedVideoExts[ext] {
-		return files.VideoFileResult{}, commonerrors.New(fmt.Sprintf("videoFile must be one of mp4, webm, mov — got %q", ext))
+		return files.VideoFileResult{}, commonerrors.New(fmt.Sprintf("videoFile must be one of mp4, webm — got %q", ext))
 	}
 	videoFileID := postID + ext
 	if err := s.files.Put(ctx, storePrefixVideos+videoFileID, file.File, contentTypeForExt(ext)); err != nil {

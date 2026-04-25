@@ -6,7 +6,10 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/pratikluitel/antipratik/components/files"
 )
 
 func streamFile(w http.ResponseWriter, r *http.Request, body io.ReadSeekCloser, ct string) {
@@ -39,4 +42,42 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
+}
+
+// parseByteRange parses a "bytes=start-end" Range header value into a ParsedRange.
+// Only single-range requests are supported; multi-range (comma-separated) returns false.
+func parseByteRange(header string) (*files.ParsedRange, bool) {
+	const prefix = "bytes="
+	if !strings.HasPrefix(header, prefix) {
+		return nil, false
+	}
+	spec := header[len(prefix):]
+	if strings.Contains(spec, ",") {
+		return nil, false
+	}
+	dash := strings.IndexByte(spec, '-')
+	if dash < 0 {
+		return nil, false
+	}
+	startStr, endStr := spec[:dash], spec[dash+1:]
+	if startStr == "" {
+		// Suffix range: bytes=-N
+		n, err := strconv.ParseInt(endStr, 10, 64)
+		if err != nil || n <= 0 {
+			return nil, false
+		}
+		return &files.ParsedRange{Start: nil, End: &n}, true
+	}
+	s, err := strconv.ParseInt(startStr, 10, 64)
+	if err != nil || s < 0 {
+		return nil, false
+	}
+	if endStr == "" {
+		return &files.ParsedRange{Start: &s, End: nil}, true
+	}
+	e, err := strconv.ParseInt(endStr, 10, 64)
+	if err != nil || e < s {
+		return nil, false
+	}
+	return &files.ParsedRange{Start: &s, End: &e}, true
 }

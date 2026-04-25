@@ -297,8 +297,6 @@ func contentTypeForExt(ext string) string {
 		return "video/mp4"
 	case ".webm":
 		return "video/webm"
-	case ".mov":
-		return "video/quicktime"
 	default:
 		return "application/octet-stream"
 	}
