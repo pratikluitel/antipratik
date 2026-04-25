@@ -40,7 +40,6 @@ type UploaderService interface {
 // StorageService exposes file retrieval and deletion to other components.
 // Inject this interface rather than importing files/store directly.
 type StorageService interface {
-	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
 	Delete(ctx context.Context, key string) error
 }
 
@@ -53,6 +52,13 @@ type FileStore interface {
 	// Returns a seekable body (caller must close), the content type, and any error.
 	// The returned body implements io.ReadSeekCloser so callers can serve Range requests.
 	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
+	// GetRange retrieves a byte range of the file stored at key.
+	// rangeHeader is the raw RFC 7233 Range request header value (e.g. "bytes=0-1023");
+	// pass "" to fetch the full object.
+	// Returns: body (caller must close), content-type, Content-Range response header
+	// ("bytes start-end/total"; empty when serving the full object), content-length of
+	// the returned body, and any error.
+	GetRange(ctx context.Context, key, rangeHeader string) (io.ReadCloser, string, string, int64, error)
 	// Delete removes the file stored at key. It is not an error if the key does not exist.
 	Delete(ctx context.Context, key string) error
 }
