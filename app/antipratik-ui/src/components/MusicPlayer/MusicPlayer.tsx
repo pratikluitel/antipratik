@@ -105,6 +105,7 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
     setPrevAudioUrl(track.audioUrl);
     setCurrentTime(0);
     setDuration(track.duration); // DB value as placeholder until loadedmetadata fires
+    setAlbumArtError(false);
   }
 
   useEffect(() => {
@@ -176,9 +177,9 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
         {/* Track info — clicking opens drawer */}
         <div className={styles.trackInfo}>
           <div className={styles.albumArt}>
-            {track.albumArt
+            {track.albumArt && !albumArtError
               // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={track.albumArt} alt={track.title} />
+              ? <img src={track.albumArt} alt={track.title} onError={() => setAlbumArtError(true)} />
               : <span>♪</span>}
           </div>
           <div>
@@ -208,7 +209,11 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
                 aria-label="Volume"
-                style={{ '--volume-fill': `${volumeFill}%` } as React.CSSProperties}
+                style={{
+                  background: volumeFill === 0
+                    ? 'var(--player-progress-bg)'
+                    : `linear-gradient(to right, var(--accent-music) ${volumeFill}%, var(--player-progress-bg) ${volumeFill}%)`
+                }}
               />
             </div>
           </div>

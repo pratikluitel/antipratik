@@ -24,7 +24,13 @@ export default function Lightbox({ images, startIndex, onClose }: Props) {
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.scrollbarGutter = 'auto';
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarGutter = '';
+    };
   }, []);
 
   useEffect(() => {

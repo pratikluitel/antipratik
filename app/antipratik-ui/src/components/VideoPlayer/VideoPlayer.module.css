@@ -111,6 +111,10 @@
   border: none;
 }
 
+.seek::-moz-range-progress {
+  background: var(--accent-videos);
+}
+
 /* ── Volume group ── */
 
 .volumeGroup {
@@ -152,20 +156,18 @@
 .volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-videos);
-  cursor: pointer;
+  width: 0;
+  height: 0;
 }
 
 .volumeSlider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-videos);
-  cursor: pointer;
+  width: 0;
+  height: 0;
   border: none;
+}
+
+.volumeSlider::-moz-range-progress {
+  background: transparent;
 }
 
 /* ── Fullscreen: video fills viewport, controls overlay the bottom ── */
@@ -178,6 +180,7 @@
   position: relative;
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
   /* gap is irrelevant in fullscreen — controls are out of flow */
   gap: 0;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useMusicPlayer } from '../MusicProvider/MusicProvider';
 import styles from './VideoPlayer.module.css';
 
 // SVG icons (20×20 viewBox)
@@ -97,11 +98,22 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
 
+  const { pause: pauseMusic } = useMusicPlayer();
+
+  // Pause music when video player opens
+  useEffect(() => { pauseMusic(); }, [pauseMusic]);
+
   // Lock body scroll while modal is open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.scrollbarGutter = 'auto';
+    return () => {
+      document.body.style.overflow = prev;
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarGutter = '';
+    };
   }, []);
 
   // Close on Escape key (only when not in fullscreen — browser handles that natively)
@@ -113,11 +125,20 @@ export default function VideoPlayer({ videoUrl, title, onClose }: Props) {
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // Track fullscreen state
+  // Track fullscreen state; suppress document scrollbar gutter while fullscreen
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    const handler = () => {
+      const fs = !!document.fullscreenElement;
+      setIsFullscreen(fs);
+      document.documentElement.style.overflow = fs ? 'hidden' : '';
+      document.documentElement.style.scrollbarGutter = fs ? 'auto' : '';
+    };
     document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
+    return () => {
+      document.removeEventListener('fullscreenchange', handler);
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarGutter = '';
+    };
   }, []);
 
   // Wire video events

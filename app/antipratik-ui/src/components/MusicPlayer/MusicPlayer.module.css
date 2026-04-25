@@ -96,9 +96,11 @@
 /* ── Volume group ───────────────────────────────────────────── */
 
 .volumeGroup {
+  /* Fixed width = icon (24px) + slider (72px). Play button never shifts. */
+  width: 96px;
   display: flex;
   align-items: center;
-  gap: 2px;
+  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -114,13 +116,20 @@
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  transition: color var(--motion-default);
+  /* Start at right edge of group (slider width away from left) */
+  transform: translateX(72px);
+  transition: transform var(--motion-default), color var(--motion-default);
 }
 
 .volumeBtn:hover,
 .volumeBtn:focus-visible {
   color: var(--accent-music);
   outline: none;
+}
+
+.volumeGroup:hover .volumeBtn,
+.volumeGroup:focus-within .volumeBtn {
+  transform: translateX(0);
 }
 
 .volumeSliderWrapper {
@@ -136,38 +145,52 @@
   width: 72px;
 }
 
+@media (max-width: 767px) {
+  .volumeBtn {
+    transform: translateX(0);
+  }
+
+  .volumeSliderWrapper {
+    width: 72px;
+  }
+}
+
 .volumeSlider {
   -webkit-appearance: none;
   appearance: none;
   width: 72px;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(
-    to right,
-    var(--accent-music) var(--volume-fill, 100%),
-    var(--player-progress-bg) var(--volume-fill, 100%)
-  );
   outline: none;
   cursor: pointer;
   display: block;
+  flex-shrink: 0;
+}
+
+.volumeSlider::-webkit-slider-runnable-track {
+  background: inherit;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.volumeSlider::-moz-range-track {
+  background: transparent;
+}
+
+.volumeSlider::-moz-range-progress {
+  background: transparent;
 }
 
 .volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-music);
-  cursor: pointer;
+  width: 0;
+  height: 0;
 }
 
 .volumeSlider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent-music);
-  cursor: pointer;
+  width: 0;
+  height: 0;
   border: none;
 }
 
@@ -206,6 +229,16 @@
 
 @media (max-width: 767px) {
   .progressArea {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  .progressArea .timeLabel {
     display: none;
   }
 }
