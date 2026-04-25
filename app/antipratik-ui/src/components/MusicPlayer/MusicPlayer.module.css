@@ -89,8 +89,109 @@
 .controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+/* ── Volume group ───────────────────────────────────────────── */
+
+.volumeGroup {
+  /* Fixed width = icon (24px) + slider (72px). Play button never shifts. */
+  width: 96px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.volumeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary-dark);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  /* Start at right edge of group (slider width away from left) */
+  transform: translateX(72px);
+  transition: transform var(--motion-default), color var(--motion-default);
+}
+
+.volumeBtn:hover,
+.volumeBtn:focus-visible {
+  color: var(--accent-music);
+  outline: none;
+}
+
+.volumeGroup:hover .volumeBtn,
+.volumeGroup:focus-within .volumeBtn {
+  transform: translateX(0);
+}
+
+.volumeSliderWrapper {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--motion-default);
+  display: flex;
+  align-items: center;
+}
+
+.volumeGroup:hover .volumeSliderWrapper,
+.volumeGroup:focus-within .volumeSliderWrapper {
+  width: 72px;
+}
+
+@media (max-width: 767px) {
+  .volumeBtn {
+    transform: translateX(0);
+  }
+
+  .volumeSliderWrapper {
+    width: 72px;
+  }
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  display: block;
+  flex-shrink: 0;
+}
+
+.volumeSlider::-webkit-slider-runnable-track {
+  background: inherit;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.volumeSlider::-moz-range-track {
+  background: transparent;
+}
+
+.volumeSlider::-moz-range-progress {
+  background: transparent;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: none;
 }
 
 .playBtn {
@@ -128,6 +229,16 @@
 
 @media (max-width: 767px) {
   .progressArea {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  .progressArea .timeLabel {
     display: none;
   }
 }

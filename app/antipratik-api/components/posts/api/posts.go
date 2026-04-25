@@ -356,9 +356,30 @@ func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	postID := uuid.New().String()
 
-	var thumbnailURL string
-	var thumbnailTinyURL, thumbnailSmallURL, thumbnailMedURL, thumbnailLargeURL *string
-	if thumbFile, thumbHeader, err := r.FormFile("thumbnailFile"); err == nil {
+	videoFile, videoHeader, err := r.FormFile("videoFile")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "videoFile is required")
+		return
+	}
+	defer func() { _ = videoFile.Close() }()
+
+	uploaded, err := h.uploads.UploadVideoFile(r.Context(), postID,
+		files.FileInput{File: videoFile, Header: videoHeader})
+	if err != nil {
+		handleLogicError(w, h.log, "CreateVideo video upload", err)
+		return
+	}
+
+	input := posts.VideoPostInput{
+		Title:    r.FormValue("title"),
+		VideoURL: uploaded.VideoURL,
+		Tags:     formTags(r),
+	}
+	if desc := r.FormValue("description"); desc != "" {
+		input.Description = &desc
+	}
+
+	if thumbFile, thumbHeader, thumbErr := r.FormFile("thumbnailFile"); thumbErr == nil {
 		defer func() { _ = thumbFile.Close() }()
 		result, uploadErr := h.uploads.UploadThumbnail(r.Context(), postID, "thumb",
 			files.FileInput{File: thumbFile, Header: thumbHeader})
@@ -366,31 +387,11 @@ func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 			handleLogicError(w, h.log, "CreateVideo thumbnail upload", uploadErr)
 			return
 		}
-		thumbnailURL = result.URL
-		thumbnailTinyURL = &result.TinyURL
-		thumbnailSmallURL = &result.SmallURL
-		thumbnailMedURL = &result.MedURL
-		thumbnailLargeURL = &result.LargeURL
-	}
-
-	duration, err := strconv.Atoi(r.FormValue("duration"))
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "duration must be an integer")
-		return
-	}
-	input := posts.VideoPostInput{
-		Title:             r.FormValue("title"),
-		VideoURL:          r.FormValue("videoURL"),
-		ThumbnailURL:      thumbnailURL,
-		ThumbnailTinyURL:  thumbnailTinyURL,
-		ThumbnailSmallURL: thumbnailSmallURL,
-		ThumbnailMedURL:   thumbnailMedURL,
-		ThumbnailLargeURL: thumbnailLargeURL,
-		Duration:          duration,
-		Tags:              formTags(r),
-	}
-	if pl := r.FormValue("playlist"); pl != "" {
-		input.Playlist = &pl
+		input.ThumbnailURL = &result.URL
+		input.ThumbnailTinyURL = &result.TinyURL
+		input.ThumbnailSmallURL = &result.SmallURL
+		input.ThumbnailMedURL = &result.MedURL
+		input.ThumbnailLargeURL = &result.LargeURL
 	}
 
 	post, err := h.logic.CreateVideo(r.Context(), postID, input)
@@ -398,7 +399,7 @@ func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateVideo", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	writeJSON(w, http.StatusCreated, map[string]string{"id": post.ID})
 }
 
 func (h *postHandler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
@@ -408,24 +409,15 @@ func (h *postHandler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// videoFile is silently ignored — editing the uploaded video file is not supported.
+
 	input := posts.UpdateVideoPost{Tags: formTags(r)}
 
 	if title := r.FormValue("title"); title != "" {
 		input.Title = &title
 	}
-	if videoURL := r.FormValue("videoURL"); videoURL != "" {
-		input.VideoURL = &videoURL
-	}
-	if durStr := r.FormValue("duration"); durStr != "" {
-		if d, err := strconv.Atoi(durStr); err == nil {
-			input.Duration = &d
-		} else {
-			writeError(w, http.StatusBadRequest, "duration must be an integer")
-			return
-		}
-	}
-	if pl := r.FormValue("playlist"); pl != "" {
-		input.Playlist = &pl
+	if desc := r.FormValue("description"); desc != "" {
+		input.Description = &desc
 	}
 
 	if thumbFile, thumbHeader, thumbErr := r.FormFile("thumbnailFile"); thumbErr == nil {

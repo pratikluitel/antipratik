@@ -35,3 +35,8 @@ type MusicFilesResult struct {
 	AlbumArtMedURL   string
 	AlbumArtLargeURL string
 }
+
+// VideoFileResult holds the relative URL for an uploaded video file.
+type VideoFileResult struct {
+	VideoURL string // relative: /files/videos/<postID>.<ext>
+}

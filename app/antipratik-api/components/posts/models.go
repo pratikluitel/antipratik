@@ -99,21 +99,20 @@ type PhotoPost struct {
 
 func (p PhotoPost) postType() string { return "photo" }
 
-// VideoPost is a video with thumbnail, URL, and duration.
+// VideoPost is an uploaded video file with optional thumbnail.
 type VideoPost struct {
+	ThumbnailURL      *string  `json:"thumbnailUrl,omitempty"`
 	ThumbnailTinyURL  *string  `json:"thumbnailTinyUrl,omitempty"`
 	ThumbnailSmallURL *string  `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string  `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string  `json:"thumbnailLargeUrl,omitempty"`
-	Playlist          *string  `json:"playlist,omitempty"`
+	Description       *string  `json:"description,omitempty"`
 	ID                string   `json:"id"`
 	Type              string   `json:"type"`
 	CreatedAt         string   `json:"createdAt"`
 	Title             string   `json:"title"`
-	ThumbnailURL      string   `json:"thumbnailUrl"`
 	VideoURL          string   `json:"videoUrl"`
 	Tags              []string `json:"tags"`
-	Duration          int      `json:"duration"`
 }
 
 func (v VideoPost) postType() string { return "video" }
@@ -199,16 +198,15 @@ type PhotoPostInput struct {
 }
 
 type VideoPostInput struct {
+	ThumbnailURL      *string  `json:"thumbnailUrl,omitempty"`
 	ThumbnailTinyURL  *string  `json:"thumbnailTinyUrl,omitempty"`
 	ThumbnailSmallURL *string  `json:"thumbnailSmallUrl,omitempty"`
 	ThumbnailMedURL   *string  `json:"thumbnailMediumUrl,omitempty"`
 	ThumbnailLargeURL *string  `json:"thumbnailLargeUrl,omitempty"`
-	Playlist          *string  `json:"playlist,omitempty"`
+	Description       *string  `json:"description,omitempty"`
 	Title             string   `json:"title"`
-	ThumbnailURL      string   `json:"thumbnailURL"`
-	VideoURL          string   `json:"videoURL"`
+	VideoURL          string   `json:"videoUrl"`
 	Tags              []string `json:"tags"`
-	Duration          int      `json:"duration"`
 }
 
 type LinkPostInput struct {
@@ -265,16 +263,15 @@ type UpdateMusicPost struct {
 }
 
 // UpdateVideoPost is the partial-update input for video posts (multipart/form-data).
+// Video file editing is not supported; only metadata fields can be updated.
 type UpdateVideoPost struct {
 	Title             *string
+	Description       *string
 	ThumbnailURL      *string
 	ThumbnailTinyURL  *string
 	ThumbnailSmallURL *string
 	ThumbnailMedURL   *string
 	ThumbnailLargeURL *string
-	VideoURL          *string
-	Duration          *int
-	Playlist          *string
 	Tags              []string
 }
 

@@ -1,0 +1,245 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--lightbox-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(90vw, 900px);
+  gap: 6px;
+}
+
+.title {
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  opacity: 0.8;
+  text-align: center;
+}
+
+.video {
+  width: 100%;
+  max-height: 70vh;
+  background: var(--color-deepest);
+  border-radius: 4px;
+  display: block;
+  cursor: pointer;
+}
+
+/* ── Controls bar ── */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--lightbox-btn-bg);
+  border: 1px solid var(--lightbox-btn-border);
+  border-radius: 4px;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.controlBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-snow);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color var(--motion-default);
+}
+
+.controlBtn:hover,
+.controlBtn:focus-visible {
+  color: var(--accent-videos);
+  outline: none;
+}
+
+/* ── Seek bar ── */
+
+.seekWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent-videos) var(--seek-fill, 0%),
+    var(--lightbox-btn-border) var(--seek-fill, 0%)
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+}
+
+.seek::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-videos);
+  cursor: pointer;
+  border: none;
+}
+
+.seek::-moz-range-progress {
+  background: var(--accent-videos);
+}
+
+/* ── Volume group ── */
+
+.volumeGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.volumeSliderWrapper {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--motion-default);
+  display: flex;
+  align-items: center;
+}
+
+.volumeGroup:hover .volumeSliderWrapper,
+.volumeGroup:focus-within .volumeSliderWrapper {
+  width: 72px;
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent-videos) var(--volume-fill, 100%),
+    var(--lightbox-btn-border) var(--volume-fill, 100%)
+  );
+  outline: none;
+  cursor: pointer;
+  display: block;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: none;
+}
+
+.volumeSlider::-moz-range-progress {
+  background: transparent;
+}
+
+/* ── Fullscreen: video fills viewport, controls overlay the bottom ── */
+
+.container:fullscreen,
+.container:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: var(--color-deepest);
+  position: relative;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* gap is irrelevant in fullscreen — controls are out of flow */
+  gap: 0;
+}
+
+.container:fullscreen .title,
+.container:-webkit-full-screen .title {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--motion-default), transform var(--motion-default);
+}
+
+.container:fullscreen .video,
+.container:-webkit-full-screen .video {
+  width: 100%;
+  height: 100%;
+  flex: none;
+  max-height: none;
+  min-height: 0;
+  border-radius: 0;
+  object-fit: contain;
+  cursor: inherit;
+}
+
+.container:fullscreen .controls,
+.container:-webkit-full-screen .controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: var(--lightbox-bg);
+  border-color: var(--lightbox-btn-border);
+  z-index: 1;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--motion-default), transform var(--motion-default);
+}
+
+/* Auto-hide state: JS adds .controlsHidden to the container while in fullscreen */
+.controlsHidden:fullscreen .controls,
+.controlsHidden:-webkit-full-screen .controls {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
+
+.controlsHidden:fullscreen .title,
+.controlsHidden:-webkit-full-screen .title {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.controlsHidden:fullscreen,
+.controlsHidden:-webkit-full-screen {
+  cursor: none;
+}
+

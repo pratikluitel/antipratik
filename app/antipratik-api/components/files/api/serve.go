@@ -29,7 +29,7 @@ func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, prefix := range []string{"photos/", "music/"} {
+	for _, prefix := range []string{"photos/", "music/", "videos/"} {
 		body, ct, err := h.fileStore.Get(r.Context(), prefix+fileID)
 		if err == nil {
 			streamFile(w, r, body, ct)

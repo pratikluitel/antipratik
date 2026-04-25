@@ -146,22 +146,21 @@ func (s *sqlitePostStore) fetchPhotoImages(ctx context.Context, ids []string) (m
 }
 
 type videoData struct {
+	description       *string
+	thumbnailURL      *string
 	thumbnailTinyURL  *string
 	thumbnailSmallURL *string
 	thumbnailMedURL   *string
 	thumbnailLargeURL *string
-	playlist          *string
 	title             string
-	thumbnailURL      string
 	videoURL          string
-	duration          int
 }
 
 func (s *sqlitePostStore) fetchVideoData(ctx context.Context, ids []string) (map[string]videoData, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
-	q := "SELECT post_id, title, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url, duration, playlist FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
+	q := "SELECT post_id, title, description, thumbnail_url, thumbnail_tiny_url, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, video_url FROM video_posts WHERE post_id IN (" + placeholders(len(ids)) + ")"
 	rows, err := s.db.QueryContext(ctx, q, stringsToAny(ids)...)
 	if err != nil {
 		return nil, fmt.Errorf("fetchVideoData: %w", err)
@@ -172,7 +171,7 @@ func (s *sqlitePostStore) fetchVideoData(ctx context.Context, ids []string) (map
 	for rows.Next() {
 		var id string
 		var d videoData
-		if err := rows.Scan(&id, &d.title, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.videoURL, &d.duration, &d.playlist); err != nil {
+		if err := rows.Scan(&id, &d.title, &d.description, &d.thumbnailURL, &d.thumbnailTinyURL, &d.thumbnailSmallURL, &d.thumbnailMedURL, &d.thumbnailLargeURL, &d.videoURL); err != nil {
 			return nil, fmt.Errorf("fetchVideoData scan: %w", err)
 		}
 		m[id] = d
@@ -295,10 +294,11 @@ func (s *sqlitePostStore) assembleAll(
 			d := videoMap[r.ID]
 			post = posts.VideoPost{
 				ID: r.ID, Type: r.Type, CreatedAt: r.CreatedAt, Tags: tags,
-				Title: d.title, ThumbnailURL: d.thumbnailURL, ThumbnailTinyURL: d.thumbnailTinyURL,
+				Title: d.title, Description: d.description,
+				ThumbnailURL: d.thumbnailURL, ThumbnailTinyURL: d.thumbnailTinyURL,
 				ThumbnailSmallURL: d.thumbnailSmallURL, ThumbnailMedURL: d.thumbnailMedURL,
 				ThumbnailLargeURL: d.thumbnailLargeURL,
-				VideoURL:          d.videoURL, Duration: d.duration, Playlist: d.playlist,
+				VideoURL:          d.videoURL,
 			}
 		case "link":
 			d := linkPostMap[r.ID]

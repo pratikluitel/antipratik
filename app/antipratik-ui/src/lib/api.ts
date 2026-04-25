@@ -66,7 +66,7 @@ function prefixPost(post: Post): Post {
     }
     case 'video': {
       const p = post as VideoPost;
-      return { ...p, thumbnailUrl: prefixUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl), thumbnailSmallUrl: prefixOptionalUrl(p.thumbnailSmallUrl), thumbnailMediumUrl: prefixOptionalUrl(p.thumbnailMediumUrl), thumbnailLargeUrl: prefixOptionalUrl(p.thumbnailLargeUrl) };
+      return { ...p, videoUrl: prefixUrl(p.videoUrl), thumbnailUrl: prefixOptionalUrl(p.thumbnailUrl), thumbnailTinyUrl: prefixOptionalUrl(p.thumbnailTinyUrl), thumbnailSmallUrl: prefixOptionalUrl(p.thumbnailSmallUrl), thumbnailMediumUrl: prefixOptionalUrl(p.thumbnailMediumUrl), thumbnailLargeUrl: prefixOptionalUrl(p.thumbnailLargeUrl) };
     }
     case 'link': {
       const p = post as LinkPost;
@@ -374,14 +374,14 @@ export async function deletePhotoImage(postID: string, imageID: number, token: s
 
 // ─── VIDEO ────────────────────────────────────────────────────────────────────
 
-export async function createVideoPost(formData: FormData, token: string): Promise<VideoPost> {
+export async function createVideoPost(formData: FormData, token: string): Promise<{ id: string }> {
   const response = await fetch(`${API_URL}/api/posts/video`, {
     method: 'POST',
     headers: authHeaders(token),
     body: formData,
   });
   await throwOnError(response, 'createVideoPost');
-  return response.json() as Promise<VideoPost>;
+  return response.json() as Promise<{ id: string }>;
 }
 
 export async function updateVideoPost(id: string, formData: FormData, token: string): Promise<VideoPost> {

@@ -38,8 +38,11 @@ func fileKeysForPost(post posts.Post) []string {
 			}
 		}
 	case posts.VideoPost:
-		if p.ThumbnailURL != "" {
-			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
+		if p.VideoURL != "" {
+			keys = append(keys, urlToStorageKey(p.VideoURL))
+		}
+		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
+			keys = append(keys, thumbnailFileKeys(*p.ThumbnailURL, p.ThumbnailTinyURL, p.ThumbnailSmallURL, p.ThumbnailMedURL, p.ThumbnailLargeURL)...)
 		}
 	case posts.LinkPost:
 		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
@@ -111,6 +114,8 @@ func urlToStorageKey(u string) string {
 		switch strings.ToLower(filepath.Ext(after)) {
 		case ".mp3", ".wav", ".ogg", ".m4a":
 			return "music/" + after
+		case ".mp4", ".webm", ".mov":
+			return "videos/" + after
 		default:
 			return "photos/" + after
 		}

@@ -162,12 +162,12 @@ File uploads are `multipart/form-data` fields on post endpoints — no separate 
 |-----------|-------------|
 | Music | `audioFile` (required), `albumArtFile` (optional) |
 | Photo | `images[]` (one or more, required) |
-| Video | `thumbnailFile` (optional) |
+| Video | `videoFile` (required on create, silently ignored on update), `thumbnailFile` (optional) |
 | Link | `thumbnailFile` (optional) |
 
-- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Audio: `mp3`, `wav`, `ogg`, `m4a`.
+- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Audio: `mp3`, `wav`, `ogg`, `m4a`. Video: `mp4`, `webm`, `mov`.
 - Photo uploads auto-generate 4 thumbnail variants: tiny (20px), small (300px), medium (600px), large (1200px). Widths defined in `logic/uploads.go`.
-- Stored keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
+- Stored keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `videos/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are relative (`/files/…`, `/thumbnails/…`) — frontend prefixes with API base URL.
 - **Tag handling in multipart:** Use `formTags(r)` helper (`components/posts/api/helpers.go`) in all multipart handlers. Returns: `nil` (key absent, non-multipart → preserve tags), `[]string{}` (absent in multipart or empty → clear all tags), `[]string{…}` (parsed values). Never read `r.Form["tags"]` directly.
 - Never add a generic `/uploads/*` endpoint. Exception: per-resource sub-collection endpoints like `POST /api/posts/{id}/images` are acceptable for managing images on an existing post.
@@ -259,7 +259,7 @@ For local dev: run `npm run build` in `app/emails/` and copy `dist/` manually be
 | essay | `{site_domain}/{slug}` |
 | photo | `{site_domain}/feed?photo={id}` |
 | music | `{site_domain}/feed?track={id}` |
-| video | video URL directly |
+| video | `{site_domain}/feed?video={id}` |
 | link | external URL directly |
 
 **Storage backend config** (`config.yaml`):

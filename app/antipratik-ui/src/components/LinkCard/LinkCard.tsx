@@ -69,6 +69,26 @@ export default function LinkCard({ post }: Props) {
     timeZone: 'UTC',
   }).format(new Date(post.createdAt));
 
+  const inner = (
+    <>
+      {post.thumbnailUrl && (
+        <LinkThumbnail post={post} />
+      )}
+
+      <div className={styles.textBlock}>
+        {tagCls && label && <span className={tagCls}>{label}</span>}
+        <span className={styles.title}>{post.title}</span>
+        <span className={styles.domain}>{post.domain}</span>
+        {post.description && (
+          <p className={styles.excerpt}>{post.description}</p>
+        )}
+        <time className={styles.date} dateTime={post.createdAt}>{date}</time>
+      </div>
+
+      <span className={styles.arrow} aria-hidden="true">{post.category === 'video' ? '▶' : '↗'}</span>
+    </>
+  );
+
   return (
     <article className={cardAccentClass(post.category)}>
       <a
@@ -77,21 +97,7 @@ export default function LinkCard({ post }: Props) {
         rel="noopener noreferrer"
         className={styles.link}
       >
-        {post.thumbnailUrl && (
-          <LinkThumbnail post={post} />
-        )}
-
-        <div className={styles.textBlock}>
-          {tagCls && label && <span className={tagCls}>{label}</span>}
-          <span className={styles.title}>{post.title}</span>
-          <span className={styles.domain}>{post.domain}</span>
-          {post.description && (
-            <p className={styles.excerpt}>{post.description}</p>
-          )}
-          <time className={styles.date} dateTime={post.createdAt}>{date}</time>
-        </div>
-
-        <span className={styles.arrow} aria-hidden="true">↗</span>
+        {inner}
       </a>
     </article>
   );

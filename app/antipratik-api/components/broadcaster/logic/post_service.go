@@ -24,6 +24,7 @@ type PostSummary struct {
 	AlbumArtMediumURL  string // music: album art medium thumbnail
 	VideoURL           string // video: video URL for click-through
 	LinkURL            string // link: external URL for click-through
+	Category           string // link: category (e.g. "video") for click-through routing
 	Domain             string // link: domain for display
 	CreatedAt         string
 }
