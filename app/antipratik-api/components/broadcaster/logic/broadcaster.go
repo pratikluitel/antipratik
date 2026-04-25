@@ -161,8 +161,11 @@ func (svc *broadcasterLogic) postLinkURL(p PostSummary) string {
 	case "music":
 		return svc.cfg.SiteDomain + "/feed?track=" + p.ID
 	case "video":
-		return p.VideoURL
+		return svc.cfg.SiteDomain + "/feed?video=" + p.ID
 	case "link":
+		if p.Category == "video" {
+			return svc.cfg.SiteDomain + "/feed?video=" + p.ID
+		}
 		return p.LinkURL
 	}
 	return svc.cfg.SiteDomain

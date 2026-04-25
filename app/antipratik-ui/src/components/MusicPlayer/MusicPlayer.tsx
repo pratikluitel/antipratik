@@ -1,9 +1,44 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { MusicPost } from '../../lib/types';
 import { formatTime } from '../../lib/utils';
 import styles from './MusicPlayer.module.css';
+
+function IconVolumeMuted() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M3 7h3l5-4v14l-5-4H3V7z" />
+      <line x1="13" y1="7" x2="19" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="19" y1="7" x2="13" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconVolumeLow() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M3 7h3l5-4v14l-5-4H3V7z" />
+      <path d="M14 7a4 4 0 0 1 0 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function IconVolumeHigh() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M3 7h3l5-4v14l-5-4H3V7z" />
+      <path d="M14 7a4 4 0 0 1 0 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <path d="M16.5 4.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function VolumeIcon({ volume, muted }: { volume: number; muted: boolean }) {
+  if (muted || volume === 0) return <IconVolumeMuted />;
+  if (volume < 0.5) return <IconVolumeLow />;
+  return <IconVolumeHigh />;
+}
 
 interface Props {
   track: MusicPost;
@@ -18,8 +53,11 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
   const [isVisible, setIsVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(track.duration);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [albumArtError, setAlbumArtError] = useState(false);
   // Stable ref for onStop to avoid stale closure in the 'ended' event listener
   const onStopRef = useRef(onStop);
   useEffect(() => { onStopRef.current = onStop; }, [onStop]);
@@ -48,6 +86,10 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
     audio.addEventListener('error', () => {
       console.warn('Audio error:', audio.error);
     });
+    audio.addEventListener('volumechange', () => {
+      setIsMuted(audio.muted);
+      setVolume(audio.volume);
+    });
 
     audioRef.current = audio;
 
@@ -63,6 +105,7 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
     setPrevAudioUrl(track.audioUrl);
     setCurrentTime(0);
     setDuration(track.duration); // DB value as placeholder until loadedmetadata fires
+    setAlbumArtError(false);
   }
 
   useEffect(() => {
@@ -104,6 +147,27 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
     seek((e.clientX - rect.left) / rect.width);
   }
 
+  const toggleMute = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.muted) {
+      audio.muted = false;
+      if (audio.volume === 0) audio.volume = 0.5;
+    } else {
+      audio.muted = true;
+    }
+  }, []);
+
+  const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const val = Number(e.target.value);
+    audio.volume = val;
+    audio.muted = val === 0;
+  }, []);
+
+  const volumeFill = isMuted ? 0 : volume * 100;
+
   return (
     <div className={`${styles.player}${isVisible && !isExiting ? ` ${styles.visible}` : ''}`}>
 
@@ -113,9 +177,9 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
         {/* Track info — clicking opens drawer */}
         <div className={styles.trackInfo}>
           <div className={styles.albumArt}>
-            {track.albumArt
+            {track.albumArt && !albumArtError
               // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={track.albumArt} alt={track.title} />
+              ? <img src={track.albumArt} alt={track.title} onError={() => setAlbumArtError(true)} />
               : <span>♪</span>}
           </div>
           <div>
@@ -126,6 +190,33 @@ export default function MusicPlayer({ track, isPlaying, isExiting, onPlay, onPau
 
         {/* Controls — stopPropagation so they don't open drawer */}
         <div className={styles.controls} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.volumeGroup}>
+            <button
+              type="button"
+              className={styles.volumeBtn}
+              onClick={toggleMute}
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              <VolumeIcon volume={volume} muted={isMuted} />
+            </button>
+            <div className={styles.volumeSliderWrapper}>
+              <input
+                type="range"
+                className={styles.volumeSlider}
+                min={0}
+                max={1}
+                step={0.02}
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                aria-label="Volume"
+                style={{
+                  background: volumeFill === 0
+                    ? 'var(--player-progress-bg)'
+                    : `linear-gradient(to right, var(--accent-music) ${volumeFill}%, var(--player-progress-bg) ${volumeFill}%)`
+                }}
+              />
+            </div>
+          </div>
           <button
             className={styles.playBtn}
             onClick={() => isPlaying ? onPause() : onPlay(track)}

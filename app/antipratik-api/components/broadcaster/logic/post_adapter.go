@@ -101,11 +101,16 @@ func toPostSummary(p posts.Post) PostSummary {
 		if v.ThumbnailMedURL != nil {
 			thumbMed = *v.ThumbnailMedURL
 		}
+		category := ""
+		if v.Category != nil {
+			category = *v.Category
+		}
 		return PostSummary{
 			ID:                 v.ID,
 			Type:               v.Type,
 			Title:              v.Title,
 			LinkURL:            v.URL,
+			Category:           category,
 			Domain:             v.Domain,
 			Excerpt:            desc,
 			ThumbnailMediumURL: thumbMed,

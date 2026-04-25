@@ -38,8 +38,11 @@ func fileKeysForPost(post posts.Post) []string {
 			}
 		}
 	case posts.VideoPost:
-		if p.ThumbnailURL != "" {
-			keys = append(keys, urlToStorageKey(p.ThumbnailURL))
+		if p.VideoURL != "" {
+			keys = append(keys, urlToStorageKey(p.VideoURL))
+		}
+		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
+			keys = append(keys, thumbnailFileKeys(*p.ThumbnailURL, p.ThumbnailTinyURL, p.ThumbnailSmallURL, p.ThumbnailMedURL, p.ThumbnailLargeURL)...)
 		}
 	case posts.LinkPost:
 		if p.ThumbnailURL != nil && *p.ThumbnailURL != "" {
@@ -73,6 +76,34 @@ func fileKeysForImage(img *posts.PhotoImage) []string {
 	return keys
 }
 
+// albumArtFileKeys returns all storage keys for a MusicPost's album art (original + 4 sizes).
+func albumArtFileKeys(p posts.MusicPost) []string {
+	var keys []string
+	if p.AlbumArt != "" {
+		keys = append(keys, urlToStorageKey(p.AlbumArt))
+	}
+	for _, u := range []*string{p.AlbumArtTinyURL, p.AlbumArtSmallURL, p.AlbumArtMedURL, p.AlbumArtLargeURL} {
+		if u != nil && *u != "" {
+			keys = append(keys, urlToStorageKey(*u))
+		}
+	}
+	return keys
+}
+
+// thumbnailFileKeys returns all storage keys for a thumbnail set (original + 4 sizes).
+func thumbnailFileKeys(url string, tiny, small, med, large *string) []string {
+	var keys []string
+	if url != "" {
+		keys = append(keys, urlToStorageKey(url))
+	}
+	for _, u := range []*string{tiny, small, med, large} {
+		if u != nil && *u != "" {
+			keys = append(keys, urlToStorageKey(*u))
+		}
+	}
+	return keys
+}
+
 // urlToStorageKey converts a serving URL (/files/<id> or /thumbnails/<id>)
 // to a storage key (photos/<id>, music/<id>, or thumbnails/<id>).
 func urlToStorageKey(u string) string {
@@ -83,6 +114,8 @@ func urlToStorageKey(u string) string {
 		switch strings.ToLower(filepath.Ext(after)) {
 		case ".mp3", ".wav", ".ogg", ".m4a":
 			return "music/" + after
+		case ".mp4", ".webm", ".mov":
+			return "videos/" + after
 		default:
 			return "photos/" + after
 		}

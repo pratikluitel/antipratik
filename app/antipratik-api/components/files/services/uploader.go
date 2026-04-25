@@ -26,3 +26,7 @@ func (s *uploaderService) UploadMusicFiles(ctx context.Context, postID string, a
 func (s *uploaderService) UploadThumbnail(ctx context.Context, postID string, suffix string, file files.FileInput) (files.ThumbnailResult, error) {
 	return s.logic.UploadThumbnail(ctx, postID, suffix, file)
 }
+
+func (s *uploaderService) UploadVideoFile(ctx context.Context, postID string, file files.FileInput) (files.VideoFileResult, error) {
+	return s.logic.UploadVideoFile(ctx, postID, file)
+}

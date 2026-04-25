@@ -67,14 +67,13 @@ export interface PhotoPost extends BasePost {
 export interface VideoPost extends BasePost {
   type: 'video';
   title: string;
-  thumbnailUrl: string;
+  videoUrl: string;
+  description?: string;
+  thumbnailUrl?: string;
   thumbnailTinyUrl?: string;   // 20px wide — LQIP blur placeholder
   thumbnailSmallUrl?: string;  // 300px wide
   thumbnailMediumUrl?: string; // 600px wide
   thumbnailLargeUrl?: string;  // 1200px wide
-  videoUrl: string;
-  duration: number; // seconds
-  playlist?: string;
 }
 
 export interface LinkPost extends BasePost {

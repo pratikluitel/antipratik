@@ -191,10 +191,7 @@ func (s *postLogic) CreateVideo(ctx context.Context, preID string, input posts.V
 	if err := commonerrors.RequireNonEmpty("title", input.Title); err != nil {
 		return posts.VideoPost{}, err
 	}
-	if err := commonerrors.RequireNonEmpty("videoURL", input.VideoURL); err != nil {
-		return posts.VideoPost{}, err
-	}
-	if err := commonerrors.RequirePositive("duration", input.Duration); err != nil {
+	if err := commonerrors.RequireNonEmpty("videoUrl", input.VideoURL); err != nil {
 		return posts.VideoPost{}, err
 	}
 
@@ -215,8 +212,11 @@ func (s *postLogic) CreateVideo(ctx context.Context, preID string, input posts.V
 	}
 	return posts.VideoPost{
 		ID: id, Type: posts.PostTypeVideo, CreatedAt: createdAt, Tags: tags,
-		Title: input.Title, ThumbnailURL: input.ThumbnailURL, ThumbnailTinyURL: input.ThumbnailTinyURL,
-		VideoURL: input.VideoURL, Duration: input.Duration, Playlist: input.Playlist,
+		Title: input.Title, Description: input.Description,
+		ThumbnailURL: input.ThumbnailURL, ThumbnailTinyURL: input.ThumbnailTinyURL,
+		ThumbnailSmallURL: input.ThumbnailSmallURL, ThumbnailMedURL: input.ThumbnailMedURL,
+		ThumbnailLargeURL: input.ThumbnailLargeURL,
+		VideoURL:          input.VideoURL,
 	}, nil
 }
 
@@ -375,6 +375,10 @@ func (s *postLogic) UpdateMusic(ctx context.Context, id string, input posts.Upda
 	}
 	if input.AlbumArt != nil {
 		merged.AlbumArt = *input.AlbumArt
+		merged.AlbumArtTinyURL = input.AlbumArtTinyURL
+		merged.AlbumArtSmallURL = input.AlbumArtSmallURL
+		merged.AlbumArtMedURL = input.AlbumArtMedURL
+		merged.AlbumArtLargeURL = input.AlbumArtLargeURL
 	}
 	if input.Album != nil {
 		merged.Album = input.Album
@@ -393,8 +397,25 @@ func (s *postLogic) UpdateMusic(ctx context.Context, id string, input posts.Upda
 		return posts.MusicPost{}, err
 	}
 
+	var oldArtKeys []string
+	if input.AlbumArt != nil && cur.AlbumArt != "" && cur.AlbumArt != *input.AlbumArt {
+		oldArtKeys = albumArtFileKeys(cur)
+	}
+
 	if err := s.store.UpdateMusic(ctx, id, merged); err != nil {
 		return posts.MusicPost{}, fmt.Errorf("postLogic.UpdateMusic: %w", err)
+	}
+
+	if len(oldArtKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldArtKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateMusic: failed to delete old album art", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 
 	tags := merged.Tags
@@ -460,22 +481,24 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 	}
 
 	merged := posts.VideoPostInput{
-		Title: cur.Title, ThumbnailURL: cur.ThumbnailURL, ThumbnailTinyURL: cur.ThumbnailTinyURL,
+		Title: cur.Title, Description: cur.Description,
+		ThumbnailURL: cur.ThumbnailURL, ThumbnailTinyURL: cur.ThumbnailTinyURL,
 		ThumbnailSmallURL: cur.ThumbnailSmallURL, ThumbnailMedURL: cur.ThumbnailMedURL,
 		ThumbnailLargeURL: cur.ThumbnailLargeURL,
-		VideoURL:          cur.VideoURL, Duration: cur.Duration, Playlist: cur.Playlist, Tags: cur.Tags,
+		VideoURL:          cur.VideoURL, Tags: cur.Tags,
 	}
 	if input.Title != nil {
 		merged.Title = *input.Title
 	}
-	if input.VideoURL != nil {
-		merged.VideoURL = *input.VideoURL
+	if input.Description != nil {
+		merged.Description = input.Description
 	}
-	if input.Duration != nil {
-		merged.Duration = *input.Duration
-	}
-	if input.Playlist != nil {
-		merged.Playlist = input.Playlist
+	if input.ThumbnailURL != nil {
+		merged.ThumbnailURL = input.ThumbnailURL
+		merged.ThumbnailTinyURL = input.ThumbnailTinyURL
+		merged.ThumbnailSmallURL = input.ThumbnailSmallURL
+		merged.ThumbnailMedURL = input.ThumbnailMedURL
+		merged.ThumbnailLargeURL = input.ThumbnailLargeURL
 	}
 	if input.Tags != nil {
 		merged.Tags = input.Tags
@@ -484,15 +507,26 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 	if err := commonerrors.RequireNonEmpty("title", merged.Title); err != nil {
 		return posts.VideoPost{}, err
 	}
-	if err := commonerrors.RequireNonEmpty("videoURL", merged.VideoURL); err != nil {
-		return posts.VideoPost{}, err
-	}
-	if err := commonerrors.RequirePositive("duration", merged.Duration); err != nil {
-		return posts.VideoPost{}, err
+
+	var oldThumbKeys []string
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != nil && *cur.ThumbnailURL != *input.ThumbnailURL {
+		oldThumbKeys = thumbnailFileKeys(*cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
 	}
 
 	if err := s.store.UpdateVideo(ctx, id, merged); err != nil {
 		return posts.VideoPost{}, fmt.Errorf("postLogic.UpdateVideo: %w", err)
+	}
+
+	if len(oldThumbKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldThumbKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateVideo: failed to delete old thumbnail", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 
 	tags := merged.Tags
@@ -501,10 +535,11 @@ func (s *postLogic) UpdateVideo(ctx context.Context, id string, input posts.Upda
 	}
 	return posts.VideoPost{
 		ID: id, Type: posts.PostTypeVideo, CreatedAt: cur.CreatedAt, Tags: tags,
-		Title: merged.Title, ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: merged.ThumbnailTinyURL,
+		Title: merged.Title, Description: merged.Description,
+		ThumbnailURL: merged.ThumbnailURL, ThumbnailTinyURL: merged.ThumbnailTinyURL,
 		ThumbnailSmallURL: merged.ThumbnailSmallURL, ThumbnailMedURL: merged.ThumbnailMedURL,
 		ThumbnailLargeURL: merged.ThumbnailLargeURL,
-		VideoURL:          merged.VideoURL, Duration: merged.Duration, Playlist: merged.Playlist,
+		VideoURL:          merged.VideoURL,
 	}, nil
 }
 
@@ -540,6 +575,13 @@ func (s *postLogic) UpdateLinkPost(ctx context.Context, id string, input posts.U
 	if input.Category != nil {
 		merged.Category = input.Category
 	}
+	if input.ThumbnailURL != nil {
+		merged.ThumbnailURL = input.ThumbnailURL
+		merged.ThumbnailTinyURL = input.ThumbnailTinyURL
+		merged.ThumbnailSmallURL = input.ThumbnailSmallURL
+		merged.ThumbnailMedURL = input.ThumbnailMedURL
+		merged.ThumbnailLargeURL = input.ThumbnailLargeURL
+	}
 	if input.Tags != nil {
 		merged.Tags = input.Tags
 	}
@@ -556,8 +598,25 @@ func (s *postLogic) UpdateLinkPost(ctx context.Context, id string, input posts.U
 	}
 	merged.Domain = domain
 
+	var oldThumbKeys []string
+	if input.ThumbnailURL != nil && cur.ThumbnailURL != nil && *cur.ThumbnailURL != "" && *cur.ThumbnailURL != *input.ThumbnailURL {
+		oldThumbKeys = thumbnailFileKeys(*cur.ThumbnailURL, cur.ThumbnailTinyURL, cur.ThumbnailSmallURL, cur.ThumbnailMedURL, cur.ThumbnailLargeURL)
+	}
+
 	if err = s.store.UpdateLinkPost(ctx, id, merged); err != nil {
 		return posts.LinkPost{}, fmt.Errorf("postLogic.UpdateLinkPost: %w", err)
+	}
+
+	if len(oldThumbKeys) > 0 {
+		log := s.log
+		files := s.files
+		go func() {
+			for _, key := range oldThumbKeys {
+				if err := files.Delete(context.Background(), key); err != nil {
+					log.Error("UpdateLinkPost: failed to delete old thumbnail", "key", key, "err", err)
+				}
+			}
+		}()
 	}
 	tags := merged.Tags
 	if tags == nil {

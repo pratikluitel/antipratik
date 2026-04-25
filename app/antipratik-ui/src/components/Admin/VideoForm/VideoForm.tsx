@@ -15,9 +15,8 @@ interface VideoFormProps {
 
 export default function VideoForm({ token, initial, onSuccess, onCancel }: VideoFormProps) {
   const [title, setTitle] = useState(initial?.title ?? '');
-  const [videoURL, setVideoURL] = useState(initial?.videoUrl ?? '');
-  const [duration, setDuration] = useState(initial?.duration?.toString() ?? '');
-  const [playlist, setPlaylist] = useState(initial?.playlist ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [loading, setLoading] = useState(false);
@@ -32,16 +31,19 @@ export default function VideoForm({ token, initial, onSuccess, onCancel }: Video
       const fd = new FormData();
       if (initial) {
         if (title !== initial.title) fd.append('title', title);
-        if (videoURL !== initial.videoUrl) fd.append('videoURL', videoURL);
-        if (duration && parseInt(duration) !== initial.duration) fd.append('duration', duration);
-        if (playlist !== (initial.playlist ?? '')) fd.append('playlist', playlist);
+        if (description !== (initial.description ?? '')) fd.append('description', description);
+        if (thumbnailFile) fd.append('thumbnailFile', thumbnailFile);
         tags.forEach((t) => fd.append('tags[]', t));
         await updateVideoPost(initial.id, fd, token);
       } else {
+        if (!videoFile) {
+          setError('A video file is required.');
+          setLoading(false);
+          return;
+        }
         fd.append('title', title);
-        fd.append('videoURL', videoURL);
-        fd.append('duration', duration);
-        if (playlist) fd.append('playlist', playlist);
+        if (description) fd.append('description', description);
+        fd.append('videoFile', videoFile);
         if (thumbnailFile) fd.append('thumbnailFile', thumbnailFile);
         tags.forEach((t) => fd.append('tags[]', t));
         await createVideoPost(fd, token);
@@ -66,29 +68,29 @@ export default function VideoForm({ token, initial, onSuccess, onCancel }: Video
       </div>
 
       <div className={f.field}>
-        <label className={`${f.label} ${f.required}`} htmlFor="video-url">Video URL</label>
-        <input id="video-url" className={f.input} type="url" value={videoURL} onChange={(e) => setVideoURL(e.target.value)} required disabled={loading} />
+        <label className={f.label} htmlFor="video-description">Description</label>
+        <textarea id="video-description" className={f.textarea} value={description} onChange={(e) => setDescription(e.target.value)} disabled={loading} rows={3} />
       </div>
 
-      <div className={f.field}>
-        <label className={`${f.label} ${f.required}`} htmlFor="video-duration">Duration (seconds)</label>
-        <input id="video-duration" className={f.input} type="number" min="1" value={duration} onChange={(e) => setDuration(e.target.value)} required disabled={loading} />
-      </div>
+      {!initial && (
+        <div className={f.field}>
+          <label className={`${f.label} ${f.required}`} htmlFor="video-file">Video file</label>
+          <input
+            id="video-file"
+            className={f.fileInput}
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+            required
+            disabled={loading}
+          />
+        </div>
+      )}
 
       <div className={f.field}>
-        <label className={f.label} htmlFor="video-playlist">Playlist</label>
-        <input id="video-playlist" className={f.input} value={playlist} onChange={(e) => setPlaylist(e.target.value)} disabled={loading} />
-      </div>
-
-      <div className={f.field}>
-        <label className={f.label} htmlFor="video-thumb">
-          Thumbnail {initial && <span className={f.immutableNote}>(cannot be changed after creation)</span>}
-        </label>
-        {initial ? (
-          <p className={f.immutableNote}>Current: {initial.thumbnailUrl || 'none'}</p>
-        ) : (
-          <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
-        )}
+        <label className={f.label} htmlFor="video-thumb">Thumbnail</label>
+        {initial && <p className={f.immutableNote}>Current: {initial.thumbnailUrl ?? 'none'}</p>}
+        <input id="video-thumb" className={f.fileInput} type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif" onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)} disabled={loading} />
       </div>
 
       <div className={f.field}>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useReducer, useMemo, useState, useEffect } from 'react';
-import type { Post, PhotoPost, MusicPost } from '../../lib/types';
+import { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
+import type { Post, PhotoPost, MusicPost, VideoPost } from '../../lib/types';
 import {
   filterReducer,
   initialFilterState,
@@ -12,6 +12,7 @@ import FilterBar from '../FilterBar/FilterBar';
 import ClusterDivider from '../ClusterDivider/ClusterDivider';
 import PostCard from '../PostCard/PostCard';
 import Lightbox from '../Lightbox/Lightbox';
+import VideoPlayer from '../VideoPlayer/VideoPlayer';
 import { useMusicPlayer } from '../MusicProvider/MusicProvider';
 import styles from './FeedPageClient.module.css';
 
@@ -21,9 +22,10 @@ interface Props {
   initialTag?: string;
   initialPhotoId?: string;
   initialTrackId?: string;
+  initialVideoId?: string;
 }
 
-export default function FeedPageClient({ posts, allTags, initialTag, initialPhotoId, initialTrackId }: Props) {
+export default function FeedPageClient({ posts, allTags, initialTag, initialPhotoId, initialTrackId, initialVideoId }: Props) {
   const [state, dispatch] = useReducer(
     filterReducer,
     initialTag
@@ -43,6 +45,7 @@ export default function FeedPageClient({ posts, allTags, initialTag, initialPhot
 
   const [lightboxImages, setLightboxImages] = useState<PhotoPost['images'] | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
   const { play } = useMusicPlayer();
 
   useEffect(() => {
@@ -66,6 +69,14 @@ export default function FeedPageClient({ posts, allTags, initialTag, initialPhot
     }
   }, [initialTrackId, posts, play]);
 
+  useEffect(() => {
+    if (!initialVideoId) return;
+    const vp = posts.find((p): p is VideoPost => p.type === 'video' && p.id === initialVideoId);
+    if (vp) Promise.resolve().then(() => setActiveVideo({ url: vp.videoUrl, title: vp.title }));
+  }, [initialVideoId, posts]);
+
+  const openVideoPlayer = useCallback((post: VideoPost) => setActiveVideo({ url: post.videoUrl, title: post.title }), []);
+
   return (
     <div className={styles.page}>
       <FilterBar state={state} allTags={allTags} dispatch={dispatch} />
@@ -86,6 +97,7 @@ export default function FeedPageClient({ posts, allTags, initialTag, initialPhot
                 setLightboxIndex(idx);
               }}
               onTagClick={(tag) => dispatch({ type: 'TOGGLE_TAG', tag })}
+              onVideoPlay={openVideoPlayer}
             />
           );
         })}
@@ -95,6 +107,13 @@ export default function FeedPageClient({ posts, allTags, initialTag, initialPhot
           images={lightboxImages}
           startIndex={lightboxIndex}
           onClose={() => setLightboxImages(null)}
+        />
+      )}
+      {activeVideo && (
+        <VideoPlayer
+          videoUrl={activeVideo.url}
+          title={activeVideo.title}
+          onClose={() => setActiveVideo(null)}
         />
       )}
     </div>

@@ -1,349 +1,128 @@
 # antipratik-api — Claude Code Reference
 
-Read this file at the start of every session before writing any code.
-
----
-
-## Project Overview & Philosophy
-
-**antipratik-api** is the backend REST API for antipratik.com, a personal brand site for a Kathmandu-based developer, music tinkerer, and blogger.
-
-### The Backend Philosophy
-
-**Minimalist, Secure, and Robust:**
-> "Build for the worst-case user — assume they're trying to break it. Validate everything, fail fast with clear errors, and never trust input."
-
-**Defensive by Design:**
-> "Every parameter is suspect. Every request could be malicious. Every response must be safe."
-
-### Three Governing Principles
-
-1. **Input Validation First** — All parameters must be strictly validated before processing. Invalid input is rejected with readable error messages.
-2. **Layered Security** — Authentication, authorization, and input sanitization at every level.
-3. **Clean Architecture** — Dependency injection with interfaces ensures testability and maintainability.
-
-### Security Principle
-> "JWT tokens expire in 7 days. Passwords are bcrypt-hashed. CORS is permissive in development but must be locked down in production."
-
----
-
 ## Tech Stack
 
-| Layer | Choice | Reason |
-|-------|--------|--------|
-| Language | Go 1.22+ | Compiled, fast, excellent concurrency, strong typing |
-| HTTP Framework | stdlib `net/http` | No unnecessary abstractions — direct control over HTTP |
-| Database | SQLite via `modernc.org/sqlite` | Pure Go (no CGO), embedded, ACID compliant |
-| Config | YAML via `gopkg.in/yaml.v3` | Human-readable, versioned in git |
-| Auth | JWT via `github.com/golang-jwt/jwt/v5` | Industry standard, stateless |
-| Password Hashing | bcrypt via `golang.org/x/crypto/bcrypt` | Slow, salted, secure |
-| UUID | `github.com/google/uuid` | For generating unique IDs |
-| JSON | stdlib `encoding/json` | No external dependencies for core functionality |
+| Layer | Choice |
+|-------|--------|
+| Language | Go 1.22+ |
+| HTTP Framework | stdlib `net/http` |
+| Database | SQLite via `modernc.org/sqlite` (pure Go, no CGO) |
+| Config | YAML via `gopkg.in/yaml.v3` |
+| Auth | JWT via `github.com/golang-jwt/jwt/v5` (7-day expiry) |
+| Password Hashing | bcrypt via `golang.org/x/crypto/bcrypt` |
+| UUID | `github.com/google/uuid` |
 
-**Environment Overrides:** Server host and port can be overridden with `ANTIPRATIK_HOST` and `ANTIPRATIK_PORT` environment variables.
+`ANTIPRATIK_HOST` and `ANTIPRATIK_PORT` env vars override server address.
 
 ---
 
-## Major Architecture Pattern: 3-Layer Factory Pattern
-
-The API follows a **3-Layer Clean Architecture** with dependency injection, organised into **components**:
+## Architecture: 3-Layer Factory Pattern
 
 ```
 components/posts/               ← post and link CRUD
-  api/ → logic/ → store/        (3-layer pattern)
+  api/ → logic/ → store/
 
 components/auth/                ← authentication, JWT, bootstrap
-  api/ → logic/ → store/        (3-layer pattern)
+  api/ → logic/ → store/
 
 components/files/               ← file storage, upload processing, serving
-  api/ → logic/ → store/        (3-layer pattern)
-  services/                     ← StorageService + UploaderService for cross-component injection
+  api/ → logic/ → store/
+  services/                     ← StorageService + UploaderService (cross-component injection)
 
 components/broadcaster/         ← newsletter, email broadcast, contact form
-  api/ → logic/ → store/        (3-layer pattern)
+  api/ → logic/ → store/
   lib/resend/                   ← Resend SMTP client (EmailSender interface)
-  services/                     ← SubscriberService for cross-component injection
-  logic/emails/dist/            ← pre-built React Email HTML templates (gitignored; built by CI)
+  services/                     ← SubscriberService (cross-component injection)
+  logic/emails/dist/            ← pre-built React Email HTML (gitignored; built by CI)
 
 handlers/                       ← route registration, CORS, rate-limit middleware
-  routes.go                     ← RegisterRoutes; wires all component handlers onto the mux
+  routes.go                     ← RegisterRoutes
   middleware.go                 ← CORSMiddleware, RateLimitMiddleware
 
-┌─────────────────┐
-│   DB Package    │  ← SQLite connection + schema migrations (infrastructure only)
-│ (common/db/)    │     Called from main.go; not a business-logic store
-└─────────────────┘
-
-migrations/                     ← top-level SQL migration files (embedded in main.go via //go:embed)
+common/db/                      ← SQLite connection + migrations (infrastructure only)
+migrations/                     ← SQL files (embedded in main.go via //go:embed)
 ```
 
-**Services layer:** When one component needs to call another's logic, it imports the
-`services/` interface (e.g. `components/broadcaster/services.SubscriberService`) rather
-than importing the concrete logic package directly. Services are injected via `main.go`.
+Cross-component calls go through the `services/` interface, never importing another component's `api/`, `logic/`, or `store/` packages. Wiring happens only in `main.go`.
 
-Each layer has an **interface** and a **concrete implementation** created via factory functions. Dependencies flow downward through constructor injection.
-
-**Wiring Example:**
+**Wiring example:**
 ```go
-postStore := postsstore.NewPostStore(db)          // returns posts.PostStore
-postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger) // returns posts.PostLogic
-postH     := postsapi.NewPostHandler(postLogic, uploaderSvc, logger) // returns posts.PostHandler
+postStore := postsstore.NewPostStore(db)
+postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger)
+postH     := postsapi.NewPostHandler(postLogic, uploaderSvc, logger)
 ```
 
-**Benefits:**
-- Testability: Mock interfaces for unit tests
-- Separation of Concerns: Each layer has one responsibility
-- Maintainability: Changes in one layer don't affect others
-
 ---
 
-## The Sacred Rules
+## Sacred Rules
 
-These rules are inviolable. Check them before writing any code.
+### Rule 1 — Validate all input
+Every parameter validated before processing. Use descriptive messages: `"slug cannot be empty"` not `"invalid input"`.
 
-### Rule 1 — All Parameters Must Be Validated
-**Every input parameter must be validated** before processing. Assume the user is malicious.
-- Wrong: Accept any string as a slug
-- Right: Check for empty strings, invalid characters, length limits
-- Use descriptive error messages: `"slug cannot be empty"` not `"invalid input"`
+### Rule 2 — Defensive programming
+Check negative numbers, malformed URLs, empty required arrays. Trim whitespace.
 
-### Rule 2 — Defensive Programming: Assume the User is an Idiot
-**Never trust user input.** Validate types, ranges, and business rules.
-- Check for negative numbers where only positive make sense
-- Validate URLs are well-formed
-- Ensure arrays are not empty when required
-- Trim whitespace and reject obviously malicious content
+### Rule 3 — Readable error messages
+Log technical details internally; expose only safe messages to clients.
 
-### Rule 3 — Readable Error Messages
-**Error responses must be user-friendly and actionable.**
-- Wrong: `{"error": "internal server error"}`
-- Right: `{"error": "title cannot be longer than 200 characters"}`
-- Log technical details internally, but expose only safe messages to clients
+### Rule 4 — JWT middleware on protected routes
+All POST/PUT/DELETE endpoints use `JWTAuthMiddleware` from `components/auth/api/middleware.go`, applied in `handlers/routes.go`. Return 401 for invalid/missing tokens.
 
-### Rule 4 — JWT Middleware on Protected Routes
-**All write operations require JWT authentication.**
-- Use `JWTAuthMiddleware` from `components/auth/api/middleware.go` for POST/PUT/DELETE endpoints
-- Applied in `handlers/routes.go` via `protect := authapi.JWTAuthMiddleware(authSvc)`
-- Return `401 Unauthorized` for invalid/missing tokens
+### Rule 5 — No direct DB access in API layer
+API handlers call logic layer; logic calls store. No `db.Query()` in handlers.
 
-### Rule 5 — No Direct Database Access in API Layer
-**API handlers never call the database directly.**
-- Wrong: `db.Query()` in `api/posts.go`
-- Right: Delegate to logic layer, which calls store layer
-- Maintains separation of concerns and enables testing
+### Rule 6 — Context propagation
+Pass `context.Context` through all layers using `r.Context()`.
 
-### Rule 6 — Context Propagation
-**Pass `context.Context` through all layers.**
-- Use `r.Context()` from HTTP requests
-- Enables request tracing, cancellation, and timeouts
-- Required for proper database operations
+### Rule 7 — Structured logging
+Use `common/logging.Logger` — never `log.Printf` or `fmt.Print`. Logger constructed once in `main.go` and passed through constructors.
+- `INFO` — startup lifecycle only (in `main.go`)
+- `ERROR` — internal failures producing 500 (in API layer via `handleLogicError`)
+- Never log: validation errors (400), 404s, 401s, passwords, tokens, or personal data.
 
-### Rule 7 — Structured Logging
-**Use the `logging.Logger` interface from `common/logging`. Never use `log.Printf` or `fmt.Print` in application code.**
+### Rule 8 — Shared error definitions
+- `common/errors` — `ValidationError`, `New`, `Is`, `RequireNonEmpty`, `RequirePositive`
+- `api/errors.go` — `handleLogicError`: maps `commonerrors.Is(err)` → 400, else → 500
+- Component-specific sentinels stay in the owning package. Never redefine `ValidationError` locally.
 
-The logger is constructed once in `main.go` from `cfg.Logging.Level` and passed through every handler constructor. Level is controlled via `config.yaml` under `logging.level` (debug | info | warn | error), defaulting to `info`.
+### Rule 9 — Consistent JSON format
+Success: direct JSON object or array. Error: `{"error": "message"}`. Created: `{"id": "uuid"}`. Use `writeJSON()` and `writeError()` helpers.
 
-**What to log and where:**
-- `INFO` — startup lifecycle only (server start, migrations). In `main.go`.
-- `ERROR` — internal failures that produce a 500 response. In the API layer via `handleLogicError`.
-- `WARN` / `DEBUG` — reserved; use sparingly and only for genuinely invisible, non-user-facing events.
+### Rule 10 — Config from YAML + env vars
+Never hardcode sensitive values. Config loaded from YAML; env vars override.
 
-**What must never be logged:**
-- Validation errors (400) — they are returned to the user; logging them is noise.
-- Not found (404) and unauthorized (401) — expected, silent.
-- Passwords, tokens, or any personal data.
+### Rule 11 — Migration-based schema
+Schema changes via SQL files in `migrations/` (embedded in `main.go`). Run on startup via `db.RunMigrations`.
 
-### Rule 8 — Shared and Component-Specific Error Definitions
-**Validation errors live in `common/errors`; component-specific sentinel errors stay in their own package.**
-- `common/errors` — `ValidationError` type, `New(msg)`, `Is(err)`, `RequireNonEmpty`, `RequirePositive`. All logic packages call these directly; no local copies.
-- `api/errors.go` — `handleLogicError` helper that maps `commonerrors.Is(err)` → 400, anything else → 500.
-- Component-specific sentinels (e.g. `files/store.ErrFileNotFound`, `broadcaster/store.ErrDuplicate`) stay in the package that owns them.
-- Never redefine `ValidationError` locally in a component. Never scatter error type definitions across business logic files.
+### Rule 12 — Store never called directly from `main`
+`main.go` never imports or calls `store` for business operations — delegate to logic layer. `common/db/` (Open, RunMigrations) is infrastructure and may be called from `main.go`.
 
-### Rule 9 — Consistent JSON Response Format
-**All responses follow the same structure.**
-- Success: Direct JSON object or array
-- Error: `{"error": "message"}`
-- IDs returned as: `{"id": "uuid"}`
-- Use `writeJSON()` and `writeError()` helpers
+### Rule 13 — Always rate-limit public POST endpoints
+Any `POST` that writes to the DB without JWT must be wrapped with `RateLimitMiddleware` in `handlers/routes.go`. Current: `POST /api/subscribe` → 3 req/hour per IP.
 
-### Rule 10 — Environment-Specific Configuration
-**Configuration is loaded from YAML, overridden by environment variables.**
-- Default config in `config.yaml`
-- Environment overrides for deployment flexibility
-- Never hardcode sensitive values
+### Rule 14 — Photo post must always have ≥ 1 image
+`DELETE /api/posts/{id}/images/{imageID}` returns 400 if the post has only one image remaining. Enforced in `postLogic.DeletePhotoImage`. Never bypass.
 
-### Rule 11 — Migration-Based Schema Evolution
-**Database schema changes via SQL migrations.**
-- Versioned migration files in `migrations/` (top-level, embedded in `main.go`)
-- Run migrations on startup with `db.RunMigrations(sqlDB, migrationsFS)`
-- Ensures consistent schema across environments
-
-### Rule 12 — Store Is Never Called Directly from `main`
-**`main.go` must never import or call the `store` layer for business operations.**
-- Wrong: `store.UpsertAdminUser(db, password)` or `store.GetOrCreateJWTSecret(db)` in `main.go`
-- Right: Delegate to `authlogic.NewSetupLogic(...)` which wraps the relevant store interfaces
-- The `db/` package (Open, RunMigrations) is infrastructure and may be called from `main.go` directly — it is not a business logic store.
-- Any future bootstrapping operations (seeding data, secrets rotation) must go through a logic-layer service.
-
----
-
-## Layers of the Architecture
-
-### Handlers Layer (`handlers/`)
-**Purpose:** Route registration and cross-cutting HTTP middleware that isn't domain-specific.
-
-**Key Components:**
-- `RegisterRoutes` in `handlers/routes.go` — wires all component handlers onto the mux
-- `CORSMiddleware` in `handlers/middleware.go` — permissive CORS headers
-- `RateLimitMiddleware` in `handlers/middleware.go` — per-IP token-bucket rate limiting
-
-**Never Does:** Business logic, database queries, auth validation.
-
-### API Layer (`components/*/api/*.go`)
-**Purpose:** HTTP request/response handling, JSON serialization, routing.
-
-**Responsibilities:**
-- Parse HTTP requests into Go structs
-- Validate basic request structure (JSON parsing)
-- Call logic layer methods
-- Serialize responses to JSON
-- Handle HTTP status codes and headers
-
-**Key Components:**
-- `PostHandler`, `LinkHandler` interfaces in `components/posts/`; implementations `postHandler`, `linkHandler` in `components/posts/api/`
-- `authHandler` in `components/auth/api/`; `JWTAuthMiddleware` in `components/auth/api/middleware.go`
-- `fileServingHandler` in `components/files/api/`
-- `broadcasterHandler` in `components/broadcaster/api/`
-
-**Never Does:** Business logic, database queries, complex validation.
-
-### Logic Layer (`components/*/logic/*.go`)
-**Purpose:** Business rules, input validation, coordination between operations.
-
-**Responsibilities:**
-- Validate business rules (e.g., slug uniqueness, tag limits)
-- Coordinate multi-step operations
-- Transform data between layers
-- Handle business logic errors
-
-**Key Components:**
-- `PostLogic`, `LinkLogic` interfaces in `components/posts/` (root `interface.go`); implementations `postLogic`, `linkLogic` in `components/posts/logic/`
-- `AuthLogic`, `SetupLogic` interfaces in `components/auth/` (root `interface.go`); implementations `authLogic`, `setupLogic` in `components/auth/logic/`
-- `UploadLogic` interface in `components/files/` (root `interface.go`); implementation `uploadLogic` in `components/files/logic/`
-- `BroadcasterLogic` interface in `components/broadcaster/` (root `interface.go`); implementation `broadcasterLogic` in `components/broadcaster/logic/`
-- Input validation and sanitization
-
-**Never Does:** HTTP concerns, direct database access.
-
-### Store Layer (`components/*/store/*.go`)
-**Purpose:** Data persistence and retrieval.
-
-**Responsibilities:**
-- Execute SQL queries
-- Map database rows to Go structs
-- Handle database transactions
-
-**Key Components:**
-- `PostStore`, `LinkStore` interfaces in `components/posts/` (root `interface.go`); implementations in `components/posts/store/`
-- `UserStore`, `SettingsStore` interfaces in `components/auth/` (root `interface.go`); implementations in `components/auth/store/`
-- `FileStore` interface in `components/files/` (root `interface.go`) with `localFileStore` and `r2FileStore` implementations in `components/files/store/`
-- `BroadcasterStore` interface in `components/broadcaster/` (root `interface.go`); implementation `sqliteBroadcasterStore` in `components/broadcaster/store/`
-- SQLite implementations with prepared statements
-
-**Never Does:** Business logic, HTTP responses.
-
-### Services Layer (`components/*/services/`)
-**Purpose:** Expose a component's logic capabilities as an injectable interface for other components.
-
-**Key Components:**
-- `StorageService`, `UploaderService` in `components/files/services/` — file access for the posts component
-- `SubscriberService` in `components/broadcaster/services/` — newsletter subscription for future cross-component use
-
-**Never Does:** Handle HTTP requests, access the database directly.
-
----
-
-## What Claude Code Must Never Do
-
-### Guardrails — Absolute Prohibitions
-
-1. **Never Skip Input Validation** — Every parameter from users must be checked. No exceptions.
-2. **Never Return Sensitive Data** — Passwords, tokens, or internal IDs in error messages.
-3. **Never Use String Formatting for SQL** — Always use prepared statements (`?` placeholders) to prevent SQL injection. This applies to every query in every store file. Never concatenate or `fmt.Sprintf` user input into a SQL string.
-4. **Never Log Sensitive Information** — Passwords, JWT secrets, or user data in logs.
-5. **Never Bypass Authentication** — All write operations must check JWT tokens.
-6. **Never Hardcode Secrets** — Use config files and environment variables.
-7. **Never Ignore Errors** — Every error must be handled appropriately.
-8. **Never Mix Layers** — API layer calls logic, logic calls store. No shortcuts.
-9. **Never Use Panic** — Return errors instead of panicking in production code.
-10. **Never Trust Client-Side Validation** — Server must validate everything again.
-11. **Never Expose Storage Backend URLs** — File access always goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`. R2 object URLs must never appear in any response, log, or error message.
-12. **Never add a generic upload endpoint** — File uploads belong inside post handlers as `multipart/form-data` fields. Do not create `/uploads/*` routes. _Exception:_ per-resource sub-collection endpoints such as `POST /api/posts/{id}/images` are acceptable when they manage images on an already-existing post (e.g. adding an image to an existing photo post).
-13. **Always rate-limit public POST endpoints** — Any `POST` route that writes to the database and requires no JWT must be wrapped with `RateLimitMiddleware` (from `handlers/middleware.go`) in `handlers/routes.go`. Use `rate.Every(time.Hour/N)` with a matching burst. Currently: `POST /api/subscribe` is rate-limited to 3 req/hour per IP. New public write endpoints must follow the same pattern.
-14. **A photo post must always contain at least 1 image** — `DELETE /api/posts/{id}/images/{imageID}` returns a 400 ValidationError if the post has only one image remaining. This is enforced in the logic layer (`postLogic.DeletePhotoImage`). Never bypass this check.
-
-### Rule 15 — Never Violate Component Boundaries
-
-**Components must never import another component's `api/`, `logic/`, or `store/` sub-packages directly.**
-
-Each component exposes capabilities to other components exclusively through its `services/` package, which implements an interface defined in the component's root `interface.go`. The consuming component accepts that interface by value — it never imports the provider's concrete implementation.
-
-**Cross-component wiring happens only in `main.go`:**
-```go
-// posts exposes PostsService to broadcaster — never pass postLogic directly
-postLogic := postslogic.NewPostLogic(postStore, storageSvc, logger) // posts.PostLogic
-postsSvc  := postsservices.NewPostsService(postLogic)               // posts.PostsService
-broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...)            // accepts posts.PostsService
-```
-
-**Rules:**
-- A component's root `interface.go` (package `<component>`) is the only file other components may import from that component.
-- A component's `services/` package wraps its logic and returns the root interface type — it is the only permitted cross-component injection point.
-- Logic, store, and API interfaces are internal to the component that owns them.
-- Models shared across components live in the component's root package (`models.go`), not in `logic/` or `store/`.
+### Rule 15 — Never violate component boundaries
+api is responsible for all api -> logic variable conversion
+store is only responsible for translating the business logic -> storage component relations.
+NEVER violate this e.g. query parameter translation never goes into the store layer, it is done in the API layer.
+Components only expose capabilities via their `services/` package (implementing the root `interface.go`). Other components import the interface, never the concrete implementation.
 
 **Wrong:**
 ```go
 import postslogic "github.com/pratikluitel/antipratik/components/posts/logic"
-broadcasterlogic.NewBroadcasterLogic(..., postLogic, ...) // passes posts.PostLogic — violation
+broadcasterlogic.NewBroadcasterLogic(..., postLogic, ...) // violation
 ```
 
 **Right:**
 ```go
-import (
-    "github.com/pratikluitel/antipratik/components/posts"
-    postsservices "github.com/pratikluitel/antipratik/components/posts/services"
-)
+import postsservices "github.com/pratikluitel/antipratik/components/posts/services"
 postsSvc := postsservices.NewPostsService(postLogic) // returns posts.PostsService
-broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...) // accepts posts.PostsService — correct
+broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...) // correct
 ```
 
----
-
-## Security Patterns Employed
-
-### Authentication & Authorization
-- **JWT Bearer Tokens:** Stateless authentication with 7-day expiration
-- **Password Hashing:** bcrypt with appropriate cost factor
-- **Token Storage:** Database-backed token validation (not just signature)
-- **Middleware Protection:** All write endpoints wrapped with JWT validation
-
-### Input Security
-- **Parameter Validation:** Strict type, range, and format checking
-- **SQL Injection Prevention:** Prepared statements only
-- **XSS Prevention:** No direct HTML output (JSON API only)
-- **CSRF Protection:** Stateless JWT doesn't require CSRF tokens
-
-### Data Protection
-- **No Sensitive Data in Logs:** Structured logging without secrets
-- **Environment-Based Config:** Secrets via environment variables
-- **SQLite Encryption:** Consider SQLCipher for production if needed
-
-### Network Security
-- **CORS Configuration:** Permissive in dev, locked down in production
-- **HTTPS Enforcement:** Required for production deployments
-- **Rate Limiting:** Per-IP rate limiting via `RateLimitMiddleware` (`handlers/middleware.go`) — required on all public POST endpoints that write to the database
+Rules: only the component's root package may be imported by other components. Models shared across components live in the root `models.go`. Logic/store/API interfaces are internal.
 
 ---
 
@@ -351,128 +130,99 @@ broadcasterlogic.NewBroadcasterLogic(..., postsSvc, ...) // accepts posts.PostsS
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/api/posts` | No | All posts, filtered by `type` and `tag` query params |
+| GET | `/api/posts` | No | All posts, filtered by `type` and `tag` |
 | GET | `/api/posts/{slug}` | No | Single essay by slug |
-| POST | `/api/posts/essay` | JWT | Create new essay |
-| PUT | `/api/posts/essay/{id}` | JWT | Update existing essay |
-| POST | `/api/posts/short` | JWT | Create new short post |
-| PUT | `/api/posts/short/{id}` | JWT | Update existing short post |
-| POST | `/api/posts/music` | JWT | Create new music post |
-| PUT | `/api/posts/music/{id}` | JWT | Update existing music post |
-| POST | `/api/posts/photo` | JWT | Create new photo post |
-| PUT | `/api/posts/photo/{id}` | JWT | Update existing photo post |
-| POST | `/api/posts/video` | JWT | Create new video post |
-| PUT | `/api/posts/video/{id}` | JWT | Update existing video post |
-| POST | `/api/posts/link` | JWT | Create new link post |
-| PUT | `/api/posts/link/{id}` | JWT | Update existing link post |
+| POST | `/api/posts/essay` | JWT | Create essay |
+| PUT | `/api/posts/essay/{id}` | JWT | Update essay |
+| POST | `/api/posts/short` | JWT | Create short post |
+| PUT | `/api/posts/short/{id}` | JWT | Update short post |
+| POST | `/api/posts/music` | JWT | Create music post |
+| PUT | `/api/posts/music/{id}` | JWT | Update music post |
+| POST | `/api/posts/photo` | JWT | Create photo post |
+| PUT | `/api/posts/photo/{id}` | JWT | Update photo post |
+| POST | `/api/posts/video` | JWT | Create video post |
+| PUT | `/api/posts/video/{id}` | JWT | Update video post |
+| POST | `/api/posts/link` | JWT | Create link post |
+| PUT | `/api/posts/link/{id}` | JWT | Update link post |
 | DELETE | `/api/posts/{id}` | JWT | Delete any post type |
 | GET | `/api/links/featured` | No | Up to 4 featured external links |
 | GET | `/api/links` | No | All external links |
-| POST | `/api/links` | JWT | Create new external link |
-| PUT | `/api/links/{id}` | JWT | Update existing external link |
+| POST | `/api/links` | JWT | Create external link |
+| PUT | `/api/links/{id}` | JWT | Update external link |
 | DELETE | `/api/links/{id}` | JWT | Delete external link |
-| POST | `/api/auth/login` | No | Login with username/password, returns JWT |
-| GET | `/api/openapi.yaml` | No | OpenAPI 3.0 specification |
-| GET | `/api/index.html` | No | Swagger UI for API documentation |
-| GET | `/files/{fileId}` | No | Stream original uploaded file binary |
-| GET | `/thumbnails/{thumbnailId}` | No | Stream photo thumbnail binary |
-
-Most API endpoints return `application/json`. Exceptions:
-- `GET /files/{fileId}` streams original audio/image binary content with the proper MIME type.
-- `GET /thumbnails/{thumbnailId}` streams binary thumbnail images.
-Errors: `{"error":"message"}`.
+| POST | `/api/auth/login` | No | Login, returns JWT |
+| GET | `/api/openapi.yaml` | No | OpenAPI 3.0 spec |
+| GET | `/api/index.html` | No | Swagger UI |
+| GET | `/files/{fileId}` | No | Stream file binary |
+| GET | `/thumbnails/{thumbnailId}` | No | Stream thumbnail binary |
 
 ### File Upload Contract
-File uploads are embedded in the existing post create endpoints as `multipart/form-data` (not separate upload endpoints).
 
-| Post type | Endpoint | File fields |
-|-----------|----------|-------------|
-| Music | `POST/PUT /api/posts/music` | `audioFile` (required), `albumArtFile` (optional) |
-| Photo | `POST/PUT /api/posts/photo` | `images[]` (one or more, required) |
-| Video | `POST/PUT /api/posts/video` | `thumbnailFile` (optional) |
-| Link | `POST/PUT /api/posts/link` | `thumbnailFile` (optional) |
+File uploads are `multipart/form-data` fields on post endpoints — no separate upload routes.
 
-- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Allowed audio types: `mp3`, `wav`, `ogg`, `m4a`.
-- `POST /api/posts/music` supports optional `albumArtFile`.
-- `POST /api/posts/video` and `POST /api/posts/link` support optional `thumbnailFile`.
-- Link URLs must be absolute; the server derives `domain` automatically from the submitted `url`.
-- Photo uploads auto-generate 4 thumbnail variants: tiny (20px), small (300px), medium (600px), large (1200px) wide. Widths are defined as constants in `logic/uploads.go` — change them there.
-- Stored file keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
-- All URL fields in responses are **relative** (`/files/…`, `/thumbnails/…`). The frontend must prefix them with the API base URL.
-- File URLs always route through the backend's own `/files/` and `/thumbnails/` endpoints — the storage backend (local or R2) is never exposed.
-- **Tag handling in multipart requests:** Use the `formTags(r)` helper (defined in `api/helpers.go`) in all multipart handlers — both CREATE and UPDATE. It reads either `tags` or `tags[]` from the form, splits comma-separated values, and returns:
-  - `nil` — key was absent in a non-multipart request → preserve existing tags (UPDATE only)
-  - `[]string{}` — key was absent in a multipart request, or present but empty → **clear all tags**
-  - `[]string{…}` — the parsed tag values
-  Never read `r.Form["tags"]` or `r.Form["tags[]"]` directly in handlers; always call `formTags(r)` (defined in `components/posts/api/helpers.go`).
+| Post type | File fields |
+|-----------|-------------|
+| Music | `audioFile` (required), `albumArtFile` (optional) |
+| Photo | `images[]` (one or more, required) |
+| Video | `videoFile` mp4/webm only (required on create, silently ignored on update), `thumbnailFile` (optional) |
+| Link | `thumbnailFile` (optional) |
 
-### Post Types Supported
-- **essay:** Long-form writing with title, slug, excerpt, body, reading time
-- **short:** Brief text posts with hashtags
-- **music:** Music tracks with album art, audio URL, duration
-- **photo:** Photo galleries with metadata
-- **video:** Videos with thumbnails and metadata
-- **link:** Curated external links as posts
+- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Audio: `mp3`, `wav`, `ogg`, `m4a`. Video: `mp4`, `webm` (`.mov` rejected — poor browser seeking support).
+- Photo uploads auto-generate 4 thumbnail variants: tiny (20px), small (300px), medium (600px), large (1200px). Widths defined in `logic/uploads.go`.
+- Stored keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `videos/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
+- All URL fields in responses are relative (`/files/…`, `/thumbnails/…`) — frontend prefixes with API base URL.
+- **Tag handling in multipart:** Use `formTags(r)` helper (`components/posts/api/helpers.go`) in all multipart handlers. Returns: `nil` (key absent, non-multipart → preserve tags), `[]string{}` (absent in multipart or empty → clear all tags), `[]string{…}` (parsed values). Never read `r.Form["tags"]` directly.
+- Never add a generic `/uploads/*` endpoint. Exception: per-resource sub-collection endpoints like `POST /api/posts/{id}/images` are acceptable for managing images on an existing post.
+- Never expose R2 object URLs — all file access goes through `/files/{fileId}` and `/thumbnails/{thumbnailId}`.
+
+---
+
+## HTTP Status Codes
+
+| Status | When to use |
+|--------|-------------|
+| `200 OK` | GET, successful POST returning data |
+| `201 Created` | POST creating a resource (returns `{"id": "…"}`) |
+| `204 No Content` | DELETE |
+| `400 Bad Request` | `commonerrors.ValidationError` |
+| `401 Unauthorized` | Missing/invalid JWT |
+| `404 Not Found` | Resource doesn't exist |
+| `429 Too Many Requests` | Rate limited |
+| `500 Internal Server Error` | Any non-ValidationError from logic/store |
+
+Use `handleLogicError` for all logic errors — never manually write a 500.
 
 ---
 
 ## Conventions
 
 ### Input Type Naming
-Input types (passed into logic/store layers) follow the `*PostInput` pattern — never `Create*Post`.
 
-| Input type | Used for |
-|-----------|----------|
-| `EssayPostInput`, `ShortPostInput` | create **and** the merged value inside update |
-| `MusicPostInput`, `VideoPostInput`, `LinkPostInput`, `PhotoPostInput` | same |
-| `Update*Post` (e.g. `UpdateEssayPost`) | **partial** update inputs only — all fields are pointers; `nil` means "leave unchanged" |
+| Type | Used for |
+|------|----------|
+| `EssayPostInput`, `ShortPostInput`, etc. | Create and the merged value inside update |
+| `UpdateEssayPost`, `UpdateMusicPost`, etc. | Partial update — all fields are pointers; `nil` = leave unchanged |
 
-Rule: if a field is required on create but optional on update, the Create type uses a value type and the Update type uses a pointer. Never add pointer fields to `*PostInput` types just to support partial updates — keep a separate `Update*Post` for that.
+Never add pointer fields to `*PostInput` types for partial updates — use the separate `Update*Post` type.
 
 ### Post Type Constants
-Use `models.PostType*` constants instead of bare string literals everywhere:
 ```go
 models.PostTypeEssay, models.PostTypeShort, models.PostTypeMusic,
 models.PostTypePhoto, models.PostTypeVideo, models.PostTypeLink
 ```
+Use constants everywhere — never bare string literals.
 
 ### Concurrency
-- `UploadPhotoFiles` processes images concurrently, bounded by `maxConcurrentUploads = 4` (defined in `logic/uploads.go`). Do not raise this without considering memory and file-store rate limits.
-- `DeletePost` deletes the database record first (post immediately invisible to readers), then cleans up files in a background goroutine using `context.Background()`. File-delete failures are logged but do not affect the response — this is intentional.
+- `UploadPhotoFiles` processes images concurrently, bounded by `maxConcurrentUploads = 4` (`logic/uploads.go`).
+- `DeletePost` deletes the DB record first (post immediately invisible), then cleans up files in a background goroutine using `context.Background()`. File-delete failures are logged but don't affect the response — intentional.
 
----
-
-## HTTP Status Code Contract
-
-Every handler must return the appropriate status using these rules. Do not deviate.
-
-| Status | Meaning | When to use |
-|--------|---------|-------------|
-| `200 OK` | Success with body | GET, successful POST that returns data |
-| `201 Created` | Resource created | POST that creates a new resource (returns `{"id": "…"}`) |
-| `204 No Content` | Success, no body | DELETE |
-| `400 Bad Request` | Client error | `commonerrors.ValidationError` — bad input, failed validation, duplicate entry |
-| `401 Unauthorized` | Auth failure | Missing/invalid JWT token |
-| `404 Not Found` | Missing resource | Resource with given ID/slug does not exist |
-| `429 Too Many Requests` | Rate limited | IP exceeded the per-endpoint rate limit |
-| `500 Internal Server Error` | Server error | Any non-ValidationError from the logic or store layer |
-
-The `handleLogicError` helper in `api/errors.go` maps `commonerrors.Is(err) → 400` and everything else `→ 500`. Use it for all logic layer errors. Never manually write a 500 — let the helper do it so the log entry is consistent.
-
----
-
-## Transaction Pattern
-
-Multi-step database writes that must be atomic (e.g. insert a post row then insert its tags) use `*sql.Tx`.
-Never split a logically atomic operation across two separate store calls from the logic layer — if one succeeds and the other fails, the database will be in a partial state.
+### Transaction Pattern
+Multi-step writes that must be atomic (e.g. insert post then insert tags) use `*sql.Tx`. Never split logically atomic operations across two separate store calls from the logic layer.
 
 ---
 
 ## Database Schema
 
-SQLite database with foreign key constraints and cascading deletes.
-
-### Core Tables
 | Table | Purpose |
 |-------|---------|
 | `posts` | Base post metadata (id, type, created_at) |
@@ -484,122 +234,58 @@ SQLite database with foreign key constraints and cascading deletes.
 | `video_posts` | Video metadata |
 | `link_posts` | Link post data |
 | `external_links` | Curated external links |
-| `users` | User accounts for authentication |
-| `settings` | Key-value configuration storage |
+| `users` | User accounts |
+| `settings` | Key-value config storage |
 
-`photo_images` has nullable thumbnail columns added across migrations `004`–`005`: `thumbnail_tiny_url`, `thumbnail_small_url`, `thumbnail_medium_url`, `thumbnail_large_url`. Existing rows may have `NULL`; rows created via the upload endpoint have all four populated.
-
-### Key Relationships
-- All post types reference `posts.id` with CASCADE DELETE
-- Tags stored separately to allow efficient filtering
-- Users have optional current JWT token with expiration
+`photo_images` has nullable thumbnail columns added in migrations `004`–`005`: `thumbnail_tiny_url`, `thumbnail_small_url`, `thumbnail_medium_url`, `thumbnail_large_url`. Existing rows may have `NULL`.
 
 ---
 
-## Development Workflow
+## Broadcaster Component
 
-1. **Start with Tests:** Write failing tests first
-2. **Validate Inputs:** Add validation in logic layer
-3. **Handle Errors:** Return descriptive error messages
-4. **Log Appropriately:** Context-rich logs for debugging
-5. **Test Endpoints:** Use OpenAPI spec and Swagger UI
-6. **Migrate Schema:** Add SQL migrations for schema changes
+Templates written as React Email components in `app/emails/`, built to static HTML by CI, embedded into the Go binary via `//go:embed` in `components/broadcaster/logic/templates.go`.
 
-## Code Quality — Required Before Every Change
+**Build flow:** `npm run build` in `app/emails/` → copies `dist/` to `components/broadcaster/logic/emails/dist/` → `go build` embeds.  
+For local dev: run `npm run build` in `app/emails/` and copy `dist/` manually before running the Go server.
 
-After every code change, run both checks and fix any errors before considering the work done:
+**Token substitution:** Templates use `__TOKEN__` placeholders replaced at send time by `strings.NewReplacer`. `__UNSUBSCRIBE_TOKEN__` and `__POSTS_HTML__` are substituted per-subscriber at dispatch time.
+
+**Post adapter:** `components/broadcaster/logic/post_adapter.go` adapts `posts.PostsService` to the broadcaster's internal `PostService` interface. Wired in `main.go` via `postsservices.NewPostsService(postLogic)`.
+
+**Email image URLs:** All file/thumbnail URLs in the DB are relative. The broadcaster's `absoluteURL` helper prefixes with `cfg.SiteDomain` before writing into email HTML. `site_domain` must be set to the public base URL (e.g. `https://antipratik.com`) — set via `ANTIPRATIK_SITE_DOMAIN` env var in production.
+
+**Email click-through URLs:**
+
+| Post type | Email link destination |
+|-----------|----------------------|
+| essay | `{site_domain}/{slug}` |
+| photo | `{site_domain}/feed?photo={id}` |
+| music | `{site_domain}/feed?track={id}` |
+| video | `{site_domain}/feed?video={id}` |
+| link | external URL directly |
+
+**Storage backend config** (`config.yaml`):
+- `local` — files written to `storage.local_dir` (default `./data/uploads/`)
+- `r2` — requires `storage.r2.endpoint`, `bucket`, `access_key_id`, `secret_access_key` (supply via secrets, not committed config)
+
+---
+
+## Code Quality
+
+After every code change:
 
 ```bash
 CGO_ENABLED=0 go vet ./...
 CGO_ENABLED=0 golangci-lint run
 ```
 
-Both commands must produce **zero errors**. Warnings from `golangci-lint` that are false positives may be suppressed with a targeted `//nolint:<linter>` comment with a brief explanation, but errors must be fixed.
-
----
-
-## Broadcaster Component
-
-The broadcaster handles newsletter subscriptions, email broadcasts, and the contact form.
-
-### Email Template Architecture
-
-Templates are written as React Email components in `app/emails/` and built to static HTML at CI time. The built HTML is embedded into the Go binary at compile time via `//go:embed`.
-
-```
-app/emails/                                        ← React Email source (TypeScript)
-  emails/newsletter.tsx                            ← newsletter template
-  emails/confirmation.tsx                          ← subscription confirmation email
-  emails/contact.tsx                               ← contact form notification email
-  scripts/render.ts                                ← renders templates to dist/
-  package.json                                     ← react-email, tsx
-
-components/broadcaster/logic/emails/dist/          ← built HTML (gitignored; built by CI)
-  newsletter.html
-  confirmation.html
-  contact.html
-
-components/broadcaster/logic/templates.go          ← //go:embed directives
-```
-
-**Build flow:**
-1. `npm run build` in `app/emails/` renders templates to `dist/`
-2. Dockerfile copies `dist/` to `components/broadcaster/logic/emails/dist/`
-3. `go build` embeds the HTML files at compile time via `templates.go`
-
-**For local development:** run `npm run build` in `app/emails/` and copy `dist/` to `components/broadcaster/logic/emails/dist/` before running the Go server.
-
-### Token substitution
-
-Templates use `__TOKEN__` placeholders replaced at send time by `strings.NewReplacer`. The `__UNSUBSCRIBE_TOKEN__` and `__POSTS_HTML__` tokens are substituted per-subscriber at dispatch time.
-
-### Post adapter
-
-`components/broadcaster/logic/post_adapter.go` adapts `posts.PostsService` to the broadcaster's internal `PostService` interface. `NewBroadcasterLogic` accepts a `posts.PostsService` (from `components/posts/services/`) and creates the adapter internally. `posts.PostsService` is wired in `main.go` via `postsservices.NewPostsService(postLogic)`. The adapter maps all six post model types (`essay`, `short`, `music`, `photo`, `video`, `link`) to `PostSummary` values used for email rendering, including markdown-to-HTML conversion for essay bodies via `goldmark`.
-
-### Email image URLs
-
-All file/thumbnail URLs stored in the database are **relative** (`/thumbnails/…`, `/files/…`). The broadcaster's `absoluteURL` helper prefixes them with `cfg.SiteDomain` before writing them into email HTML. **`site_domain` must be set to the publicly reachable base URL** (e.g. `https://antipratik.com`) — email clients cannot load relative or `localhost` URLs. Set via `ANTIPRATIK_SITE_DOMAIN` env var in production.
-
-### Email click-through URLs
-
-| Post type | Email link destination |
-|-----------|----------------------|
-| essay | `{site_domain}/{slug}` |
-| photo | `{site_domain}/feed?photo={id}` → opens lightbox |
-| music | `{site_domain}/feed?track={id}` → auto-plays track |
-| video | video URL directly |
-| link | external URL directly |
-
----
-
-## Deployment Considerations
-
-- **Environment Variables:** `ANTIPRATIK_HOST`, `ANTIPRATIK_PORT` for configuration
-- **`ANTIPRATIK_SITE_DOMAIN`:** Must be set to the public base URL (e.g. `https://antipratik.com`). Used for email image URLs and user-facing links. Without it, email images will not load.
-- **Database Path:** Configurable SQLite file location
-- **Static Serving:** Serves Next.js build from configurable directory
-- **CORS:** Must be configured for production domains
-- **HTTPS:** Required for secure cookie/token handling
-- **Backups:** SQLite database should be regularly backed up
-- **File Storage:** Configure `storage.backend` in `config.yaml`:
-  - `local` — files written to `storage.local_dir` (default `./data/uploads/`)
-  - `r2` — files stored in Cloudflare R2; requires `storage.r2.endpoint`, `bucket`, `access_key_id`, `secret_access_key`
-  - R2 credentials should be supplied via environment or secrets management, not committed to `config.yaml`
-
----
+Both must produce zero errors. False-positive warnings may be suppressed with `//nolint:<linter>` + explanation, but errors must be fixed.
 
 ## Running Locally
 
 ```bash
 cd app/antipratik-api
 go run ./main.go
-# custom config:
-go run ./main.go --config /path/to/config.yaml
-```
-
-For development with hot reloading (automatic restart on code changes):
-```bash
-cd app/antipratik-api
+# or with hot reload:
 air
 ```

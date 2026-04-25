@@ -73,8 +73,42 @@ func (s *localFileStore) Get(_ context.Context, key string) (io.ReadSeekCloser, 
 		}
 		return nil, "", fmt.Errorf("localFileStore.Get: %w", err)
 	}
-	// Derive content type from extension.
 	return f, contentTypeFromKey(key), nil
+}
+
+func (s *localFileStore) GetRange(_ context.Context, key string, r *files.ParsedRange) (io.ReadCloser, string, string, int64, error) {
+	path := filepath.Join(s.baseDir, filepath.FromSlash(key))
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, "", "", 0, ErrFileNotFound
+		}
+		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange: %w", err)
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		_ = f.Close()
+		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange stat: %w", err)
+	}
+	ct := contentTypeFromKey(key)
+	total := fi.Size()
+
+	if r == nil {
+		return f, ct, "", total, nil
+	}
+
+	start, end, ok := resolveRange(r, total)
+	if !ok {
+		_ = f.Close()
+		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange: unsatisfiable range")
+	}
+	if _, err := f.Seek(start, io.SeekStart); err != nil {
+		_ = f.Close()
+		return nil, "", "", 0, fmt.Errorf("localFileStore.GetRange seek: %w", err)
+	}
+	length := end - start + 1
+	cr := fmt.Sprintf("bytes %d-%d/%d", start, end, total)
+	return &limitedReadCloser{Reader: io.LimitReader(f, length), Closer: f}, ct, cr, length, nil
 }
 
 // ── R2 implementation ─────────────────────────────────────────────────────────
@@ -154,6 +188,38 @@ func (s *r2FileStore) Get(ctx context.Context, key string) (io.ReadSeekCloser, s
 	return &bytesReadSeekCloser{bytes.NewReader(buf)}, ct, nil
 }
 
+func (s *r2FileStore) GetRange(ctx context.Context, key string, r *files.ParsedRange) (io.ReadCloser, string, string, int64, error) {
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	}
+	if r != nil {
+		input.Range = aws.String(parsedRangeToS3Header(r))
+	}
+	out, err := s.client.GetObject(ctx, input)
+	if err != nil {
+		var nsk *types.NoSuchKey
+		if errors.As(err, &nsk) {
+			return nil, "", "", 0, ErrFileNotFound
+		}
+		return nil, "", "", 0, fmt.Errorf("r2FileStore.GetRange: %w", err)
+	}
+	ct := contentTypeFromKey(key)
+	if out.ContentType != nil && *out.ContentType != "" {
+		ct = *out.ContentType
+	}
+	var cr string
+	if out.ContentRange != nil {
+		cr = *out.ContentRange
+	}
+	var length int64 = -1
+	if out.ContentLength != nil {
+		length = *out.ContentLength
+	}
+	// out.Body is streamed directly — caller must close it.
+	return out.Body, ct, cr, length, nil
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // bytesReadSeekCloser wraps a *bytes.Reader to satisfy io.ReadSeekCloser.
@@ -161,26 +227,8 @@ type bytesReadSeekCloser struct{ *bytes.Reader }
 
 func (bytesReadSeekCloser) Close() error { return nil }
 
-// contentTypeFromKey returns a MIME type based on the file extension in key.
-func contentTypeFromKey(key string) string {
-	switch filepath.Ext(key) {
-	case ".jpg", ".jpeg":
-		return "image/jpeg"
-	case ".png":
-		return "image/png"
-	case ".webp":
-		return "image/webp"
-	case ".gif":
-		return "image/gif"
-	case ".mp3":
-		return "audio/mpeg"
-	case ".wav":
-		return "audio/wav"
-	case ".ogg":
-		return "audio/ogg"
-	case ".m4a":
-		return "audio/mp4"
-	default:
-		return "application/octet-stream"
-	}
+// limitedReadCloser pairs a limited reader with the underlying closer.
+type limitedReadCloser struct {
+	io.Reader
+	io.Closer
 }

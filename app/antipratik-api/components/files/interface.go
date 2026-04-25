@@ -21,6 +21,11 @@ type UploadLogic interface {
 	// UploadThumbnail stores a single thumbnail image plus a 20px-wide tiny variant.
 	// suffix is appended to the postID in the stored file name (e.g. "thumb").
 	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error)
+
+	// UploadVideoFile stores a video file for the given post.
+	// Accepted extensions: mp4, webm, mov. Stored at videos/<postID>.<ext>.
+	// Returns a relative URL of the form /files/videos/<postID>.<ext>.
+	UploadVideoFile(ctx context.Context, postID string, file FileInput) (VideoFileResult, error)
 }
 
 // UploaderService exposes file upload capabilities to other components.
@@ -29,12 +34,12 @@ type UploaderService interface {
 	UploadPhotoFiles(ctx context.Context, postID string, files []FileInput) ([]PhotoImageResult, error)
 	UploadMusicFiles(ctx context.Context, postID string, audioFile *FileInput, albumArtFile *FileInput) (MusicFilesResult, error)
 	UploadThumbnail(ctx context.Context, postID string, suffix string, file FileInput) (ThumbnailResult, error)
+	UploadVideoFile(ctx context.Context, postID string, file FileInput) (VideoFileResult, error)
 }
 
 // StorageService exposes file retrieval and deletion to other components.
 // Inject this interface rather than importing files/store directly.
 type StorageService interface {
-	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
 	Delete(ctx context.Context, key string) error
 }
 
@@ -47,6 +52,12 @@ type FileStore interface {
 	// Returns a seekable body (caller must close), the content type, and any error.
 	// The returned body implements io.ReadSeekCloser so callers can serve Range requests.
 	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
+	// GetRange retrieves a byte range of the file stored at key.
+	// r is the parsed range from the HTTP Range header; nil means serve the full object.
+	// Returns: body (caller must close), content-type, Content-Range response header
+	// ("bytes start-end/total"; empty when serving the full object), content-length of
+	// the returned body, and any error.
+	GetRange(ctx context.Context, key string, r *ParsedRange) (io.ReadCloser, string, string, int64, error)
 	// Delete removes the file stored at key. It is not an error if the key does not exist.
 	Delete(ctx context.Context, key string) error
 }
