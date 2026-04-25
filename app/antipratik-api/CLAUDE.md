@@ -104,7 +104,9 @@ Any `POST` that writes to the DB without JWT must be wrapped with `RateLimitMidd
 `DELETE /api/posts/{id}/images/{imageID}` returns 400 if the post has only one image remaining. Enforced in `postLogic.DeletePhotoImage`. Never bypass.
 
 ### Rule 15 — Never violate component boundaries
-
+api is responsible for all api -> logic variable conversion
+store is only responsible for translating the business logic -> storage component relations.
+NEVER violate this e.g. query parameter translation never goes into the store layer, it is done in the API layer.
 Components only expose capabilities via their `services/` package (implementing the root `interface.go`). Other components import the interface, never the concrete implementation.
 
 **Wrong:**
@@ -162,10 +164,10 @@ File uploads are `multipart/form-data` fields on post endpoints — no separate 
 |-----------|-------------|
 | Music | `audioFile` (required), `albumArtFile` (optional) |
 | Photo | `images[]` (one or more, required) |
-| Video | `videoFile` (required on create, silently ignored on update), `thumbnailFile` (optional) |
+| Video | `videoFile` mp4/webm only (required on create, silently ignored on update), `thumbnailFile` (optional) |
 | Link | `thumbnailFile` (optional) |
 
-- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Audio: `mp3`, `wav`, `ogg`, `m4a`. Video: `mp4`, `webm`, `mov`.
+- Allowed photo types: `jpg`, `jpeg`, `png`, `webp`. Audio: `mp3`, `wav`, `ogg`, `m4a`. Video: `mp4`, `webm` (`.mov` rejected — poor browser seeking support).
 - Photo uploads auto-generate 4 thumbnail variants: tiny (20px), small (300px), medium (600px), large (1200px). Widths defined in `logic/uploads.go`.
 - Stored keys: `photos/<postId>-<index>.<ext>`, `music/<postId>.<ext>`, `videos/<postId>.<ext>`, `thumbnails/<postId>-<index>-<size>.<ext>`.
 - All URL fields in responses are relative (`/files/…`, `/thumbnails/…`) — frontend prefixes with API base URL.

@@ -53,12 +53,11 @@ type FileStore interface {
 	// The returned body implements io.ReadSeekCloser so callers can serve Range requests.
 	Get(ctx context.Context, key string) (io.ReadSeekCloser, string, error)
 	// GetRange retrieves a byte range of the file stored at key.
-	// rangeHeader is the raw RFC 7233 Range request header value (e.g. "bytes=0-1023");
-	// pass "" to fetch the full object.
+	// r is the parsed range from the HTTP Range header; nil means serve the full object.
 	// Returns: body (caller must close), content-type, Content-Range response header
 	// ("bytes start-end/total"; empty when serving the full object), content-length of
 	// the returned body, and any error.
-	GetRange(ctx context.Context, key, rangeHeader string) (io.ReadCloser, string, string, int64, error)
+	GetRange(ctx context.Context, key string, r *ParsedRange) (io.ReadCloser, string, string, int64, error)
 	// Delete removes the file stored at key. It is not an error if the key does not exist.
 	Delete(ctx context.Context, key string) error
 }

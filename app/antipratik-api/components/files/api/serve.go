@@ -21,8 +21,7 @@ func NewFileServingHandler(fs files.FileStore, log logging.Logger) files.FilesAP
 }
 
 // ServeFile handles GET /files/{fileId}.
-// Forwards the Range request header to the store so R2 returns only the requested
-// bytes — no full-file buffering for seeks on large video files.
+// Parses the Range header in the API layer and passes the resolved range to the store.
 func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 	fileID := r.PathValue("fileId")
 	if fileID == "" {
@@ -30,10 +29,18 @@ func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rangeHeader := r.Header.Get("Range")
+	var parsedRange *files.ParsedRange
+	if raw := r.Header.Get("Range"); raw != "" {
+		pr, ok := parseByteRange(raw)
+		if !ok {
+			writeError(w, http.StatusRequestedRangeNotSatisfiable, "invalid range")
+			return
+		}
+		parsedRange = pr
+	}
 
 	for _, prefix := range []string{"photos/", "music/", "videos/"} {
-		body, ct, contentRange, contentLength, err := h.fileStore.GetRange(r.Context(), prefix+fileID, rangeHeader)
+		body, ct, contentRange, contentLength, err := h.fileStore.GetRange(r.Context(), prefix+fileID, parsedRange)
 		if err == nil {
 			streamFileRange(w, body, ct, contentRange, contentLength)
 			return
