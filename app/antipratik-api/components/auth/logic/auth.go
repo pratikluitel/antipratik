@@ -53,7 +53,7 @@ func (s *authLogic) validateUser(ctx context.Context, username string) (*auth.Us
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("user not found")
+		return nil, errors.New("invalid credentials")
 	}
 
 	return user, nil
