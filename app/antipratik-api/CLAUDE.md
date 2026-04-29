@@ -86,7 +86,7 @@ Use `common/logging.Logger` — never `log.Printf` or `fmt.Print`. Logger constr
 - Component-specific sentinels stay in the owning package. Never redefine `ValidationError` locally.
 
 ### Rule 9 — Consistent JSON format
-Success: direct JSON object or array. Error: `{"error": "message"}`. Created: `{"id": "uuid"}`. Use `writeJSON()` and `writeError()` helpers.
+Success: direct JSON object or array. Error: `{"error": "message"}`. Created: `{"id": "uuid"}`. Use `requests.WriteJSON()` and `requests.WriteError()` helpers.
 
 ### Rule 10 — Config from YAML + env vars
 Never hardcode sensitive values. Config loaded from YAML; env vars override.

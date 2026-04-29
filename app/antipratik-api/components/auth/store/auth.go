@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/pratikluitel/antipratik/components/auth"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // sqliteUserStore implements UserStore using a SQLite database.
@@ -25,13 +24,50 @@ func NewUserStore(db *sql.DB) auth.UserStore {
 func (s *sqliteUserStore) GetUserByUsername(ctx context.Context, username string) (*auth.User, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, username, password_hash, current_token, token_expires_at FROM users WHERE username=?`, username)
-	return scanUser(row)
+
+	user, err := scanUser(row)
+	if err != nil {
+		return nil, fmt.Errorf("get user by username: %w", err)
+	}
+
+	return user, nil
 }
 
 func (s *sqliteUserStore) GetUserByToken(ctx context.Context, token string) (*auth.User, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, username, password_hash, current_token, token_expires_at FROM users WHERE current_token=?`, token)
-	return scanUser(row)
+
+	user, err := scanUser(row)
+	if err != nil {
+		return nil, fmt.Errorf("get user by token: %w", err)
+	}
+
+	return user, nil
+}
+
+func scanUser(row *sql.Row) (*auth.User, error) {
+	var u auth.User
+	var currentToken sql.NullString
+	var tokenExpiresAt sql.NullString
+	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &currentToken, &tokenExpiresAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if currentToken.Valid {
+		u.CurrentToken = currentToken.String
+	}
+	if tokenExpiresAt.Valid {
+		u.TokenExpiresAt, err = time.Parse(time.RFC3339, tokenExpiresAt.String)
+		if err != nil {
+			return nil, fmt.Errorf("parse token expires at: %w", err)
+		}
+	}
+
+	return &u, nil
 }
 
 func (s *sqliteUserStore) UpsertToken(ctx context.Context, username string, token string, expiresAt time.Time) error {
@@ -51,47 +87,32 @@ func (s *sqliteUserStore) UpsertAdminUser(ctx context.Context, password string) 
 	}
 
 	if err == sql.ErrNoRows {
-		var newHash []byte
-		newHash, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			return fmt.Errorf("hash admin password: %w", err)
-		}
-		_, err = s.db.ExecContext(ctx, `INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)`,
-			uuid.New().String(), "admin", string(newHash))
-		return err
+		return s.createAdminUser(ctx, password)
 	}
 
-	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil {
-		return nil // password unchanged
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
+		return s.updateAdminPassword(ctx, password)
 	}
 
+	return nil
+}
+
+func (s *sqliteUserStore) createAdminUser(ctx context.Context, password string) error {
+	var newHash []byte
 	newHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("hash admin password: %w", err)
 	}
-	_, err = s.db.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE username = ?`, string(newHash), "admin")
+	_, err = s.db.ExecContext(ctx, `INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)`,
+		uuid.New().String(), "admin", string(newHash))
 	return err
 }
 
-func scanUser(row *sql.Row) (*auth.User, error) {
-	var u auth.User
-	var currentToken sql.NullString
-	var tokenExpiresAt sql.NullString
-	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &currentToken, &tokenExpiresAt)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
+func (s *sqliteUserStore) updateAdminPassword(ctx context.Context, password string) error {
+	newHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("update admin password: %w", err)
 	}
-	if currentToken.Valid {
-		u.CurrentToken = &currentToken.String
-	}
-	if tokenExpiresAt.Valid {
-		t, err := time.Parse(time.RFC3339, tokenExpiresAt.String)
-		if err == nil {
-			u.TokenExpiresAt = &t
-		}
-	}
-	return &u, nil
+	_, err = s.db.ExecContext(ctx, `UPDATE users SET password_hash = ? WHERE username = ?`, string(newHash), "admin")
+	return err
 }

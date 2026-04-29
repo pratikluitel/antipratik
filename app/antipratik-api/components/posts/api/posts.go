@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pratikluitel/antipratik/common/logging"
+	"github.com/pratikluitel/antipratik/common/requests"
 	"github.com/pratikluitel/antipratik/components/files"
 	"github.com/pratikluitel/antipratik/components/posts"
 )
@@ -39,7 +40,7 @@ func (h *postHandler) GetPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, posts)
+	requests.WriteJSON(w, http.StatusOK, posts)
 }
 
 // GetTags handles GET /api/tags — returns all tag names sorted alphabetically.
@@ -49,7 +50,7 @@ func (h *postHandler) GetTags(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "GetTags", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, tags)
+	requests.WriteJSON(w, http.StatusOK, tags)
 }
 
 // GetPost handles GET /api/posts/{slug}
@@ -62,11 +63,11 @@ func (h *postHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if post == nil {
-		writeError(w, http.StatusNotFound, "not found")
+		requests.WriteError(w, http.StatusNotFound, "not found")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 // ── JSON-body write handlers (essay, short) ───────────────────────────────────
@@ -74,7 +75,7 @@ func (h *postHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 func (h *postHandler) CreateEssay(w http.ResponseWriter, r *http.Request) {
 	var input posts.EssayPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	post, err := h.logic.CreateEssay(r.Context(), input)
@@ -82,13 +83,13 @@ func (h *postHandler) CreateEssay(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateEssay", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	requests.WriteJSON(w, http.StatusCreated, post)
 }
 
 func (h *postHandler) CreateShort(w http.ResponseWriter, r *http.Request) {
 	var input posts.ShortPostInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	post, err := h.logic.CreateShort(r.Context(), input)
@@ -96,14 +97,14 @@ func (h *postHandler) CreateShort(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateShort", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	requests.WriteJSON(w, http.StatusCreated, post)
 }
 
 func (h *postHandler) UpdateEssay(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var input posts.UpdateEssayPost
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	post, err := h.logic.UpdateEssay(r.Context(), id, input)
@@ -111,14 +112,14 @@ func (h *postHandler) UpdateEssay(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateEssay", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 func (h *postHandler) UpdateShort(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var input posts.UpdateShortPost
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	post, err := h.logic.UpdateShort(r.Context(), id, input)
@@ -126,7 +127,7 @@ func (h *postHandler) UpdateShort(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateShort", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 // ── Multipart write handlers (music, photo, video, link) ─────────────────────
@@ -143,7 +144,7 @@ func (h *postHandler) UpdateShort(w http.ResponseWriter, r *http.Request) {
 
 func (h *postHandler) CreateMusic(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -151,7 +152,7 @@ func (h *postHandler) CreateMusic(w http.ResponseWriter, r *http.Request) {
 
 	audioFile, audioHeader, err := r.FormFile("audioFile")
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "audioFile is required")
+		requests.WriteError(w, http.StatusBadRequest, "audioFile is required")
 		return
 	}
 	defer func() { _ = audioFile.Close() }()
@@ -171,7 +172,7 @@ func (h *postHandler) CreateMusic(w http.ResponseWriter, r *http.Request) {
 
 	duration, err := strconv.Atoi(r.FormValue("duration"))
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "duration must be an integer")
+		requests.WriteError(w, http.StatusBadRequest, "duration must be an integer")
 		return
 	}
 
@@ -208,13 +209,13 @@ func (h *postHandler) CreateMusic(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateMusic", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	requests.WriteJSON(w, http.StatusCreated, post)
 }
 
 func (h *postHandler) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -258,18 +259,18 @@ func (h *postHandler) UpdateMusic(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateMusic", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 func (h *postHandler) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
 	fileHeaders := r.MultipartForm.File["images[]"]
 	if len(fileHeaders) == 0 {
-		writeError(w, http.StatusBadRequest, "at least one image file is required")
+		requests.WriteError(w, http.StatusBadRequest, "at least one image file is required")
 		return
 	}
 
@@ -279,7 +280,7 @@ func (h *postHandler) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 	for _, fh := range fileHeaders {
 		f, err := fh.Open()
 		if err != nil {
-			writeError(w, http.StatusBadRequest, "could not read uploaded image")
+			requests.WriteError(w, http.StatusBadRequest, "could not read uploaded image")
 			return
 		}
 		defer func() { _ = f.Close() }()
@@ -325,13 +326,13 @@ func (h *postHandler) CreatePhoto(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreatePhoto", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	requests.WriteJSON(w, http.StatusCreated, post)
 }
 
 func (h *postHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -345,12 +346,12 @@ func (h *postHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdatePhoto", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -358,7 +359,7 @@ func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 
 	videoFile, videoHeader, err := r.FormFile("videoFile")
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "videoFile is required")
+		requests.WriteError(w, http.StatusBadRequest, "videoFile is required")
 		return
 	}
 	defer func() { _ = videoFile.Close() }()
@@ -399,13 +400,13 @@ func (h *postHandler) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateVideo", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": post.ID})
+	requests.WriteJSON(w, http.StatusCreated, map[string]string{"id": post.ID})
 }
 
 func (h *postHandler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -440,12 +441,12 @@ func (h *postHandler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateVideo", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 func (h *postHandler) CreateLinkPost(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -489,13 +490,13 @@ func (h *postHandler) CreateLinkPost(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateLinkPost", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, post)
+	requests.WriteJSON(w, http.StatusCreated, post)
 }
 
 func (h *postHandler) UpdateLinkPost(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
@@ -533,7 +534,7 @@ func (h *postHandler) UpdateLinkPost(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateLinkPost", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, post)
+	requests.WriteJSON(w, http.StatusOK, post)
 }
 
 func (h *postHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
@@ -550,18 +551,18 @@ func (h *postHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 func (h *postHandler) AddPhotoImage(w http.ResponseWriter, r *http.Request) {
 	postID := r.PathValue("id")
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		writeError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
+		requests.WriteError(w, http.StatusBadRequest, "request body too large or not multipart/form-data")
 		return
 	}
 
 	fhs := r.MultipartForm.File["image"]
 	if len(fhs) == 0 {
-		writeError(w, http.StatusBadRequest, "image file is required")
+		requests.WriteError(w, http.StatusBadRequest, "image file is required")
 		return
 	}
 	f, err := fhs[0].Open()
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "could not read uploaded image")
+		requests.WriteError(w, http.StatusBadRequest, "could not read uploaded image")
 		return
 	}
 	defer func() { _ = f.Close() }()
@@ -590,7 +591,7 @@ func (h *postHandler) AddPhotoImage(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "AddPhotoImage", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, result)
+	requests.WriteJSON(w, http.StatusCreated, result)
 }
 
 func (h *postHandler) GetPhotoImage(w http.ResponseWriter, r *http.Request) {
@@ -603,10 +604,10 @@ func (h *postHandler) GetPhotoImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if img == nil {
-		writeError(w, http.StatusNotFound, "image not found")
+		requests.WriteError(w, http.StatusNotFound, "image not found")
 		return
 	}
-	writeJSON(w, http.StatusOK, img)
+	requests.WriteJSON(w, http.StatusOK, img)
 }
 
 func (h *postHandler) UpdatePhotoImage(w http.ResponseWriter, r *http.Request) {
@@ -618,7 +619,7 @@ func (h *postHandler) UpdatePhotoImage(w http.ResponseWriter, r *http.Request) {
 		Alt     *string `json:"alt"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid JSON body")
 		return
 	}
 
@@ -631,10 +632,10 @@ func (h *postHandler) UpdatePhotoImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if img == nil {
-		writeError(w, http.StatusNotFound, "image not found")
+		requests.WriteError(w, http.StatusNotFound, "image not found")
 		return
 	}
-	writeJSON(w, http.StatusOK, img)
+	requests.WriteJSON(w, http.StatusOK, img)
 }
 
 func (h *postHandler) DeletePhotoImage(w http.ResponseWriter, r *http.Request) {
@@ -647,7 +648,7 @@ func (h *postHandler) DeletePhotoImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if notFound {
-		writeError(w, http.StatusNotFound, "image not found")
+		requests.WriteError(w, http.StatusNotFound, "image not found")
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

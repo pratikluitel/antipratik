@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	commonerrors "github.com/pratikluitel/antipratik/common/errors"
@@ -14,66 +12,60 @@ import (
 )
 
 type authLogic struct {
-	users     auth.UserStore
+	userStore auth.UserStore
 	jwtSecret string
 }
 
 // NewAuthLogic creates a new authLogic.
-func NewAuthLogic(users auth.UserStore, jwtSecret string) auth.AuthLogic {
-	return &authLogic{users: users, jwtSecret: jwtSecret}
+func NewAuthLogic(userStore auth.UserStore, jwtSecret string) auth.AuthLogic {
+	return &authLogic{userStore: userStore, jwtSecret: jwtSecret}
 }
 
 func (s *authLogic) Login(ctx context.Context, username, password string) (string, error) {
-	if err := commonerrors.RequireNonEmpty("username", username); err != nil {
+	user, err := s.validateUser(ctx, username)
+	if err != nil {
 		return "", err
 	}
-	if err := commonerrors.RequireNonEmpty("password", password); err != nil {
+
+	if err = s.validatePassword(password, user.PasswordHash); err != nil {
 		return "", err
 	}
 
-	user, err := s.users.GetUserByUsername(ctx, username)
+	token, expiresAt, err := s.createToken(user.Username)
 	if err != nil {
-		return "", fmt.Errorf("auth service login: %w", err)
-	}
-	if user == nil {
-		return "", errors.New("invalid credentials")
-	}
-	if err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", err
 	}
 
-	expiresAt := time.Now().Add(7 * 24 * time.Hour)
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.Username,
-		"exp": expiresAt.Unix(),
-	})
-	tokenStr, err := token.SignedString([]byte(s.jwtSecret))
-	if err != nil {
-		return "", fmt.Errorf("auth service sign token: %w", err)
+	if err = s.userStore.UpsertToken(ctx, user.Username, token, expiresAt); err != nil {
+		return "", fmt.Errorf("failed to store token: %w", err)
 	}
-
-	if err = s.users.UpsertToken(ctx, username, tokenStr, expiresAt); err != nil {
-		return "", fmt.Errorf("auth service store token: %w", err)
-	}
-	return tokenStr, nil
+	return token, nil
 }
 
-func (s *authLogic) ValidateToken(ctx context.Context, token string) error {
-	parsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return []byte(s.jwtSecret), nil
-	})
-	if err != nil || !parsed.Valid {
-		return errors.New("invalid token")
+func (s *authLogic) validateUser(ctx context.Context, username string) (*auth.User, error) {
+	if err := commonerrors.RequireNonEmpty("username", username); err != nil {
+		return nil, err
 	}
-	user, err := s.users.GetUserByToken(ctx, token)
+
+	user, err := s.userStore.GetUserByUsername(ctx, username)
 	if err != nil {
-		return fmt.Errorf("auth service validate: %w", err)
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
+
 	if user == nil {
-		return errors.New("token not found")
+		return nil, errors.New("invalid credentials")
+	}
+
+	return user, nil
+}
+
+func (s *authLogic) validatePassword(password, hashedPassword string) error {
+	if err := commonerrors.RequireNonEmpty("password", password); err != nil {
+		return err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
+		return errors.New("invalid credentials")
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/common/logging"
+	"github.com/pratikluitel/antipratik/common/requests"
 	"github.com/pratikluitel/antipratik/components/posts"
 )
 
@@ -26,7 +27,7 @@ func (h *linkHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "GetLinks", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, links)
+	requests.WriteJSON(w, http.StatusOK, links)
 }
 
 // GetFeaturedLinks handles GET /api/links/featured
@@ -36,13 +37,13 @@ func (h *linkHandler) GetFeaturedLinks(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "GetFeaturedLinks", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, links)
+	requests.WriteJSON(w, http.StatusOK, links)
 }
 
 func (h *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 	var input posts.CreateExternalLink
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	id, err := h.logic.CreateLink(r.Context(), input)
@@ -50,14 +51,14 @@ func (h *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "CreateLink", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
+	requests.WriteJSON(w, http.StatusCreated, map[string]string{"id": id})
 }
 
 func (h *linkHandler) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	var input posts.UpdateExternalLink
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	link, err := h.logic.UpdateLink(r.Context(), id, input)
@@ -65,7 +66,7 @@ func (h *linkHandler) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "UpdateLink", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, link)
+	requests.WriteJSON(w, http.StatusOK, link)
 }
 
 func (h *linkHandler) DeleteLink(w http.ResponseWriter, r *http.Request) {
