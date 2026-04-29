@@ -124,7 +124,7 @@ func (h *broadcasterHandler) DeleteSubscriber(w http.ResponseWriter, r *http.Req
 		handleLogicError(w, h.log, "DeleteSubscriber", err)
 		return
 	}
-	requests.WriteJSON(w, http.StatusNoContent, map[string]any{})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // ── Broadcast endpoints ───────────────────────────────────────────────────────
@@ -207,7 +207,7 @@ func (h *broadcasterHandler) DeleteBroadcast(w http.ResponseWriter, r *http.Requ
 		handleLogicError(w, h.log, "DeleteBroadcast", err)
 		return
 	}
-	requests.WriteJSON(w, http.StatusNoContent, map[string]any{})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // GetBroadcasts handles GET /api/broadcasts?type=email.

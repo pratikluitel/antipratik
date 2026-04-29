@@ -16,7 +16,3 @@ func handleLogicError(w http.ResponseWriter, log logging.Logger, op string, err 
 		requests.WriteError(w, http.StatusInternalServerError, "internal server error")
 	}
 }
-
-func writeError(w http.ResponseWriter, status int, msg string) {
-	requests.WriteJSON(w, status, map[string]string{"error": msg})
-}

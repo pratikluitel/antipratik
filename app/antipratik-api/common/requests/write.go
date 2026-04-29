@@ -2,7 +2,6 @@ package requests
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 )
 
@@ -21,6 +20,5 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func WriteError(w http.ResponseWriter, status int, msg string) {
-	slog.Error("http error response", "status", status, "message", msg)
 	WriteJSON(w, status, Error{Message: msg})
 }
