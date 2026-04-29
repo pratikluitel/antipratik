@@ -28,7 +28,7 @@ type UserStore interface {
 
 // SettingsStore handles application settings persistence.
 type SettingsStore interface {
-	GetOrCreateJWTSecret(ctx context.Context) (string, error)
+	GetOrCreateJWTSecret(ctx context.Context, newSecret string) (string, error)
 }
 
 type AuthAPI interface {

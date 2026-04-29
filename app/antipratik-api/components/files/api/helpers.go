@@ -2,7 +2,6 @@
 package api
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
@@ -32,16 +31,6 @@ func streamFileRange(w http.ResponseWriter, body io.ReadCloser, ct, contentRange
 		w.WriteHeader(http.StatusPartialContent)
 	}
 	_, _ = io.Copy(w, body)
-}
-
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
-}
-
-func writeError(w http.ResponseWriter, status int, msg string) {
-	writeJSON(w, status, map[string]string{"error": msg})
 }
 
 // parseByteRange parses a "bytes=start-end" Range header value into a ParsedRange.

@@ -26,10 +26,10 @@ func (s *slogLogger) Info(msg string, args ...any)  { s.l.Info(msg, args...) }
 func (s *slogLogger) Warn(msg string, args ...any)  { s.l.Warn(msg, args...) }
 func (s *slogLogger) Error(msg string, args ...any) { s.l.Error(msg, args...) }
 
-// New creates a Logger at the given level string ("debug", "info", "warn", "error").
-// Defaults to INFO for any unrecognised value.
-// Output is text format (suitable for journald/systemd on Hetzner).
-func New(level string) Logger {
+// NewSlog creates a configured *slog.Logger at the given level string.
+// Suitable for passing to slog.SetDefault so package-level slog calls
+// (e.g. in common/requests) share the same handler, level, and writer.
+func NewSlog(level string) *slog.Logger {
 	var lvl slog.Level
 	switch strings.ToLower(level) {
 	case "debug":
@@ -42,5 +42,12 @@ func New(level string) Logger {
 		lvl = slog.LevelInfo
 	}
 	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})
-	return &slogLogger{l: slog.New(h)}
+	return slog.New(h)
+}
+
+// New creates a Logger at the given level string ("debug", "info", "warn", "error").
+// Defaults to INFO for any unrecognised value.
+// Output is text format (suitable for journald/systemd on Hetzner).
+func New(level string) Logger {
+	return &slogLogger{l: NewSlog(level)}
 }

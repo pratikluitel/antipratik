@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/common/logging"
+	"github.com/pratikluitel/antipratik/common/requests"
 	"github.com/pratikluitel/antipratik/components/files"
 	"github.com/pratikluitel/antipratik/components/files/store"
 )
@@ -25,7 +26,7 @@ func NewFileServingHandler(fs files.FileStore, log logging.Logger) files.FilesAP
 func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 	fileID := r.PathValue("fileId")
 	if fileID == "" {
-		writeError(w, http.StatusBadRequest, "fileId is required")
+		requests.WriteError(w, http.StatusBadRequest, "fileId is required")
 		return
 	}
 
@@ -33,7 +34,7 @@ func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 	if raw := r.Header.Get("Range"); raw != "" {
 		pr, ok := parseByteRange(raw)
 		if !ok {
-			writeError(w, http.StatusRequestedRangeNotSatisfiable, "invalid range")
+			requests.WriteError(w, http.StatusRequestedRangeNotSatisfiable, "invalid range")
 			return
 		}
 		parsedRange = pr
@@ -47,29 +48,29 @@ func (h *fileServingHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 		}
 		if !errors.Is(err, store.ErrFileNotFound) {
 			h.log.Error("ServeFile error", "key", prefix+fileID, "err", err)
-			writeError(w, http.StatusInternalServerError, "internal server error")
+			requests.WriteError(w, http.StatusInternalServerError, "internal server error")
 			return
 		}
 	}
-	writeError(w, http.StatusNotFound, "file not found")
+	requests.WriteError(w, http.StatusNotFound, "file not found")
 }
 
 // ServeThumbnail handles GET /thumbnails/{thumbnailId}.
 func (h *fileServingHandler) ServeThumbnail(w http.ResponseWriter, r *http.Request) {
 	thumbnailID := r.PathValue("thumbnailId")
 	if thumbnailID == "" {
-		writeError(w, http.StatusBadRequest, "thumbnailId is required")
+		requests.WriteError(w, http.StatusBadRequest, "thumbnailId is required")
 		return
 	}
 
 	body, ct, err := h.fileStore.Get(r.Context(), "thumbnails/"+thumbnailID)
 	if err != nil {
 		if errors.Is(err, store.ErrFileNotFound) {
-			writeError(w, http.StatusNotFound, "thumbnail not found")
+			requests.WriteError(w, http.StatusNotFound, "thumbnail not found")
 			return
 		}
 		h.log.Error("ServeThumbnail error", "key", "thumbnails/"+thumbnailID, "err", err)
-		writeError(w, http.StatusInternalServerError, "internal server error")
+		requests.WriteError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
 	streamFile(w, r, body, ct)

@@ -5,6 +5,7 @@ import (
 	"embed"
 	"flag"
 	"log"
+	"log/slog"
 	"net/http"
 
 	authapi "github.com/pratikluitel/antipratik/components/auth/api"
@@ -43,6 +44,7 @@ func main() {
 	}
 
 	logger := logging.New(cfg.Logging.Level)
+	slog.SetDefault(logging.NewSlog(cfg.Logging.Level))
 
 	sqlDB, err := db.Open(cfg.DB.Path)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/pratikluitel/antipratik/common/logging"
+	"github.com/pratikluitel/antipratik/common/requests"
 	"github.com/pratikluitel/antipratik/components/broadcaster"
 	"github.com/pratikluitel/antipratik/components/broadcaster/store"
 )
@@ -33,7 +34,7 @@ type subscribeRequest struct {
 func (h *broadcasterHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	var input subscribeRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	if input.Type == "" {
@@ -43,7 +44,7 @@ func (h *broadcasterHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "Subscribe", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{})
+	requests.WriteJSON(w, http.StatusCreated, map[string]any{})
 }
 
 // ResendConfirmation handles POST /api/subscribers/resend-confirmation.
@@ -52,7 +53,7 @@ func (h *broadcasterHandler) ResendConfirmation(w http.ResponseWriter, r *http.R
 		Type string `json:"type"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	if body.Type == "" {
@@ -63,7 +64,7 @@ func (h *broadcasterHandler) ResendConfirmation(w http.ResponseWriter, r *http.R
 		handleLogicError(w, h.log, "ResendConfirmation", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"sent_count": n})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{"sent_count": n})
 }
 
 // Confirm handles GET /api/confirm?token=<token>.
@@ -71,13 +72,13 @@ func (h *broadcasterHandler) Confirm(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	if err := h.logic.ConfirmSubscription(r.Context(), token); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "token not found")
+			requests.WriteError(w, http.StatusNotFound, "token not found")
 			return
 		}
 		handleLogicError(w, h.log, "Confirm", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"message": "subscription confirmed"})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{"message": "subscription confirmed"})
 }
 
 // Unsubscribe handles GET /api/unsubscribe?token=<token>.
@@ -85,13 +86,13 @@ func (h *broadcasterHandler) Unsubscribe(w http.ResponseWriter, r *http.Request)
 	token := r.URL.Query().Get("token")
 	if err := h.logic.Unsubscribe(r.Context(), token); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "token not found")
+			requests.WriteError(w, http.StatusNotFound, "token not found")
 			return
 		}
 		handleLogicError(w, h.log, "Unsubscribe", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"message": "unsubscribed"})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{"message": "unsubscribed"})
 }
 
 // GetSubscribers handles GET /api/subscribers.
@@ -105,25 +106,25 @@ func (h *broadcasterHandler) GetSubscribers(w http.ResponseWriter, r *http.Reque
 		handleLogicError(w, h.log, "GetSubscribers", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, subs)
+	requests.WriteJSON(w, http.StatusOK, subs)
 }
 
 // DeleteSubscriber handles DELETE /api/subscribers/{address}.
 func (h *broadcasterHandler) DeleteSubscriber(w http.ResponseWriter, r *http.Request) {
 	address := r.PathValue("address")
 	if address == "" {
-		writeError(w, http.StatusBadRequest, "address is required")
+		requests.WriteError(w, http.StatusBadRequest, "address is required")
 		return
 	}
 	if err := h.logic.DeleteSubscriber(r.Context(), address); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "subscriber not found")
+			requests.WriteError(w, http.StatusNotFound, "subscriber not found")
 			return
 		}
 		handleLogicError(w, h.log, "DeleteSubscriber", err)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	requests.WriteJSON(w, http.StatusNoContent, map[string]any{})
 }
 
 // ── Broadcast endpoints ───────────────────────────────────────────────────────
@@ -149,7 +150,7 @@ type broadcastUpdateRequest struct {
 func (h *broadcasterHandler) CreateBroadcast(w http.ResponseWriter, r *http.Request) {
 	var req broadcastRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	preview, err := h.logic.CreateBroadcast(r.Context(), broadcaster.BroadcastInput{
@@ -162,7 +163,7 @@ func (h *broadcasterHandler) CreateBroadcast(w http.ResponseWriter, r *http.Requ
 		handleLogicError(w, h.log, "CreateBroadcast", err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"id": preview.ID, "html": preview.HTML})
+	requests.WriteJSON(w, http.StatusCreated, map[string]any{"id": preview.ID, "html": preview.HTML})
 }
 
 // UpdateBroadcast handles PUT /api/broadcasts/{id}.
@@ -173,7 +174,7 @@ func (h *broadcasterHandler) UpdateBroadcast(w http.ResponseWriter, r *http.Requ
 	}
 	var req broadcastUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	preview, err := h.logic.UpdateBroadcast(r.Context(), id, broadcaster.BroadcastUpdateInput{
@@ -183,13 +184,13 @@ func (h *broadcasterHandler) UpdateBroadcast(w http.ResponseWriter, r *http.Requ
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "broadcast not found")
+			requests.WriteError(w, http.StatusNotFound, "broadcast not found")
 			return
 		}
 		handleLogicError(w, h.log, "UpdateBroadcast", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"id": preview.ID, "html": preview.HTML})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{"id": preview.ID, "html": preview.HTML})
 }
 
 // DeleteBroadcast handles DELETE /api/broadcasts/{id}.
@@ -200,13 +201,13 @@ func (h *broadcasterHandler) DeleteBroadcast(w http.ResponseWriter, r *http.Requ
 	}
 	if err := h.logic.DeleteBroadcast(r.Context(), id); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "broadcast not found")
+			requests.WriteError(w, http.StatusNotFound, "broadcast not found")
 			return
 		}
 		handleLogicError(w, h.log, "DeleteBroadcast", err)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
+	requests.WriteJSON(w, http.StatusNoContent, map[string]any{})
 }
 
 // GetBroadcasts handles GET /api/broadcasts?type=email.
@@ -220,7 +221,7 @@ func (h *broadcasterHandler) GetBroadcasts(w http.ResponseWriter, r *http.Reques
 		handleLogicError(w, h.log, "GetBroadcasts", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, summaries)
+	requests.WriteJSON(w, http.StatusOK, summaries)
 }
 
 // DispatchBroadcast handles POST /api/broadcasts/{id}/dispatch.
@@ -232,13 +233,13 @@ func (h *broadcasterHandler) DispatchBroadcast(w http.ResponseWriter, r *http.Re
 	n, err := h.logic.DispatchBroadcast(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "broadcast not found")
+			requests.WriteError(w, http.StatusNotFound, "broadcast not found")
 			return
 		}
 		handleLogicError(w, h.log, "DispatchBroadcast", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"buffered_count": n})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{"buffered_count": n})
 }
 
 // GetBroadcastSendDetails handles GET /api/broadcasts/{id}/sends.
@@ -250,13 +251,13 @@ func (h *broadcasterHandler) GetBroadcastSendDetails(w http.ResponseWriter, r *h
 	details, err := h.logic.GetBroadcastSends(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "broadcast not found")
+			requests.WriteError(w, http.StatusNotFound, "broadcast not found")
 			return
 		}
 		handleLogicError(w, h.log, "GetBroadcastSendDetails", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, details)
+	requests.WriteJSON(w, http.StatusOK, details)
 }
 
 // ── Contact endpoint ──────────────────────────────────────────────────────────
@@ -271,7 +272,7 @@ type contactRequest struct {
 func (h *broadcasterHandler) Contact(w http.ResponseWriter, r *http.Request) {
 	var req contactRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid request body")
+		requests.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 	if err := h.logic.SendContactMessage(r.Context(), broadcaster.ContactInput{
@@ -282,5 +283,5 @@ func (h *broadcasterHandler) Contact(w http.ResponseWriter, r *http.Request) {
 		handleLogicError(w, h.log, "Contact", err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{})
+	requests.WriteJSON(w, http.StatusOK, map[string]any{})
 }
